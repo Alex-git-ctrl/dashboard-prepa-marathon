@@ -14,6 +14,8 @@ from datetime import date, datetime
 import requests
 from dotenv import load_dotenv
 
+import alerts
+
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 S1 = date(2026, 9, 7)      # lundi de la semaine 1 du plan
@@ -135,6 +137,8 @@ def main():
             "charge": a.get("icu_training_load"),
             "deniv": a.get("total_elevation_gain"),
             "efficacite": eff,
+            "rpe": a.get("icu_rpe"),
+            "notes": (a.get("description") or "").strip() or None,
             "derive_pct": st["derive_pct"],
             "dyn": st["dyn"] or None,
         }
@@ -153,7 +157,9 @@ def main():
               "vo2max": "vo2max", "readiness": "readiness", "sleepScore": "sommeil_score",
               "avgSleepingHR": "fc_sommeil", "spO2": "spo2", "respiration": "respiration",
               "bodyFat": "masse_grasse", "ctl": "ctl", "atl": "atl",
-              "rampRate": "ramp_rate", "steps": "pas"}
+              "rampRate": "ramp_rate", "steps": "pas",
+              "soreness": "courbatures", "fatigue": "fatigue", "mood": "moral",
+              "injury": "douleur_niveau", "comments": "commentaire"}
     serie = []
     for w in sorted(wellness, key=lambda x: x.get("id", "")):
         row = {"date": w.get("id")}
@@ -200,6 +206,45 @@ def main():
     metrics["actuel"]["efficacite"] = efficacite[-1]["valeur"] if efficacite else None
     metrics["actuel"]["cadence"] = mean([x["cadence"] for x in seances])
 
+    # ---- Journal : une ligne par jour ou il s'est passe quelque chose ----
+    par_date = {w["date"]: w for w in serie}
+    journal = []
+    for rec in seances:
+        w = par_date.get(rec["date"], {})
+        journal.append({
+            "date": rec["date"], "semaine": rec["semaine"],
+            "km": rec["km"], "minutes": rec["minutes"],
+            "allure_s_km": rec["allure_s_km"], "fc_moy": rec["fc_moy"],
+            "derive_pct": rec["derive_pct"],
+            "rpe": rec["rpe"], "notes": rec["notes"],
+            "courbatures": w.get("courbatures"), "fatigue": w.get("fatigue"),
+            "moral": w.get("moral"), "sommeil_h": w.get("sommeil_h"),
+            "douleur": w.get("commentaire") if w.get("douleur_niveau") else None,
+        })
+    # Jours sans course mais avec une note subjective : ils comptent aussi.
+    dates_courues = {r["date"] for r in seances}
+    for w in serie:
+        if w["date"] in dates_courues:
+            continue
+        if any(w.get(k) is not None for k in
+               ("courbatures", "fatigue", "moral", "douleur_niveau", "commentaire")):
+            journal.append({
+                "date": w["date"], "semaine": None, "km": None, "minutes": None,
+                "allure_s_km": None, "fc_moy": None, "derive_pct": None,
+                "rpe": None, "notes": None,
+                "courbatures": w.get("courbatures"), "fatigue": w.get("fatigue"),
+                "moral": w.get("moral"), "sommeil_h": w.get("sommeil_h"),
+                "douleur": w.get("commentaire") if w.get("douleur_niveau") else None,
+            })
+    journal.sort(key=lambda j: j["date"])
+    metrics["journal"] = journal[-40:]
+
+    # ---- Alertes ----
+    with open(os.path.join(ROOT, "docs", "plan.json"), encoding="utf-8") as fh:
+        plan = json.load(fh)
+    sem_courante = (today - S1).days // 7 + 1
+    metrics["alertes"] = alerts.compute(metrics, plan, sem_courante)
+
     with open(os.path.join(ROOT, "docs", "metrics.json"), "w", encoding="utf-8") as fh:
         json.dump(metrics, fh, indent=2, ensure_ascii=False)
 
@@ -209,6 +254,10 @@ def main():
     absent = [k for k, v in metrics["couverture"].items() if not v]
     print(f"  wellness alimente : {', '.join(dispo_ok) or 'aucun'}")
     print(f"  wellness vide     : {', '.join(absent) or 'aucun'}")
+    print(f"  journal : {len(journal)} entree(s) · alertes : "
+          f"{len(metrics['alertes'])}")
+    for a in metrics["alertes"]:
+        print(f"    [{a['niveau']}] {a['titre']}")
 
 
 if __name__ == "__main__":

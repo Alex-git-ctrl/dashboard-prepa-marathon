@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-03T20:44:38",
+  "maj": "2026-09-03T22:51:49",
   "nb_activites": 0,
   "semaines": {},
   "seances": [],
@@ -20,6 +20,11 @@
       "atl": null,
       "ramp_rate": null,
       "pas": 150,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
       "sommeil_h": null
     },
     {
@@ -38,6 +43,11 @@
       "atl": null,
       "ramp_rate": null,
       "pas": 3795,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
       "sommeil_h": null
     }
   ],
@@ -61,6 +71,11 @@
     "atl": null,
     "ramp_rate": null,
     "pas": 3795,
+    "courbatures": null,
+    "fatigue": null,
+    "moral": null,
+    "douleur_niveau": null,
+    "commentaire": null,
     "sommeil_h": null,
     "derive_pct": null,
     "efficacite": null,
@@ -80,7 +95,14 @@
     "ctl": 0,
     "atl": 0,
     "ramp_rate": 0,
-    "pas": 2
+    "pas": 2,
+    "courbatures": 0,
+    "fatigue": 0,
+    "moral": 0,
+    "douleur_niveau": 0,
+    "commentaire": 0
   },
-  "jours_wellness": 2
+  "jours_wellness": 2,
+  "journal": [],
+  "alertes": []
 }

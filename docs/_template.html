@@ -55,6 +55,37 @@ section{margin-top:52px}
 .shead h2{font-size:23px}
 .shead p{margin:6px 0 0;color:var(--muted);font-size:15px;max-width:66ch}
 
+/* --- alertes --- */
+.alerts{display:grid;gap:10px;margin-top:26px}
+.alert{background:var(--surface);border:1px solid var(--rule);border-left-width:4px;
+  border-radius:3px;padding:15px 19px}
+.alert.critique{border-left-color:var(--crit)}
+.alert.attention{border-left-color:var(--warn)}
+.alert.calme{border-left-color:var(--ok)}
+.alert.neutre{border-left-color:var(--rule)}
+.alert .an{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+.alert.critique .an{color:var(--crit)}
+.alert.attention .an{color:var(--warn)}
+.alert.calme .an{color:var(--ok)}
+.alert.neutre .an{color:var(--faint)}
+.alert .at{font-family:var(--serif);font-size:18px;font-weight:600;margin-top:3px}
+.alert .ad{color:var(--ink-2);font-size:15px;margin-top:5px;max-width:70ch}
+.alert .aa{color:var(--muted);font-size:14.5px;margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--rule-2);max-width:70ch}
+
+/* --- journal --- */
+.jn{display:inline-block;min-width:24px;text-align:center;font-family:var(--mono);
+  font-weight:600;padding:1px 7px;border-radius:3px;background:var(--sunk)}
+.jn.hot{background:var(--crit);color:#fff}
+.jn.mid{background:var(--warn);color:#fff}
+.pain{color:var(--crit);font-weight:600}
+.howto{background:var(--sunk);border:1px solid var(--rule);border-radius:3px;
+  padding:18px 20px;margin-top:14px;font-size:14.5px;color:var(--ink-2);
+  line-height:1.65}
+.howto code{font-family:var(--mono);font-size:13.5px;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:1px 6px}
+.howto b{font-weight:600}
+
 /* --- courses --- */
 .races{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .race{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
@@ -171,6 +202,8 @@ tr.soft td{color:var(--muted)}
     <div class="stamp" id="stamp"></div>
   </header>
 
+  <div class="alerts" id="alerts"></div>
+
   <section>
     <div class="shead"><h2>Les trois échéances</h2>
       <p>Deux courses de calibration avant Barcelone. Chacune sert à recalculer les
@@ -225,6 +258,14 @@ tr.soft td{color:var(--muted)}
   </section>
 
   <section>
+    <div class="shead"><h2>Journal de séance</h2>
+      <p>Ce que la montre ne peut pas mesurer : l'effort perçu et la douleur.
+        C'est le meilleur détecteur précoce de blessure, et il alimente
+        directement les alertes en haut de page.</p></div>
+    <div id="journal"></div>
+  </section>
+
+  <section>
     <div class="shead"><h2>Ce que la montre remonte</h2>
       <p>Inventaire honnête de tous les champs disponibles via Intervals.icu, et de
         ceux qui arrivent réellement aujourd'hui.</p></div>
@@ -254,6 +295,34 @@ const nowW = PLAN.semaines.find(w => w.semaine === cur) || PLAN.semaines[0];
 $('stamp').textContent = 'Données de la montre Garmin, synchronisées via Intervals.icu · '
   + 'mise à jour le ' + new Date(M.maj).toLocaleString('fr-FR',
       {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
+/* ---------- alertes ---------- */
+(function () {
+  const AL = M.alertes || [];
+  const bloc = (cls, niv, titre, det, act) => `<div class="alert ${cls}">
+    <div class="an">${niv}</div><div class="at">${titre}</div>
+    <div class="ad">${det}</div>${act ? `<div class="aa">${act}</div>` : ''}</div>`;
+  if (AL.length) {
+    $('alerts').innerHTML = AL.map(a =>
+      bloc(a.niveau, a.niveau === 'critique' ? 'à traiter' : 'à surveiller',
+        a.titre, a.detail, a.quoi_faire)).join('');
+  } else if (M.nb_activites >= 3) {
+    $('alerts').innerHTML = bloc('calme', 'rien à signaler',
+      'Charge, dérive cardiaque et récupération dans les clous',
+      'Les six règles de surveillance ont été vérifiées et aucune ne se déclenche.',
+      '');
+  } else {
+    $('alerts').innerHTML = bloc('neutre', 'surveillance en veille',
+      'Pas encore assez de données pour surveiller quoi que ce soit',
+      'Six règles tournent à chaque mise à jour : montée de charge, dérive '
+      + 'cardiaque, variabilité cardiaque, FC de repos, douleur signalée et '
+      + 'effort perçu. Elles restent silencieuses tant que les mesures sont '
+      + 'trop rares pour être fiables.',
+      'La surveillance de la charge démarre après 3 semaines, celle de la '
+      + 'variabilité cardiaque après 14 nuits. La dérive cardiaque, elle, '
+      + 'sera active dès ta deuxième sortie longue.');
+  }
+})();
 
 /* ---------- courses ---------- */
 $('races').innerHTML = PLAN.courses.map(c => `
@@ -592,6 +661,46 @@ $('plan-sub').textContent = 'Pic à ' + PLAN.pic_volume_km + ' km, sortie longue
   + PLAN.pic_sortie_longue_km + ' km. Les semaines de décharge sont en gris : '
   + 'elles ne sont pas facultatives.';
 
+/* ---------- journal ---------- */
+(function () {
+  const J = M.journal || [];
+  const aide = `<div class="howto">
+    <b>Comment le remplir.</b> Depuis ton téléphone, dans Intervals.icu :
+    le RPE se note sur la séance, le ressenti et la douleur dans le
+    <i>wellness</i> du jour.<br>
+    Depuis l'ordinateur, en une ligne :<br>
+    <code>python scripts/journal.py --rpe 4</code><br>
+    <code>python scripts/journal.py --rpe 7 --douleur "genou droit sur les 3 derniers km"</code>
+    <br><br>Le <b>RPE</b> est l'effort perçu de 1 à 10. En endurance
+    fondamentale il doit tourner autour de 3 ou 4 : au-delà, tu cours tes
+    séances faciles trop vite, et l'alerte se déclenchera.</div>`;
+  if (!J.length) {
+    $('journal').innerHTML = `<div class="empty">Aucune entrée pour l'instant.
+      Ta première séance est mardi 8 septembre.</div>` + aide;
+    return;
+  }
+  const cell = v => v == null ? '<span style="color:var(--faint)">—</span>' : v;
+  const rpeCell = v => v == null ? '<span style="color:var(--faint)">—</span>'
+    : `<span class="jn ${v >= 8 ? 'hot' : v >= 6 ? 'mid' : ''}">${v}</span>`;
+  const allure = s => s == null ? null
+    : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  $('journal').innerHTML = '<div class="tw"><table><thead><tr><th>Date</th>'
+    + '<th>Sem.</th><th>Distance</th><th>Allure</th><th>FC moy.</th>'
+    + '<th>Dérive</th><th>RPE</th><th>Ressenti et notes</th></tr></thead><tbody>'
+    + J.slice().reverse().map(j => {
+      const txt = [j.douleur ? `<span class="pain">${j.douleur}</span>` : null,
+        j.notes].filter(Boolean).join(' · ');
+      return `<tr><td class="num">${dshort(j.date)}</td>
+        <td class="num">${cell(j.semaine)}</td>
+        <td class="num">${j.km != null ? j.km + ' km' : '—'}</td>
+        <td class="num">${cell(allure(j.allure_s_km))}</td>
+        <td class="num">${cell(j.fc_moy)}</td>
+        <td class="num">${j.derive_pct != null ? j.derive_pct + ' %' : '—'}</td>
+        <td>${rpeCell(j.rpe)}</td>
+        <td style="color:var(--muted);min-width:200px">${txt || '—'}</td></tr>`;
+    }).join('') + '</tbody></table></div>' + aide;
+})();
+
 /* ---------- couverture des donnees ---------- */
 (function () {
   const cv = M.couverture || {};
@@ -612,6 +721,8 @@ $('plan-sub').textContent = 'Pic à ' + PLAN.pic_volume_km + ' km, sortie longue
     ['VO2max', 'Estimation Garmin', !!cv.vo2max, 'Projection de chrono'],
     ['Training Readiness', 'Estimation Garmin', !!cv.readiness, 'Décision du jour'],
     ['SpO2 et respiration', 'Nuit', !!cv.spo2, 'Signal de surcharge'],
+    ['Effort perçu et douleur', 'Journal, saisie manuelle', !!(M.journal || []).length,
+      'Alimente les alertes sur le RPE et la douleur'],
     ['Body Battery', 'Garmin uniquement', null,
       'Non exposé par l’API Intervals.icu, définitivement indisponible'],
   ];
