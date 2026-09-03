@@ -1,0 +1,15 @@
+# Secrets : ne doit JAMAIS partir sur un depot public
+.env
+.env.local
+*.key
+
+# Donnees brutes : contiennent le GPS et les donnees de sante detaillees
+data/raw/
+*.fit
+*.tcx
+*.gpx
+
+# Python
+.venv/
+__pycache__/
+*.pyc
