@@ -3,7 +3,7 @@
 Tableau de bord de préparation au Zurich Marató de Barcelona du 14 mars 2027.
 Objectif : terminer sous 4 heures.
 
-**Le tableau de bord :** https://alex-git-ctrl.github.io/marathon-barcelone-2027/
+**Le tableau de bord :** https://alex-git-ctrl.github.io/dashboard-prepa-marathon/
 
 ## Comment ça marche
 
