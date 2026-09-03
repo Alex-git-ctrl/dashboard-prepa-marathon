@@ -1,175 +1,162 @@
 <title>Sub-4 à Barcelone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
 <style>
 /* ============================================================
-   Langage visuel iOS. La police systeme est un choix delibere :
-   elle rend en SF Pro sur iPhone, la seule facon d'etre vraiment
-   natif. Les couleurs sont les couleurs systeme d'Apple.
+   Application de preparation marathon.
+   Geist pour l'interface, Geist Mono pour les chiffres.
+   Mode clair uniquement, palette grise Apple.
    ============================================================ */
 :root{
   color-scheme:light;
-  --bg:#F2F2F7; --card:#FFFFFF; --card-2:#F2F2F7;
-  --label:#000000; --label-2:rgba(60,60,67,.62); --label-3:rgba(60,60,67,.34);
-  --sep:rgba(60,60,67,.20); --fill:rgba(120,120,128,.12);
-  --blue:#007AFF; --green:#248A3D; --red:#D70015; --orange:#C93400;
-  --tint:#007AFF;
+  --bg:#F2F2F7; --card:#FFFFFF; --sunk:#F5F5F7;
+  --label:#1D1D1F; --label-2:#6E6E73; --label-3:#8E8E93;
+  --sep:#E3E3E8; --fill:#EFEFF4;
+  --blue:#0071E3; --green:#1D8438; --red:#C7332B; --orange:#B45309;
+  --tint:#0071E3;
   --s1:#007AFF; --s2:#E06C00;
-  --nav:rgba(249,249,249,.82);
-  --g1:#BFD9F7; --g2:#8CBAF0; --g3:#5A9AE8; --g4:#2E7CDD; --g5:#0A5CB8;
-  --sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable Text",
-        "Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  --num:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Menlo,monospace;
-  --r:12px;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#000000; --card:#1C1C1E; --card-2:#2C2C2E;
-    --label:#FFFFFF; --label-2:rgba(235,235,245,.62); --label-3:rgba(235,235,245,.32);
-    --sep:rgba(84,84,88,.60); --fill:rgba(120,120,128,.24);
-    --blue:#0A84FF; --green:#30D158; --red:#FF453A; --orange:#FF9F0A;
-    --tint:#0A84FF;
-    --s1:#0A84FF; --s2:#FF9F0A;
-    --nav:rgba(28,28,30,.78);
-    --g1:#1B3550; --g2:#22466B; --g3:#2A5B8C; --g4:#3577B5; --g5:#4A96DC;
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#000000; --card:#1C1C1E; --card-2:#2C2C2E;
-  --label:#FFFFFF; --label-2:rgba(235,235,245,.62); --label-3:rgba(235,235,245,.32);
-  --sep:rgba(84,84,88,.60); --fill:rgba(120,120,128,.24);
-  --blue:#0A84FF; --green:#30D158; --red:#FF453A; --orange:#FF9F0A;
-  --tint:#0A84FF;
-  --s1:#0A84FF; --s2:#FF9F0A;
-  --nav:rgba(28,28,30,.78);
-  --g1:#1B3550; --g2:#22466B; --g3:#2A5B8C; --g4:#3577B5; --g5:#4A96DC;
+  --nav:rgba(250,250,252,.86);
+  --g1:#CBDEF7; --g2:#9DC0EF; --g3:#6C9FE4; --g4:#3E7ED4; --g5:#1B5CAE;
+  --sans:"Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --num:"Geist Mono",ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace;
+  --r:14px;
+  --sh:0 1px 2px rgba(28,28,40,.05), 0 6px 18px -8px rgba(28,28,40,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--label);font-family:var(--sys);
-  font-size:17px;line-height:1.45;letter-spacing:-.01em;
-  -webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--label);font-family:var(--sans);
+  font-size:16px;line-height:1.5;letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
 
 /* ---------- barre de navigation ---------- */
 .nav{position:sticky;top:0;z-index:40;background:var(--nav);
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:.5px solid var(--sep)}
-.nav-in{max-width:860px;margin:0 auto;padding:11px 20px;display:flex;
+  border-bottom:1px solid var(--sep)}
+.nav-in{max-width:880px;margin:0 auto;padding:12px 20px;display:flex;
   align-items:center;justify-content:space-between;gap:12px}
-.nav-t{font-size:17px;font-weight:600;letter-spacing:-.02em}
-.nav-s{font-size:12px;color:var(--label-3);font-variant-numeric:tabular-nums}
+.nav-t{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.nav-s{font-size:12px;color:var(--label-3);font-family:var(--num)}
 
-main{max-width:860px;margin:0 auto;
-  padding:0 20px calc(86px + env(safe-area-inset-bottom))}
+main{max-width:880px;margin:0 auto;
+  padding:0 20px calc(88px + env(safe-area-inset-bottom))}
 .tab{display:none}
 .tab.on{display:block;animation:in .3s cubic-bezier(.32,.72,0,1)}
-@keyframes in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.big{font-size:34px;font-weight:700;letter-spacing:-.028em;line-height:1.12;
-  padding:18px 0 3px;text-wrap:balance}
-.lede{color:var(--label-2);font-size:15px;line-height:1.47;padding-bottom:2px;
-  max-width:62ch;text-wrap:pretty}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.big{font-size:33px;font-weight:600;letter-spacing:-.028em;line-height:1.14;
+  padding:20px 0 4px;text-wrap:balance}
+.lede{color:var(--label-2);font-size:15px;line-height:1.5;max-width:62ch;
+  text-wrap:pretty}
 
-/* ---------- groupes de listes ---------- */
-.grp{margin-top:26px}
-.grp-h{font-size:15px;font-weight:600;letter-spacing:-.012em;padding:0 4px 8px}
-.grp-n{font-size:13px;color:var(--label-2);padding:9px 4px 0;line-height:1.42;
+/* ---------- groupes ---------- */
+.grp{margin-top:28px}
+.grp-h{font-size:14px;font-weight:600;letter-spacing:-.008em;padding:0 4px 9px;
+  color:var(--label-2)}
+.grp-n{font-size:13px;color:var(--label-2);padding:10px 4px 0;line-height:1.45;
   max-width:60ch}
-.list{background:var(--card);border-radius:var(--r);overflow:hidden}
-.li{display:flex;align-items:center;gap:14px;min-height:46px;padding:11px 16px;
+.list{background:var(--card);border-radius:var(--r);overflow:hidden;
+  box-shadow:var(--sh)}
+.li{display:flex;align-items:center;gap:14px;min-height:48px;padding:12px 16px;
   position:relative}
-.li+.li::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;
+.li+.li::before{content:"";position:absolute;left:16px;right:0;top:0;height:1px;
   background:var(--sep)}
-.li-k{flex:1;min-width:0;font-size:16px}
-.li-sub{font-size:13px;color:var(--label-2);margin-top:1px;line-height:1.35}
-.li-v{font-size:16px;color:var(--label-2);font-family:var(--num);
+.li-k{flex:1;min-width:0;font-size:15.5px;font-weight:450}
+.li-sub{font-size:13px;color:var(--label-2);margin-top:2px;line-height:1.4;
+  font-weight:400}
+.li-v{font-size:15px;color:var(--label-2);font-family:var(--num);
   font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
-.li-v.hi{color:var(--label);font-weight:600}
+.li-v.hi{color:var(--label);font-weight:500}
 
 /* ---------- cartes ---------- */
-.card{background:var(--card);border-radius:var(--r);padding:16px}
+.card{background:var(--card);border-radius:var(--r);padding:18px;
+  box-shadow:var(--sh)}
 .cards{display:grid;gap:12px}
-.c2{grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
+.c2{grid-template-columns:repeat(auto-fit,minmax(162px,1fr))}
 
-/* ---------- tuiles chiffrees ---------- */
-.stat{background:var(--card);border-radius:var(--r);padding:14px 16px 15px}
+.stat{background:var(--card);border-radius:var(--r);padding:15px 17px 16px;
+  box-shadow:var(--sh)}
 .stat-l{font-size:13px;color:var(--label-2);font-weight:500}
-.stat-v{font-size:30px;font-weight:600;letter-spacing:-.03em;margin-top:5px;
-  font-variant-numeric:tabular-nums;line-height:1.05}
-.stat-v em{font-style:normal;font-size:15px;color:var(--label-2);font-weight:500;
-  margin-left:3px}
-.stat-f{font-size:12.5px;color:var(--label-3);margin-top:4px;line-height:1.35}
-.stat-w{font-size:13.5px;color:var(--label-3);margin-top:9px;line-height:1.4}
+.stat-v{font-size:29px;font-weight:600;letter-spacing:-.032em;margin-top:6px;
+  font-family:var(--num);font-variant-numeric:tabular-nums;line-height:1.05}
+.stat-v em{font-style:normal;font-size:14px;color:var(--label-2);font-weight:500;
+  margin-left:3px;font-family:var(--sans)}
+.stat-f{font-size:12.5px;color:var(--label-3);margin-top:5px;line-height:1.35}
+.stat-w{font-size:13.5px;color:var(--label-3);margin-top:10px;line-height:1.4}
 
 /* ---------- compte a rebours ---------- */
-.hero{background:var(--card);border-radius:16px;padding:20px;
+.hero{background:var(--card);border-radius:18px;padding:22px;box-shadow:var(--sh);
   display:flex;align-items:center;justify-content:space-between;gap:16px}
 .hero .t{font-size:13px;color:var(--label-2);font-weight:500}
-.hero .n{font-size:24px;font-weight:700;letter-spacing:-.025em;margin-top:2px}
-.hero .d{font-size:14px;color:var(--label-2);margin-top:3px}
+.hero .n{font-size:23px;font-weight:600;letter-spacing:-.025em;margin-top:3px}
+.hero .d{font-size:14px;color:var(--label-2);margin-top:4px}
 .hero-r{text-align:right;flex-shrink:0}
-.hero-r .j{font-size:40px;font-weight:700;letter-spacing:-.035em;color:var(--tint);
-  font-variant-numeric:tabular-nums;line-height:1}
-.hero-r .u{font-size:12px;color:var(--label-3);font-weight:500;margin-top:1px}
+.hero-r .j{font-size:42px;font-weight:600;letter-spacing:-.04em;color:var(--tint);
+  font-family:var(--num);font-variant-numeric:tabular-nums;line-height:1}
+.hero-r .u{font-size:11px;color:var(--label-3);font-weight:500;margin-top:3px;
+  letter-spacing:.06em}
 
 /* ---------- badges ---------- */
-.bdg{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;
-  padding:3px 9px;border-radius:7px;background:var(--fill);color:var(--label-2);
-  white-space:nowrap}
-.bdg.b{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue)}
-.bdg.g{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
-.bdg.r{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
-.bdg.o{background:color-mix(in srgb,var(--orange) 18%,transparent);color:var(--orange)}
+.bdg{display:inline-flex;align-items:center;font-size:12.5px;font-weight:500;
+  padding:4px 10px;border-radius:8px;background:var(--fill);color:var(--label-2);
+  white-space:nowrap;font-family:var(--num);letter-spacing:-.01em}
+.bdg.b{background:#E8F1FD;color:#0059B8}
+.bdg.g{background:#E4F4E9;color:#1D7A34}
+.bdg.r{background:#FCEAE9;color:#B32A22}
+.bdg.o{background:#FBEFE0;color:#9A5B00}
 
 /* ---------- alertes ---------- */
-.alert{background:var(--card);border-radius:var(--r);padding:15px 16px;
-  display:flex;gap:13px}
-.alert .ic{width:26px;height:26px;flex-shrink:0;border-radius:50%;display:grid;
-  place-items:center;font-size:15px;font-weight:700;color:#fff;margin-top:1px;
-  line-height:1}
+.alert{background:var(--card);border-radius:var(--r);padding:16px 17px;
+  display:flex;gap:14px;box-shadow:var(--sh)}
+.alert .ic{width:28px;height:28px;flex-shrink:0;border-radius:9px;display:grid;
+  place-items:center;margin-top:1px}
+.alert .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
 .alert.critique .ic{background:var(--red)}
 .alert.attention .ic{background:var(--orange)}
 .alert.calme .ic{background:var(--green)}
 .alert.neutre .ic{background:var(--label-3)}
-.alert .at{font-size:16px;font-weight:600;letter-spacing:-.015em}
-.alert .ad{font-size:14.5px;color:var(--label-2);margin-top:3px;line-height:1.42}
-.alert .aa{font-size:14px;color:var(--label-2);margin-top:10px;padding-top:10px;
-  border-top:.5px solid var(--sep);line-height:1.45}
+.alert .at{font-size:15.5px;font-weight:600;letter-spacing:-.015em}
+.alert .ad{font-size:14.5px;color:var(--label-2);margin-top:4px;line-height:1.45}
+.alert .aa{font-size:14px;color:var(--label-2);margin-top:11px;padding-top:11px;
+  border-top:1px solid var(--sep);line-height:1.5}
 
 /* ---------- graphiques ---------- */
-.chart{background:var(--card);border-radius:var(--r);padding:15px 16px 12px}
-.chart .ct{font-size:16px;font-weight:600;letter-spacing:-.015em}
-.chart .cs{font-size:13px;color:var(--label-2);margin-top:2px;line-height:1.35}
-.cb{margin-top:12px;position:relative}
+.chart{background:var(--card);border-radius:var(--r);padding:17px 18px 13px;
+  box-shadow:var(--sh)}
+.chart .ct{font-size:15.5px;font-weight:600;letter-spacing:-.015em}
+.chart .cs{font-size:13px;color:var(--label-2);margin-top:3px;line-height:1.4}
+.cb{margin-top:13px;position:relative}
 .cb svg{display:block;width:100%;height:auto;overflow:visible}
-.keys{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12.5px;
+.keys{display:flex;flex-wrap:wrap;gap:15px;margin-top:11px;font-size:12.5px;
   color:var(--label-2)}
 .keys span{display:flex;align-items:center;gap:6px}
-.keys i{width:13px;height:3px;border-radius:2px;display:block;flex-shrink:0}
+.keys i{width:14px;height:3px;border-radius:2px;display:block;flex-shrink:0}
 .keys i.sq{width:11px;height:11px;border-radius:3px}
-text.ax{font-family:var(--num);font-size:10px;fill:var(--label-3)}
-text.dl{font-family:var(--num);font-size:10px;font-weight:600}
-.wait{text-align:center;color:var(--label-3);font-size:13.5px;line-height:1.5;
-  padding:24px 12px;margin-top:12px;background:var(--card-2);border-radius:10px}
+text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--label-3)}
+text.dl{font-family:"Geist Mono",monospace;font-size:10px;font-weight:600}
+.wait{text-align:center;color:var(--label-3);font-size:13.5px;line-height:1.55;
+  padding:26px 14px;margin-top:13px;background:var(--sunk);border-radius:11px}
 .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
-  background:var(--label);color:var(--card);font-size:12px;padding:6px 10px;
-  border-radius:8px;white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
-  font-family:var(--num);line-height:1.4;font-weight:500}
+  background:var(--label);color:#fff;font-size:12px;padding:7px 11px;
+  border-radius:9px;white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
+  font-family:var(--num);line-height:1.45;font-weight:500;
+  box-shadow:0 6px 20px -6px rgba(0,0,0,.35)}
 
 /* ---------- tableau ---------- */
 .scroll{overflow-x:auto;background:var(--card);border-radius:var(--r);
-  -webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:600px}
-th{font-size:12.5px;color:var(--label-2);text-align:left;padding:11px 14px;
-  font-weight:600;border-bottom:.5px solid var(--sep);white-space:nowrap}
-td{padding:10px 14px;border-bottom:.5px solid var(--sep);vertical-align:top}
+  box-shadow:var(--sh);-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:610px}
+th{font-size:12.5px;color:var(--label-2);text-align:left;padding:12px 14px;
+  font-weight:600;border-bottom:1px solid var(--sep);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--sep);vertical-align:top}
 tbody tr:last-child td{border-bottom:none}
 td.t{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.now td{background:color-mix(in srgb,var(--blue) 10%,transparent);font-weight:600}
-tr.evt td{background:var(--fill)}
+tr.now td{background:#EBF3FD;font-weight:600}
+tr.evt td{background:var(--sunk)}
 tr.evt td.ev{color:var(--tint);font-weight:600}
 tr.soft td{color:var(--label-2)}
 
-.code{background:var(--card-2);border-radius:8px;padding:9px 12px;margin-top:8px;
+.code{background:var(--sunk);border-radius:9px;padding:10px 13px;margin-top:9px;
   font-family:var(--num);font-size:12.5px;overflow-x:auto;white-space:pre;
   color:var(--label);line-height:1.6}
 
@@ -177,20 +164,21 @@ tr.soft td{color:var(--label-2)}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav);
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
-  border-top:.5px solid var(--sep);padding-bottom:env(safe-area-inset-bottom)}
-.tabbar-in{max-width:560px;margin:0 auto;display:grid;
+  border-top:1px solid var(--sep);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar-in{max-width:580px;margin:0 auto;display:grid;
   grid-template-columns:repeat(5,1fr)}
-.tb{position:relative;appearance:none;border:0;background:none;padding:7px 2px 6px;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
-  color:var(--label-3);font-family:inherit;font-size:10px;font-weight:500;
-  transition:color .15s,transform .12s}
-.tb svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
+.tb{position:relative;appearance:none;border:0;background:none;padding:9px 2px 7px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--label-3);font-family:inherit;font-size:10.5px;font-weight:500;
+  letter-spacing:-.01em;transition:color .18s,transform .12s}
+.tb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .18s}
 .tb[aria-selected="true"]{color:var(--tint)}
+.tb[aria-selected="true"] svg{stroke-width:2.05}
 .tb:active{transform:scale(.9)}
-.tb:focus-visible{outline:2px solid var(--tint);outline-offset:-3px;border-radius:9px}
-.dotb{position:absolute;top:5px;right:calc(50% - 17px);width:9px;height:9px;
-  border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--bg)}
+.tb:focus-visible{outline:2px solid var(--tint);outline-offset:-3px;border-radius:10px}
+.dotb{position:absolute;top:6px;right:calc(50% - 17px);width:9px;height:9px;
+  border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #FAFAFC}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;
   transition:none!important}}
@@ -292,19 +280,30 @@ const cur = Math.floor((today - W1) / 6048e5) + 1;
 const nowW = PLAN.semaines.find(w => w.semaine === cur) || PLAN.semaines[0];
 const A = M.actuel, wl = M.wellness, AL = M.alertes || [];
 
-/* ================= onglets ================= */
+/* ================= onglets =================
+   Icones dessinees a la main sur une grille de 24, trait de 1,6
+   qui s'epaissit a 2,05 sur l'onglet actif. */
 const ICONS = {
-  today:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.6V20.5h13V9.6"/>'
-       +'<path d="M9.6 20.5V15h4.8v5.5"/>',
-  plan:'<rect x="3.2" y="4.8" width="17.6" height="16" rx="3.2"/>'
-      +'<path d="M3.2 9.6h17.6M8 3.2v3.4M16 3.2v3.4"/><path d="M7.4 13.4h4M7.4 17h7"/>',
-  prog:'<path d="M3.6 20.4V3.8"/><path d="M3.6 20.4H21"/>'
-      +'<path d="M7 16.4l3.9-4.7 3.2 2.6L20.2 7.4"/>',
-  log:'<path d="M5.2 3.6h10.6l3.6 3.6v13.2H5.2z"/><path d="M15.4 3.6v3.8h3.8"/>'
-     +'<path d="M8.6 12.2h7M8.6 16h4.6"/>',
-  data:'<ellipse cx="12" cy="6" rx="7.4" ry="2.9"/>'
-      +'<path d="M4.6 6v12c0 1.6 3.3 2.9 7.4 2.9s7.4-1.3 7.4-2.9V6"/>'
-      +'<path d="M4.6 12c0 1.6 3.3 2.9 7.4 2.9s7.4-1.3 7.4-2.9"/>',
+  today:'<g transform="rotate(-90 12 12)">'
+       +'<circle cx="12" cy="12" r="8.6" stroke-dasharray="43 11"/>'
+       +'<circle cx="12" cy="12" r="4.6" stroke-dasharray="21 8"/></g>',
+  plan:'<rect x="3.3" y="5" width="17.4" height="15.7" rx="3.6"/>'
+      +'<path d="M3.3 9.9h17.4"/><path d="M8.2 3.3v3.4M15.8 3.3v3.4"/>'
+      +'<path d="M7.6 14h3.2M7.6 17.4h6.6"/>',
+  prog:'<path d="M3.4 16.8l4.4-5.1 3.3 2.7 3.2-4.1 3.1 2.4"/>'
+      +'<circle cx="17.4" cy="12.7" r="1.9" fill="currentColor" stroke="none"/>'
+      +'<path d="M3.4 20.6h17.2"/>',
+  log:'<path d="M19.4 12.6v5.6a2.6 2.6 0 0 1-2.6 2.6H6.2a2.6 2.6 0 0 1-2.6-2.6V7.6'
+     +'A2.6 2.6 0 0 1 6.2 5h5.5"/>'
+     +'<path d="M16.6 3.6l3.8 3.8-6.4 6.4-4 .2.2-4z"/>',
+  data:'<ellipse cx="12" cy="6.2" rx="7.3" ry="2.9"/>'
+      +'<path d="M4.7 6.2v11.6c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9V6.2"/>'
+      +'<path d="M4.7 12c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9"/>',
+};
+const SYM = {
+  bang:'<path d="M12 5.5v7"/><path d="M12 17.2v.2"/>',
+  check:'<path d="M5.5 12.4l4.2 4.2 8.8-9.2"/>',
+  dot:'<path d="M12 11.9v.2"/>',
 };
 const TABS = [
   ['today', "Aujourd'hui", "Aujourd'hui"],
@@ -350,18 +349,18 @@ $('today-lede').textContent = cur < 1
 
 (function () {
   const b = (cls, sym, t, d, a) => `<div class="alert ${cls}">
-    <div class="ic">${sym}</div><div style="min-width:0">
-    <div class="at">${t}</div><div class="ad">${d}</div>
+    <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${SYM[sym]}</svg></div>
+    <div style="min-width:0"><div class="at">${t}</div><div class="ad">${d}</div>
     ${a ? `<div class="aa">${a}</div>` : ''}</div></div>`;
   if (AL.length) {
     $('alerts').innerHTML = AL.map(a =>
-      b(a.niveau, '!', a.titre, a.detail, a.quoi_faire)).join('');
+      b(a.niveau, 'bang', a.titre, a.detail, a.quoi_faire)).join('');
   } else if (M.nb_activites >= 3) {
-    $('alerts').innerHTML = b('calme', '&#10003;', 'Rien à signaler',
+    $('alerts').innerHTML = b('calme', 'check', 'Rien à signaler',
       'Charge, dérive cardiaque et récupération sont dans les clous. '
       + 'Les six règles de surveillance ont été vérifiées.', '');
   } else {
-    $('alerts').innerHTML = b('neutre', '&middot;', 'Surveillance en veille',
+    $('alerts').innerHTML = b('neutre', 'dot', 'Surveillance en veille',
       'Six règles tournent à chaque mise à jour : montée de charge, dérive '
       + 'cardiaque, variabilité cardiaque, FC de repos, douleur signalée et '
       + 'effort perçu.',
@@ -434,18 +433,18 @@ $('quick').innerHTML = [
 /* ================= plan ================= */
 $('races').innerHTML = PLAN.courses.map(c => `<div class="card">
   <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
-    <span style="font-size:18px;font-weight:600;letter-spacing:-.02em">${c.nom}</span>
+    <span style="font-size:17.5px;font-weight:600;letter-spacing:-.02em">${c.nom}</span>
     <span class="bdg b">J-${jrs(c.date)}</span></div>
-  <div style="font-size:14px;color:var(--label-2);margin-top:3px">${dlong(c.date)}</div>
-  <div style="display:flex;gap:22px;margin-top:11px;padding-top:11px;
-    border-top:.5px solid var(--sep)">
+  <div style="font-size:14px;color:var(--label-2);margin-top:4px">${dlong(c.date)}</div>
+  <div style="display:flex;gap:24px;margin-top:13px;padding-top:13px;
+    border-top:1px solid var(--sep)">
     <div><div style="font-size:12px;color:var(--label-2)">Objectif</div>
-      <div style="font-family:var(--num);font-weight:600;font-size:15px">${c.cible}</div>
-    </div>
+      <div style="font-family:var(--num);font-weight:500;font-size:15px;margin-top:2px"
+        >${c.cible}</div></div>
     <div><div style="font-size:12px;color:var(--label-2)">Allure</div>
-      <div style="font-family:var(--num);font-weight:600;font-size:15px">${c.allure}</div>
-    </div></div>
-  <div style="font-size:13.5px;color:var(--label-2);margin-top:10px;line-height:1.45"
+      <div style="font-family:var(--num);font-weight:500;font-size:15px;margin-top:2px"
+        >${c.allure}</div></div></div>
+  <div style="font-size:13.5px;color:var(--label-2);margin-top:11px;line-height:1.5"
     >${c.role}</div></div>`).join('');
 
 $('paces').innerHTML = [
@@ -504,8 +503,8 @@ function lineChart(box, series, opt) {
   for (let g = 0; g <= 3; g++) {
     const v = mn + (mx - mn) * g / 3, y = Y(v);
     s += `<line x1="${L}" y1="${y.toFixed(1)}" x2="${W - R}" y2="${y.toFixed(1)}"
-      stroke="var(--sep)" stroke-width=".7"/>
-      <text class="ax" x="${L - 6}" y="${(y + 3.4).toFixed(1)}"
+      stroke="var(--sep)" stroke-width="1"/>
+      <text class="ax" x="${L - 7}" y="${(y + 3.4).toFixed(1)}"
       text-anchor="end">${v.toFixed(dec)}</text>`;
   }
   if (opt.target != null && opt.target > mn && opt.target < mx)
@@ -527,7 +526,7 @@ function lineChart(box, series, opt) {
   box.innerHTML = s;
 
   const svg = box.querySelector('svg');
-  const move = e => {
+  svg.addEventListener('pointermove', e => {
     const r = svg.getBoundingClientRect();
     if (!r.width) return;
     const j = Math.max(0, Math.min(n - 1, Math.round(
@@ -539,8 +538,7 @@ function lineChart(box, series, opt) {
     tip.style.left = (r.left + window.scrollX + (X(j) / W) * r.width) + 'px';
     tip.style.top = (r.top + window.scrollY) + 'px';
     tip.style.opacity = 1;
-  };
-  svg.addEventListener('pointermove', move);
+  });
   svg.addEventListener('pointerleave', () => { tip.style.opacity = 0; });
   return true;
 }
@@ -554,15 +552,16 @@ function volChart(box, plan, done) {
     aria-label="Volume hebdomadaire planifié sur 27 semaines">`;
   for (let g = 10; g <= mx; g += 10)
     s += `<line x1="${L}" y1="${Y(g).toFixed(1)}" x2="${W - R}" y2="${Y(g).toFixed(1)}"
-      stroke="var(--sep)" stroke-width=".7"/><text class="ax" x="${L - 6}"
+      stroke="var(--sep)" stroke-width="1"/><text class="ax" x="${L - 7}"
       y="${(Y(g) + 3.6).toFixed(1)}" text-anchor="end">${g}</text>`;
   plan.forEach((p, i) => {
     const x = L + i * step + (step - bw) / 2, y = Y(p.v), h = H - B - y;
     s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}"
-      height="${h.toFixed(1)}" rx="3" fill="${p.fill}" opacity="${p.dim ? .5 : 1}"/>`;
+      height="${h.toFixed(1)}" rx="3.5" fill="${p.fill}"
+      opacity="${p.dim ? .55 : 1}"/>`;
     const r = done[p.sem];
     if (r) s += `<rect x="${(x + bw / 4).toFixed(1)}" y="${Y(r).toFixed(1)}"
-      width="${(bw / 2).toFixed(1)}" height="${(H - B - Y(r)).toFixed(1)}" rx="2"
+      width="${(bw / 2).toFixed(1)}" height="${(H - B - Y(r)).toFixed(1)}" rx="2.5"
       fill="var(--s2)"/>`;
     if (p.race) s += `<circle cx="${(x + bw / 2).toFixed(1)}" cy="${T - 6}" r="3.4"
       fill="var(--s2)"/>`;
@@ -673,14 +672,14 @@ $('kpis').innerHTML = [
 /* ================= journal ================= */
 (function () {
   const J = M.journal || [];
-  $('howto').innerHTML = `<div style="font-size:15px;line-height:1.5">
+  $('howto').innerHTML = `<div style="font-size:15px;line-height:1.55">
     <b>Depuis le téléphone</b>, dans Intervals.icu : le RPE se note sur la séance,
     le ressenti et la douleur dans le <i>wellness</i> du jour.</div>
-    <div style="font-size:15px;line-height:1.5;margin-top:12px"><b>Depuis
+    <div style="font-size:15px;line-height:1.55;margin-top:13px"><b>Depuis
     l'ordinateur</b>, en une ligne :</div>
     <div class="code">python scripts/journal.py --rpe 4</div>
     <div class="code">python scripts/journal.py --rpe 7 --douleur "genou droit"</div>
-    <div style="font-size:14px;color:var(--label-2);margin-top:13px;line-height:1.45">
+    <div style="font-size:14px;color:var(--label-2);margin-top:14px;line-height:1.5">
     Le <b>RPE</b> est l'effort perçu de 1 à 10. En endurance fondamentale il doit
     tourner autour de 3 ou 4 : au-delà, tu cours tes séances faciles trop vite,
     et l'alerte se déclenche.</div>`;
@@ -714,7 +713,7 @@ const pc = (m, d) => { const s = m * 60 / d;
 
 $('verdict').innerHTML = `<span class="bdg ${M.nb_activites ? 'b' : 'g'}">`
   + (M.nb_activites ? 'Suivi en cours' : 'Crédible, à confirmer') + '</span>'
-  + '<div style="font-size:15px;line-height:1.5;color:var(--label-2);margin-top:12px">'
+  + '<div style="font-size:15px;line-height:1.55;color:var(--label-2);margin-top:13px">'
   + (M.nb_activites
     ? 'Projections recalculées sur les séances réellement enregistrées.'
     : 'Le sub-4h demande 5:41/km. Depuis le 10 km en 48 min, la théorie projette '
@@ -764,7 +763,7 @@ $('vrows').innerHTML = [
       : r[2] ? 'Reçue' : 'En attente'}</span></div>`).join('');
 })();
 
-$('priv').innerHTML = `<div style="font-size:15px;line-height:1.5;color:var(--label-2)">
+$('priv').innerHTML = `<div style="font-size:15px;line-height:1.55;color:var(--label-2)">
   Les données viennent de la montre Garmin, synchronisées vers Intervals.icu puis
   agrégées. <b style="color:var(--label)">Aucune coordonnée GPS ni trace de parcours
   n'est publiée sur cette page.</b><br><br>
