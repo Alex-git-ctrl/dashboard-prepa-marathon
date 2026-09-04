@@ -184,6 +184,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--data);
   vertical-align:2px;margin-right:6px}
 
+/* ---------- selecteur de periode ---------- */
+.seg{display:flex;background:var(--creux);border-radius:11px;padding:3px;gap:3px;
+  margin-bottom:16px}
+.seg button{flex:1;appearance:none;border:0;background:none;padding:9px 4px;
+  border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;
+  color:var(--sourd);cursor:pointer;transition:background .15s,color .15s;
+  letter-spacing:-.01em}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
+  font-weight:600;box-shadow:0 1px 2px rgba(22,25,28,.10)}
+.seg button:active{transform:scale(.97)}
+.seg button:focus-visible{outline:2px solid var(--data);outline-offset:-2px}
+
 /* ---------- graphiques ---------- */
 .chart{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
   padding:16px 17px 12px;margin-top:11px}
@@ -220,7 +232,7 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
-.bar-in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.bar-in{max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;padding:12px 2px 10px;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
   color:var(--acier);font-family:inherit;font-size:11.5px;font-weight:500;
@@ -318,6 +330,18 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
     <div class="sec"><h2>Évolution</h2><div id="charts"></div></div>
   </section>
 
+  <section class="tab" id="t-sante" role="tabpanel" aria-labelledby="b-sante">
+    <h1>Santé</h1>
+    <p class="lede">Ce qui rend l'entraînement possible. Un plan casse presque
+      toujours sur le sommeil et la récupération, rarement sur les séances.</p>
+    <div class="sec"><h2>Aujourd'hui</h2><div class="grid" id="sante-tuiles"></div></div>
+    <div class="sec"><h2>Évolution</h2>
+      <div class="seg" id="sante-seg" role="group"
+        aria-label="Période d'agrégation"></div>
+      <div id="sante-charts"></div>
+      <p class="note" id="sante-n"></p></div>
+  </section>
+
   <section class="tab" id="t-log" role="tabpanel" aria-labelledby="b-log">
     <h1>Journal</h1>
     <p class="lede">Ce que la montre ne mesure pas : l'effort perçu et la douleur.
@@ -386,6 +410,8 @@ const ICONS = {
       +'<path d="M3.4 20.6h17.2"/>',
   log:'<path d="M19.4 12.6v5.6a2.6 2.6 0 0 1-2.6 2.6H6.2a2.6 2.6 0 0 1-2.6-2.6V7.6'
      +'A2.6 2.6 0 0 1 6.2 5h5.5"/><path d="M16.6 3.6l3.8 3.8-6.4 6.4-4 .2.2-4z"/>',
+  sante:'<path d="M3.2 12.4h4.1l2-4.6 3.1 8.6 2.3-5.5 1.6 1.5h4.5"/>'
+      +'<path d="M20.5 9.4a4.6 4.6 0 0 0-8.5-2.5A4.6 4.6 0 0 0 3.5 9.4"/>',
   data:'<ellipse cx="12" cy="6.2" rx="7.3" ry="2.9"/>'
       +'<path d="M4.7 6.2v11.6c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9V6.2"/>'
       +'<path d="M4.7 12c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9"/>',
@@ -396,9 +422,9 @@ const SYM = {
   check:'<circle cx="12" cy="12" r="9.4"/><path d="M7.6 12.3l3 3 5.8-6.2"/>',
   dot:'<circle cx="12" cy="12" r="9.4"/><path d="M8.4 12h7.2"/>',
 };
-const TABS = [['today', "Aujourd'hui", "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
-  ['prog', 'Progrès', 'Progression'], ['log', 'Journal', 'Journal'],
-  ['data', 'Données', 'Données']];
+const TABS = [['today', 'Accueil', "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
+  ['prog', 'Progrès', 'Progression'], ['sante', 'Santé', 'Santé'],
+  ['log', 'Journal', 'Journal'], ['data', 'Données', 'Données']];
 const urgent = AL.some(a => a.niveau === 'critique');
 $('tabbar').innerHTML = TABS.map(([id, court], i) => `
   <button class="tb" id="b-${id}" role="tab" aria-controls="t-${id}"
@@ -833,6 +859,108 @@ $('kpis').innerHTML = [
     if (ok && c.k) $('k' + i).innerHTML = c.k.map(([n, col]) =>
       `<span><i style="background:${col}"></i>${n}</span>`).join('');
   });
+})();
+
+/* ================= sante ================= */
+(function () {
+  const S = M.sante;
+  if (!S) return;
+  const J = S.jours || [];
+
+  /* --- tuiles du jour --- */
+  const T = [
+    ['pas', 'Pas aujourd’hui', 'pas', 0, 'Dès la première journée portée'],
+    ['sommeil_h', 'Sommeil', 'h', 1, 'Dès la première nuit synchronisée'],
+    ['sommeil_score', 'Score de sommeil', '/100', 0, 'Mesuré par la montre'],
+    ['fatigue_indice', 'Indice de fatigue', '/100', 0,
+     'Calculé après ' + S.minimum_jours + ' nuits'],
+  ];
+  $('sante-tuiles').innerHTML = T.map(([cle, nom, u, dec, att]) => {
+    const v = S.actuel[cle];
+    const dt = S.actuel[cle + '_date'];
+    if (v == null) return '<div class="tile"><div class="l">' + nom + '</div>'
+      + '<div class="w">' + att + '</div></div>';
+    return '<div class="tile"><div class="l">' + nom + '</div>'
+      + '<div class="v">' + nf(dec ? Number(v.toFixed(dec)) : Math.round(v))
+      + '<em>' + u + '</em></div>'
+      + '<div class="d">' + (dt ? dshort(dt) : '') + '</div></div>';
+  }).join('');
+
+  /* --- agregation par periode --- */
+  const PERIODES = [['jour', 'Jour', 30], ['semaine', 'Semaine', 12],
+    ['mois', 'Mois', 12], ['annee', 'Année', 5]];
+  let mode = 'jour';
+  try { mode = localStorage.getItem('sante-periode') || 'jour'; } catch (e) {}
+  if (!PERIODES.some(p => p[0] === mode)) mode = 'jour';
+
+  function bucket(dateStr, m) {
+    if (m === 'mois') return dateStr.slice(0, 7) + '-01';
+    if (m === 'annee') return dateStr.slice(0, 4) + '-01-01';
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));   // lundi de la semaine
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+      + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  /** Moyenne par jour sur la periode : la seule facon de comparer une semaine
+      a une annee sans que les totaux ecrasent tout. */
+  function agrege(champ, m) {
+    const pts = J.filter(j => j[champ] != null);
+    const lim = PERIODES.find(p => p[0] === m)[2];
+    if (m === 'jour') return pts.slice(-lim).map(j => ({d:j.date, v:j[champ]}));
+    const g = {};
+    pts.forEach(j => { const k = bucket(j.date, m); (g[k] = g[k] || []).push(j[champ]); });
+    return Object.keys(g).sort().slice(-lim).map(k => ({
+      d:k, v:g[k].reduce((a, b) => a + b, 0) / g[k].length, n:g[k].length}));
+  }
+
+  const ATTENTE = {
+    jour:'Il faut au moins deux jours de mesures pour tracer une courbe.',
+    semaine:'Il faut au moins deux semaines de mesures pour cette vue.',
+    mois:'Il faut au moins deux mois de mesures pour cette vue.',
+    annee:'Il faut au moins deux années de mesures pour cette vue.',
+  };
+  const NOTES = {
+    fatigue_indice:'Calculé, pas mesuré. 50 correspond à ta normale : au-dessus, '
+      + 'tu récupères moins bien que d’habitude. Il compare ta VFC et ta FC de repos '
+      + 'à leur moyenne des ' + S.reference_jours + ' derniers jours.',
+    pas:'Marche quotidienne hors séances de course, un bon marqueur de dépense de fond.',
+    sommeil_h:'Sous 7 heures régulières, la progression ralentit quelle que soit '
+      + 'la qualité des séances.',
+  };
+
+  function dessine() {
+    $('sante-charts').innerHTML = S.champs.map((c, i) =>
+      '<div class="chart"><div class="ct">' + c.nom + '</div>'
+      + (NOTES[c.cle] ? '<div class="cs">' + NOTES[c.cle] + '</div>' : '')
+      + '<div class="cb" id="sc' + i + '"></div></div>').join('');
+    S.champs.forEach((c, i) => {
+      const data = agrege(c.cle, mode);
+      lineChart($('sc' + i), [{name:c.nom, color:'var(--data)', data:data}],
+        {unit:' ' + c.unite.replace('/100', ''), dec:c.dec,
+         target:c.cle === 'fatigue_indice' ? 50 : null,
+         wait:ATTENTE[mode]});
+    });
+    const p = PERIODES.find(x => x[0] === mode);
+    $('sante-n').textContent = mode === 'jour'
+      ? 'Valeurs quotidiennes, ' + p[2] + ' derniers jours.'
+      : 'Moyenne par jour sur chaque ' + p[1].toLowerCase() + ', '
+        + p[2] + ' dernières périodes.';
+  }
+
+  $('sante-seg').innerHTML = PERIODES.map(([cle, nom]) =>
+    '<button type="button" data-p="' + cle + '" aria-pressed="'
+    + (cle === mode) + '">' + nom + '</button>').join('');
+  $('sante-seg').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    mode = b.dataset.p;
+    [...$('sante-seg').children].forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.p === mode ? 'true' : 'false'));
+    try { localStorage.setItem('sante-periode', mode); } catch (err) {}
+    dessine();
+  });
+  dessine();
 })();
 
 /* ================= journal ================= */

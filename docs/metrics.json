@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-04T17:50:44",
+  "maj": "2026-09-04T21:03:43",
   "nb_activites": 0,
   "semaines": {},
   "seances": [],
@@ -52,20 +52,20 @@
     },
     {
       "date": "2026-09-04",
-      "hrv": 67.0,
+      "hrv": 40.0,
       "fc_repos": 53,
       "poids": null,
       "vo2max": null,
       "readiness": null,
       "sommeil_score": 70.0,
       "fc_sommeil": null,
-      "spo2": null,
+      "spo2": 98.0,
       "respiration": null,
       "masse_grasse": null,
       "ctl": null,
       "atl": null,
       "ramp_rate": null,
-      "pas": 345,
+      "pas": 2488,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -80,20 +80,20 @@
   "zones_allure_pct": {},
   "dynamique": {},
   "actuel": {
-    "hrv": 67.0,
+    "hrv": 40.0,
     "fc_repos": 53,
     "poids": 82.0,
     "vo2max": null,
     "readiness": null,
     "sommeil_score": 70.0,
     "fc_sommeil": null,
-    "spo2": null,
+    "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
     "ctl": null,
     "atl": null,
     "ramp_rate": null,
-    "pas": 345,
+    "pas": 2488,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -112,7 +112,7 @@
     "readiness": 0,
     "sommeil_score": 1,
     "fc_sommeil": 0,
-    "spo2": 0,
+    "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
     "ctl": 0,
@@ -134,7 +134,7 @@
     "readiness": null,
     "sommeil_score": "2026-09-04",
     "fc_sommeil": null,
-    "spo2": null,
+    "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
     "ctl": null,
@@ -155,6 +155,124 @@
   "derniere_donnee": "2026-09-04",
   "derniere_seance": null,
   "journal": [],
+  "sante": {
+    "champs": [
+      {
+        "cle": "pas",
+        "nom": "Pas",
+        "unite": "pas",
+        "dec": 0
+      },
+      {
+        "cle": "sommeil_h",
+        "nom": "Sommeil",
+        "unite": "h",
+        "dec": 1
+      },
+      {
+        "cle": "sommeil_score",
+        "nom": "Score de sommeil",
+        "unite": "/100",
+        "dec": 0
+      },
+      {
+        "cle": "fatigue_indice",
+        "nom": "Indice de fatigue",
+        "unite": "/100",
+        "dec": 0
+      },
+      {
+        "cle": "fc_repos",
+        "nom": "FC de repos",
+        "unite": "bpm",
+        "dec": 0
+      },
+      {
+        "cle": "hrv",
+        "nom": "Variabilité cardiaque",
+        "unite": "ms",
+        "dec": 0
+      },
+      {
+        "cle": "poids",
+        "nom": "Poids",
+        "unite": "kg",
+        "dec": 1
+      },
+      {
+        "cle": "spo2",
+        "nom": "SpO2",
+        "unite": "%",
+        "dec": 0
+      },
+      {
+        "cle": "respiration",
+        "nom": "Respiration",
+        "unite": "/min",
+        "dec": 1
+      }
+    ],
+    "jours": [
+      {
+        "pas": 150,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "fc_repos": 69,
+        "hrv": null,
+        "poids": 82.0,
+        "spo2": null,
+        "respiration": null,
+        "date": "2026-09-02",
+        "fatigue_indice": null
+      },
+      {
+        "pas": 4339,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "fc_repos": 49,
+        "hrv": 76.0,
+        "poids": null,
+        "spo2": null,
+        "respiration": null,
+        "date": "2026-09-03",
+        "fatigue_indice": null
+      },
+      {
+        "pas": 2488,
+        "sommeil_h": 5.8,
+        "sommeil_score": 70.0,
+        "fc_repos": 53,
+        "hrv": 40.0,
+        "poids": null,
+        "spo2": 98.0,
+        "respiration": null,
+        "date": "2026-09-04",
+        "fatigue_indice": null
+      }
+    ],
+    "actuel": {
+      "pas": 2488,
+      "pas_date": "2026-09-04",
+      "sommeil_h": 5.8,
+      "sommeil_h_date": "2026-09-04",
+      "sommeil_score": 70.0,
+      "sommeil_score_date": "2026-09-04",
+      "fatigue_indice": null,
+      "fatigue_indice_date": null,
+      "fc_repos": 53,
+      "fc_repos_date": "2026-09-04",
+      "hrv": 40.0,
+      "hrv_date": "2026-09-04",
+      "poids": 82.0,
+      "poids_date": "2026-09-02",
+      "spo2": 98.0,
+      "spo2_date": "2026-09-04",
+      "respiration": null,
+      "respiration_date": null
+    },
+    "reference_jours": 28,
+    "minimum_jours": 14
+  },
   "calibration": {
     "reference": {
       "source": "10 km de référence",

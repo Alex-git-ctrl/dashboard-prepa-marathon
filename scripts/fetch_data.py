@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 import alerts
 import calibration
+import sante
 
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -275,6 +276,9 @@ def main():
     journal.sort(key=lambda j: j["date"])
     metrics["journal"] = journal[-40:]
 
+    # ---- Vie quotidienne : pas, sommeil, fatigue ----
+    metrics["sante"] = sante.construit(serie)
+
     # ---- Calibration : zones et projections issues des courses reelles ----
     metrics["calibration"] = calibration.calcule(seances, PLAN["courses"])
 
@@ -292,6 +296,9 @@ def main():
     absent = [k for k, v in metrics["couverture"].items() if not v]
     print(f"  wellness alimente : {', '.join(dispo_ok) or 'aucun'}")
     print(f"  wellness vide     : {', '.join(absent) or 'aucun'}")
+    sa = metrics["sante"]["actuel"]
+    dispo_sante = [c["nom"] for c in metrics["sante"]["champs"] if sa.get(c["cle"])]
+    print(f"  sante : {', '.join(dispo_sante) or 'aucun indicateur'}")
     cal = metrics["calibration"]
     print(f"  donnee la plus recente : {metrics['derniere_donnee'] or 'aucune'}")
     print(f"  calibration : VDOT {cal['vdot']} d'apres {cal['reference']['source']} "

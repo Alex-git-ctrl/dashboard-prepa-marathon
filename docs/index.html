@@ -193,6 +193,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--data);
   vertical-align:2px;margin-right:6px}
 
+/* ---------- selecteur de periode ---------- */
+.seg{display:flex;background:var(--creux);border-radius:11px;padding:3px;gap:3px;
+  margin-bottom:16px}
+.seg button{flex:1;appearance:none;border:0;background:none;padding:9px 4px;
+  border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;
+  color:var(--sourd);cursor:pointer;transition:background .15s,color .15s;
+  letter-spacing:-.01em}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
+  font-weight:600;box-shadow:0 1px 2px rgba(22,25,28,.10)}
+.seg button:active{transform:scale(.97)}
+.seg button:focus-visible{outline:2px solid var(--data);outline-offset:-2px}
+
 /* ---------- graphiques ---------- */
 .chart{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
   padding:16px 17px 12px;margin-top:11px}
@@ -229,7 +241,7 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
-.bar-in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.bar-in{max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;padding:12px 2px 10px;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
   color:var(--acier);font-family:inherit;font-size:11.5px;font-weight:500;
@@ -329,6 +341,18 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
     <div class="sec"><h2>Évolution</h2><div id="charts"></div></div>
   </section>
 
+  <section class="tab" id="t-sante" role="tabpanel" aria-labelledby="b-sante">
+    <h1>Santé</h1>
+    <p class="lede">Ce qui rend l'entraînement possible. Un plan casse presque
+      toujours sur le sommeil et la récupération, rarement sur les séances.</p>
+    <div class="sec"><h2>Aujourd'hui</h2><div class="grid" id="sante-tuiles"></div></div>
+    <div class="sec"><h2>Évolution</h2>
+      <div class="seg" id="sante-seg" role="group"
+        aria-label="Période d'agrégation"></div>
+      <div id="sante-charts"></div>
+      <p class="note" id="sante-n"></p></div>
+  </section>
+
   <section class="tab" id="t-log" role="tabpanel" aria-labelledby="b-log">
     <h1>Journal</h1>
     <p class="lede">Ce que la montre ne mesure pas : l'effort perçu et la douleur.
@@ -353,7 +377,7 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
 
 <script>
 const PLAN = {"genere_le":"2026-09-04","athlete":"Alex Gourdou","depart":{"volume_km":12,"sortie_longue_km":6,"seances":2,"poids_kg":82,"ref_10k_min":48},"courses":[{"cle":"dix","nom":"10 km","lieu":"course locale","date":"2026-09-26","jour":"samedi","semaine":3,"distance_km":10,"cible":"46 a 48 min","allure":"4:36 a 4:48 /km","role":"Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."},{"cle":"semi","nom":"Semi-marathon","lieu":"Paris","date":"2026-10-25","jour":"dimanche","semaine":7,"distance_km":21.0975,"cible":"1h45 a 1h52","allure":"5:00 a 5:19 /km","role":"Jalon de decision : c'est lui qui fixe l'allure marathon."},{"cle":"marathon","nom":"Marathon de Barcelone","lieu":"Barcelone","date":"2027-03-14","jour":"dimanche","semaine":27,"distance_km":42.195,"cible":"sub-4h00","allure":"5:41 /km","role":"Zurich Marato de Barcelona, depart 8h30 Placa de Catalunya. Parcours plat, parmi les plus rapides au monde."}],"blocs":[{"debut":1,"fin":7,"nom":"Bloc 1","desc":"Base aerobie, 10 km et semi"},{"debut":8,"fin":12,"nom":"Bloc 2","desc":"Recuperation et fondation marathon"},{"debut":13,"fin":20,"nom":"Bloc 3","desc":"Construction specifique"},{"debut":21,"fin":24,"nom":"Bloc 4","desc":"Pic de volume et test 30K"},{"debut":25,"fin":27,"nom":"Bloc 5","desc":"Affutage"}],"semaines":[{"semaine":1,"lundi":"2026-09-07","dimanche":"2026-09-13","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":8,"seance1_min":35,"seance2_min":35,"volume_km":19.5,"course":null,"note":"Passage a 3 seances. Tout en endurance fondamentale."},{"semaine":2,"lundi":"2026-09-14","dimanche":"2026-09-20","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":10,"seance1_min":40,"seance2_min":40,"volume_km":23.1,"course":null,"note":"Premiere sortie a 10 km. Aucune acceleration."},{"semaine":3,"lundi":"2026-09-21","dimanche":"2026-09-27","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":10,"seance1_min":30,"seance2_min":30,"volume_km":19.8,"course":"dix","note":"10 KM samedi 26/09. La course tient lieu de sortie longue."},{"semaine":4,"lundi":"2026-09-28","dimanche":"2026-10-04","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":12,"seance1_min":40,"seance2_min":40,"volume_km":25.1,"course":null,"note":"Reprise apres la course. Zones recalibrees sur le chrono."},{"semaine":5,"lundi":"2026-10-05","dimanche":"2026-10-11","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":15,"seance1_min":45,"seance2_min":45,"volume_km":29.8,"course":null,"note":"Seance 2 : 3 x 6 min a allure semi, 2 min de trot entre."},{"semaine":6,"lundi":"2026-10-12","dimanche":"2026-10-18","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":18,"seance1_min":45,"seance2_min":40,"volume_km":31.9,"course":null,"note":"Plus longue sortie avant le semi, dont 5 km a allure semi."},{"semaine":7,"lundi":"2026-10-19","dimanche":"2026-10-25","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":21.1,"seance1_min":30,"seance2_min":25,"volume_km":30.1,"course":"semi","note":"SEMI-MARATHON dimanche 25/10."},{"semaine":8,"lundi":"2026-10-26","dimanche":"2026-11-01","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"recup","sortie_longue_km":10,"seance1_min":30,"seance2_min":35,"volume_km":20.7,"course":null,"note":"Recuperation. Rien au-dessus de l'endurance fondamentale."},{"semaine":9,"lundi":"2026-11-02","dimanche":"2026-11-08","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":14,"seance1_min":40,"seance2_min":40,"volume_km":27.1,"course":null,"note":"Reprise du volume avec les nouvelles zones."},{"semaine":10,"lundi":"2026-11-09","dimanche":"2026-11-15","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":16,"seance1_min":45,"seance2_min":45,"volume_km":30.8,"course":null,"note":""},{"semaine":11,"lundi":"2026-11-16","dimanche":"2026-11-22","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":18,"seance1_min":45,"seance2_min":45,"volume_km":32.8,"course":null,"note":"Premiere sortie longue a 18 km du bloc marathon."},{"semaine":12,"lundi":"2026-11-23","dimanche":"2026-11-29","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"decharge","sortie_longue_km":14,"seance1_min":35,"seance2_min":35,"volume_km":25.5,"course":null,"note":""},{"semaine":13,"lundi":"2026-11-30","dimanche":"2026-12-06","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":20,"seance1_min":45,"seance2_min":45,"volume_km":34.8,"course":null,"note":"Seance 2 : 2 x 15 min a allure marathon."},{"semaine":14,"lundi":"2026-12-07","dimanche":"2026-12-13","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":22,"seance1_min":45,"seance2_min":45,"volume_km":36.8,"course":null,"note":"Derniers 5 km de la sortie longue a allure marathon."},{"semaine":15,"lundi":"2026-12-14","dimanche":"2026-12-20","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":24,"seance1_min":45,"seance2_min":45,"volume_km":38.8,"course":null,"note":"Cap des 24 km. Tester le ravitaillement en course."},{"semaine":16,"lundi":"2026-12-21","dimanche":"2026-12-27","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":40,"volume_km":28.3,"course":null,"note":""},{"semaine":17,"lundi":"2026-12-28","dimanche":"2027-01-03","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":25,"seance1_min":45,"seance2_min":45,"volume_km":39.8,"course":null,"note":"Seance 2 : 3 x 10 min au seuil."},{"semaine":18,"lundi":"2027-01-04","dimanche":"2027-01-10","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":27,"seance1_min":45,"seance2_min":45,"volume_km":41.8,"course":null,"note":"Derniers 8 km a allure marathon."},{"semaine":19,"lundi":"2027-01-11","dimanche":"2027-01-17","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":29,"seance1_min":45,"seance2_min":45,"volume_km":43.8,"course":null,"note":"Sortie la plus longue avant le test 30K."},{"semaine":20,"lundi":"2027-01-18","dimanche":"2027-01-24","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":18,"seance1_min":35,"seance2_min":40,"volume_km":30.3,"course":null,"note":""},{"semaine":21,"lundi":"2027-01-25","dimanche":"2027-01-31","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"specifique","sortie_longue_km":26,"seance1_min":45,"seance2_min":45,"volume_km":40.8,"course":null,"note":"Repetition generale : chaussures et ravitaillement de course."},{"semaine":22,"lundi":"2027-02-01","dimanche":"2027-02-07","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"pic","sortie_longue_km":30,"seance1_min":45,"seance2_min":45,"volume_km":44.8,"course":null,"note":"Cap des 30 km. Pic de volume de la preparation."},{"semaine":23,"lundi":"2027-02-08","dimanche":"2027-02-14","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"TEST","sortie_longue_km":30,"seance1_min":45,"seance2_min":40,"volume_km":43.9,"course":null,"note":"TEST 30K a allure marathon. L'indicateur cle avant Barcelone."},{"semaine":24,"lundi":"2027-02-15","dimanche":"2027-02-21","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":35,"volume_km":27.5,"course":null,"note":"Assimilation du test."},{"semaine":25,"lundi":"2027-02-22","dimanche":"2027-02-28","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":22,"seance1_min":40,"seance2_min":40,"volume_km":35.1,"course":null,"note":"Debut de l'affutage : le volume baisse, l'intensite reste."},{"semaine":26,"lundi":"2027-03-01","dimanche":"2027-03-07","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":14,"seance1_min":35,"seance2_min":30,"volume_km":24.7,"course":null,"note":"Seance 2 : 4 x 3 min a allure marathon."},{"semaine":27,"lundi":"2027-03-08","dimanche":"2027-03-14","bloc":"Bloc 5","bloc_desc":"Affutage","type":"COURSE","sortie_longue_km":42.195,"seance1_min":25,"seance2_min":20,"volume_km":49.6,"course":"marathon","note":"MARATHON DE BARCELONE dimanche 14/03, depart 8h30."}],"pic_volume_km":44.8,"pic_sortie_longue_km":30};
-const M = {"maj":"2026-09-04T17:50:44","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":67.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":67.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":0,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"dates":{"hrv":"2026-09-04","fc_repos":"2026-09-04","poids":"2026-09-02","vo2max":null,"readiness":null,"sommeil_score":"2026-09-04","fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":"2026-09-04","courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":"2026-09-04","derive_pct":null,"efficacite":null,"cadence":null,"volume":null},"derniere_donnee":"2026-09-04","derniere_seance":null,"journal":[],"calibration":{"reference":{"source":"10 km de référence","date":null,"estime":true,"distance_km":10.0,"temps":"48:00","allure":"4:48/km"},"vdot":42.0,"zones":[{"cle":"ef","nom":"Endurance fondamentale","usage":"La majorité du volume, sorties longues comprises","lent_s_km":402,"rapide_s_km":363,"texte":"6:03 – 6:42"},{"cle":"marathon","nom":"Allure marathon","usage":"Fractions spécifiques à partir de la semaine 13","lent_s_km":336,"rapide_s_km":319,"texte":"5:19 – 5:36"},{"cle":"seuil","nom":"Seuil","usage":"Séances de 3 × 10 min, blocs 3 et 4","lent_s_km":308,"rapide_s_km":298,"texte":"4:58 – 5:08"},{"cle":"dix","nom":"Allure 10 km","usage":"Rythme de course sur 10 km","lent_s_km":295,"rapide_s_km":285,"texte":"4:45 – 4:55"}],"projections":{"dix":{"temps_s":2880,"texte":"48:00","allure":"4:48/km"},"semi":{"temps_s":6354,"texte":"1h45","allure":"5:01/km"},"marathon":{"temps_s":13249,"texte":"3h40","allure":"5:14/km"}},"cible_marathon":{"allure":"5:41/km","temps":"3h59"},"marge_marathon_s":27},"alertes":[]};
+const M = {"maj":"2026-09-04T21:03:43","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":40.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":40.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":1,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"dates":{"hrv":"2026-09-04","fc_repos":"2026-09-04","poids":"2026-09-02","vo2max":null,"readiness":null,"sommeil_score":"2026-09-04","fc_sommeil":null,"spo2":"2026-09-04","respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":"2026-09-04","courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":"2026-09-04","derive_pct":null,"efficacite":null,"cadence":null,"volume":null},"derniere_donnee":"2026-09-04","derniere_seance":null,"journal":[],"sante":{"champs":[{"cle":"pas","nom":"Pas","unite":"pas","dec":0},{"cle":"sommeil_h","nom":"Sommeil","unite":"h","dec":1},{"cle":"sommeil_score","nom":"Score de sommeil","unite":"/100","dec":0},{"cle":"fatigue_indice","nom":"Indice de fatigue","unite":"/100","dec":0},{"cle":"fc_repos","nom":"FC de repos","unite":"bpm","dec":0},{"cle":"hrv","nom":"Variabilité cardiaque","unite":"ms","dec":0},{"cle":"poids","nom":"Poids","unite":"kg","dec":1},{"cle":"spo2","nom":"SpO2","unite":"%","dec":0},{"cle":"respiration","nom":"Respiration","unite":"/min","dec":1}],"jours":[{"pas":150,"sommeil_h":null,"sommeil_score":null,"fc_repos":69,"hrv":null,"poids":82.0,"spo2":null,"respiration":null,"date":"2026-09-02","fatigue_indice":null},{"pas":4339,"sommeil_h":null,"sommeil_score":null,"fc_repos":49,"hrv":76.0,"poids":null,"spo2":null,"respiration":null,"date":"2026-09-03","fatigue_indice":null},{"pas":2488,"sommeil_h":5.8,"sommeil_score":70.0,"fc_repos":53,"hrv":40.0,"poids":null,"spo2":98.0,"respiration":null,"date":"2026-09-04","fatigue_indice":null}],"actuel":{"pas":2488,"pas_date":"2026-09-04","sommeil_h":5.8,"sommeil_h_date":"2026-09-04","sommeil_score":70.0,"sommeil_score_date":"2026-09-04","fatigue_indice":null,"fatigue_indice_date":null,"fc_repos":53,"fc_repos_date":"2026-09-04","hrv":40.0,"hrv_date":"2026-09-04","poids":82.0,"poids_date":"2026-09-02","spo2":98.0,"spo2_date":"2026-09-04","respiration":null,"respiration_date":null},"reference_jours":28,"minimum_jours":14},"calibration":{"reference":{"source":"10 km de référence","date":null,"estime":true,"distance_km":10.0,"temps":"48:00","allure":"4:48/km"},"vdot":42.0,"zones":[{"cle":"ef","nom":"Endurance fondamentale","usage":"La majorité du volume, sorties longues comprises","lent_s_km":402,"rapide_s_km":363,"texte":"6:03 – 6:42"},{"cle":"marathon","nom":"Allure marathon","usage":"Fractions spécifiques à partir de la semaine 13","lent_s_km":336,"rapide_s_km":319,"texte":"5:19 – 5:36"},{"cle":"seuil","nom":"Seuil","usage":"Séances de 3 × 10 min, blocs 3 et 4","lent_s_km":308,"rapide_s_km":298,"texte":"4:58 – 5:08"},{"cle":"dix","nom":"Allure 10 km","usage":"Rythme de course sur 10 km","lent_s_km":295,"rapide_s_km":285,"texte":"4:45 – 4:55"}],"projections":{"dix":{"temps_s":2880,"texte":"48:00","allure":"4:48/km"},"semi":{"temps_s":6354,"texte":"1h45","allure":"5:01/km"},"marathon":{"temps_s":13249,"texte":"3h40","allure":"5:14/km"}},"cible_marathon":{"allure":"5:41/km","temps":"3h59"},"marge_marathon_s":27},"alertes":[]};
 
 const $ = i => document.getElementById(i);
 const nf = n => n.toLocaleString('fr-FR');
@@ -397,6 +421,8 @@ const ICONS = {
       +'<path d="M3.4 20.6h17.2"/>',
   log:'<path d="M19.4 12.6v5.6a2.6 2.6 0 0 1-2.6 2.6H6.2a2.6 2.6 0 0 1-2.6-2.6V7.6'
      +'A2.6 2.6 0 0 1 6.2 5h5.5"/><path d="M16.6 3.6l3.8 3.8-6.4 6.4-4 .2.2-4z"/>',
+  sante:'<path d="M3.2 12.4h4.1l2-4.6 3.1 8.6 2.3-5.5 1.6 1.5h4.5"/>'
+      +'<path d="M20.5 9.4a4.6 4.6 0 0 0-8.5-2.5A4.6 4.6 0 0 0 3.5 9.4"/>',
   data:'<ellipse cx="12" cy="6.2" rx="7.3" ry="2.9"/>'
       +'<path d="M4.7 6.2v11.6c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9V6.2"/>'
       +'<path d="M4.7 12c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9"/>',
@@ -407,9 +433,9 @@ const SYM = {
   check:'<circle cx="12" cy="12" r="9.4"/><path d="M7.6 12.3l3 3 5.8-6.2"/>',
   dot:'<circle cx="12" cy="12" r="9.4"/><path d="M8.4 12h7.2"/>',
 };
-const TABS = [['today', "Aujourd'hui", "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
-  ['prog', 'Progrès', 'Progression'], ['log', 'Journal', 'Journal'],
-  ['data', 'Données', 'Données']];
+const TABS = [['today', 'Accueil', "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
+  ['prog', 'Progrès', 'Progression'], ['sante', 'Santé', 'Santé'],
+  ['log', 'Journal', 'Journal'], ['data', 'Données', 'Données']];
 const urgent = AL.some(a => a.niveau === 'critique');
 $('tabbar').innerHTML = TABS.map(([id, court], i) => `
   <button class="tb" id="b-${id}" role="tab" aria-controls="t-${id}"
@@ -844,6 +870,108 @@ $('kpis').innerHTML = [
     if (ok && c.k) $('k' + i).innerHTML = c.k.map(([n, col]) =>
       `<span><i style="background:${col}"></i>${n}</span>`).join('');
   });
+})();
+
+/* ================= sante ================= */
+(function () {
+  const S = M.sante;
+  if (!S) return;
+  const J = S.jours || [];
+
+  /* --- tuiles du jour --- */
+  const T = [
+    ['pas', 'Pas aujourd’hui', 'pas', 0, 'Dès la première journée portée'],
+    ['sommeil_h', 'Sommeil', 'h', 1, 'Dès la première nuit synchronisée'],
+    ['sommeil_score', 'Score de sommeil', '/100', 0, 'Mesuré par la montre'],
+    ['fatigue_indice', 'Indice de fatigue', '/100', 0,
+     'Calculé après ' + S.minimum_jours + ' nuits'],
+  ];
+  $('sante-tuiles').innerHTML = T.map(([cle, nom, u, dec, att]) => {
+    const v = S.actuel[cle];
+    const dt = S.actuel[cle + '_date'];
+    if (v == null) return '<div class="tile"><div class="l">' + nom + '</div>'
+      + '<div class="w">' + att + '</div></div>';
+    return '<div class="tile"><div class="l">' + nom + '</div>'
+      + '<div class="v">' + nf(dec ? Number(v.toFixed(dec)) : Math.round(v))
+      + '<em>' + u + '</em></div>'
+      + '<div class="d">' + (dt ? dshort(dt) : '') + '</div></div>';
+  }).join('');
+
+  /* --- agregation par periode --- */
+  const PERIODES = [['jour', 'Jour', 30], ['semaine', 'Semaine', 12],
+    ['mois', 'Mois', 12], ['annee', 'Année', 5]];
+  let mode = 'jour';
+  try { mode = localStorage.getItem('sante-periode') || 'jour'; } catch (e) {}
+  if (!PERIODES.some(p => p[0] === mode)) mode = 'jour';
+
+  function bucket(dateStr, m) {
+    if (m === 'mois') return dateStr.slice(0, 7) + '-01';
+    if (m === 'annee') return dateStr.slice(0, 4) + '-01-01';
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));   // lundi de la semaine
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+      + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  /** Moyenne par jour sur la periode : la seule facon de comparer une semaine
+      a une annee sans que les totaux ecrasent tout. */
+  function agrege(champ, m) {
+    const pts = J.filter(j => j[champ] != null);
+    const lim = PERIODES.find(p => p[0] === m)[2];
+    if (m === 'jour') return pts.slice(-lim).map(j => ({d:j.date, v:j[champ]}));
+    const g = {};
+    pts.forEach(j => { const k = bucket(j.date, m); (g[k] = g[k] || []).push(j[champ]); });
+    return Object.keys(g).sort().slice(-lim).map(k => ({
+      d:k, v:g[k].reduce((a, b) => a + b, 0) / g[k].length, n:g[k].length}));
+  }
+
+  const ATTENTE = {
+    jour:'Il faut au moins deux jours de mesures pour tracer une courbe.',
+    semaine:'Il faut au moins deux semaines de mesures pour cette vue.',
+    mois:'Il faut au moins deux mois de mesures pour cette vue.',
+    annee:'Il faut au moins deux années de mesures pour cette vue.',
+  };
+  const NOTES = {
+    fatigue_indice:'Calculé, pas mesuré. 50 correspond à ta normale : au-dessus, '
+      + 'tu récupères moins bien que d’habitude. Il compare ta VFC et ta FC de repos '
+      + 'à leur moyenne des ' + S.reference_jours + ' derniers jours.',
+    pas:'Marche quotidienne hors séances de course, un bon marqueur de dépense de fond.',
+    sommeil_h:'Sous 7 heures régulières, la progression ralentit quelle que soit '
+      + 'la qualité des séances.',
+  };
+
+  function dessine() {
+    $('sante-charts').innerHTML = S.champs.map((c, i) =>
+      '<div class="chart"><div class="ct">' + c.nom + '</div>'
+      + (NOTES[c.cle] ? '<div class="cs">' + NOTES[c.cle] + '</div>' : '')
+      + '<div class="cb" id="sc' + i + '"></div></div>').join('');
+    S.champs.forEach((c, i) => {
+      const data = agrege(c.cle, mode);
+      lineChart($('sc' + i), [{name:c.nom, color:'var(--data)', data:data}],
+        {unit:' ' + c.unite.replace('/100', ''), dec:c.dec,
+         target:c.cle === 'fatigue_indice' ? 50 : null,
+         wait:ATTENTE[mode]});
+    });
+    const p = PERIODES.find(x => x[0] === mode);
+    $('sante-n').textContent = mode === 'jour'
+      ? 'Valeurs quotidiennes, ' + p[2] + ' derniers jours.'
+      : 'Moyenne par jour sur chaque ' + p[1].toLowerCase() + ', '
+        + p[2] + ' dernières périodes.';
+  }
+
+  $('sante-seg').innerHTML = PERIODES.map(([cle, nom]) =>
+    '<button type="button" data-p="' + cle + '" aria-pressed="'
+    + (cle === mode) + '">' + nom + '</button>').join('');
+  $('sante-seg').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    mode = b.dataset.p;
+    [...$('sante-seg').children].forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.p === mode ? 'true' : 'false'));
+    try { localStorage.setItem('sante-periode', mode); } catch (err) {}
+    dessine();
+  });
+  dessine();
 })();
 
 /* ================= journal ================= */
