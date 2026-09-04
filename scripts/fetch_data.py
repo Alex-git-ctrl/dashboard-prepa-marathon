@@ -15,6 +15,7 @@ import requests
 from dotenv import load_dotenv
 
 import alerts
+import calibration
 
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -116,9 +117,13 @@ def main():
             w["charge"] += a.get("icu_training_load") or 0
             w["deniv"] += a.get("total_elevation_gain") or 0
 
+        zs = {}
         for z in range(1, 8):
-            zfc[f"z{z}"] += a.get(f"hr_z{z}_secs") or 0
+            sec_fc = a.get(f"hr_z{z}_secs") or 0
+            zfc[f"z{z}"] += sec_fc
             zall[f"z{z}"] += a.get(f"z{z}_secs") or 0
+            if sec_fc:
+                zs[f"z{z}"] = sec_fc
 
         st = analyse_streams(s, a["id"]) if km >= 8 else {"derive_pct": None, "dyn": {}}
         for k, v in st["dyn"].items():
@@ -141,6 +146,9 @@ def main():
             "notes": (a.get("description") or "").strip() or None,
             "derive_pct": st["derive_pct"],
             "dyn": st["dyn"] or None,
+            # Repartition du temps par zone de FC sur cette seance : c'est le
+            # retour le plus actionnable apres une sortie en endurance.
+            "zones_fc": zs or None,
         }
         seances.append(rec)
         if st["derive_pct"] is not None:
@@ -262,9 +270,13 @@ def main():
     journal.sort(key=lambda j: j["date"])
     metrics["journal"] = journal[-40:]
 
-    # ---- Alertes ----
+    # ---- Calibration : zones et projections issues des courses reelles ----
     with open(os.path.join(ROOT, "docs", "plan.json"), encoding="utf-8") as fh:
-        plan = json.load(fh)
+        plan_cal = json.load(fh)
+    metrics["calibration"] = calibration.calcule(seances, plan_cal["courses"])
+
+    # ---- Alertes ----
+    plan = plan_cal
     sem_courante = (today - S1).days // 7 + 1
     metrics["alertes"] = alerts.compute(metrics, plan, sem_courante)
 
@@ -277,7 +289,12 @@ def main():
     absent = [k for k, v in metrics["couverture"].items() if not v]
     print(f"  wellness alimente : {', '.join(dispo_ok) or 'aucun'}")
     print(f"  wellness vide     : {', '.join(absent) or 'aucun'}")
+    cal = metrics["calibration"]
     print(f"  donnee la plus recente : {metrics['derniere_donnee'] or 'aucune'}")
+    print(f"  calibration : VDOT {cal['vdot']} d'apres {cal['reference']['source']} "
+          f"({cal['reference']['temps']})")
+    for z in cal["zones"]:
+        print(f"    {z['nom']:26s} {z['texte']} /km")
     print(f"  journal : {len(journal)} entree(s) · alertes : "
           f"{len(metrics['alertes'])}")
     for a in metrics["alertes"]:

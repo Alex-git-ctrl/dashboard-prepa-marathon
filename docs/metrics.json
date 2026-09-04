@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-04T17:19:53",
+  "maj": "2026-09-04T17:31:39",
   "nb_activites": 0,
   "semaines": {},
   "seances": [],
@@ -155,5 +155,72 @@
   "derniere_donnee": "2026-09-04",
   "derniere_seance": null,
   "journal": [],
+  "calibration": {
+    "reference": {
+      "source": "10 km de référence",
+      "date": null,
+      "estime": true,
+      "distance_km": 10.0,
+      "temps": "48:00",
+      "allure": "4:48/km"
+    },
+    "vdot": 42.0,
+    "zones": [
+      {
+        "cle": "ef",
+        "nom": "Endurance fondamentale",
+        "usage": "La majorité du volume, sorties longues comprises",
+        "lent_s_km": 402,
+        "rapide_s_km": 363,
+        "texte": "6:03 – 6:42"
+      },
+      {
+        "cle": "marathon",
+        "nom": "Allure marathon",
+        "usage": "Fractions spécifiques à partir de la semaine 13",
+        "lent_s_km": 336,
+        "rapide_s_km": 319,
+        "texte": "5:19 – 5:36"
+      },
+      {
+        "cle": "seuil",
+        "nom": "Seuil",
+        "usage": "Séances de 3 × 10 min, blocs 3 et 4",
+        "lent_s_km": 308,
+        "rapide_s_km": 298,
+        "texte": "4:58 – 5:08"
+      },
+      {
+        "cle": "dix",
+        "nom": "Allure 10 km",
+        "usage": "Rythme de course sur 10 km",
+        "lent_s_km": 295,
+        "rapide_s_km": 285,
+        "texte": "4:45 – 4:55"
+      }
+    ],
+    "projections": {
+      "dix": {
+        "temps_s": 2880,
+        "texte": "48:00",
+        "allure": "4:48/km"
+      },
+      "semi": {
+        "temps_s": 6354,
+        "texte": "1h45",
+        "allure": "5:01/km"
+      },
+      "marathon": {
+        "temps_s": 13249,
+        "texte": "3h40",
+        "allure": "5:14/km"
+      }
+    },
+    "cible_marathon": {
+      "allure": "5:41/km",
+      "temps": "3h59"
+    },
+    "marge_marathon_s": 27
+  },
   "alertes": []
 }
