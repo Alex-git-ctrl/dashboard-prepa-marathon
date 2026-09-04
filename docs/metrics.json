@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-04T17:17:24",
+  "maj": "2026-09-04T17:19:53",
   "nb_activites": 0,
   "semaines": {},
   "seances": [],
@@ -126,6 +126,34 @@
     "commentaire": 0
   },
   "jours_wellness": 3,
+  "dates": {
+    "hrv": "2026-09-04",
+    "fc_repos": "2026-09-04",
+    "poids": "2026-09-02",
+    "vo2max": null,
+    "readiness": null,
+    "sommeil_score": "2026-09-04",
+    "fc_sommeil": null,
+    "spo2": null,
+    "respiration": null,
+    "masse_grasse": null,
+    "ctl": null,
+    "atl": null,
+    "ramp_rate": null,
+    "pas": "2026-09-04",
+    "courbatures": null,
+    "fatigue": null,
+    "moral": null,
+    "douleur_niveau": null,
+    "commentaire": null,
+    "sommeil_h": "2026-09-04",
+    "derive_pct": null,
+    "efficacite": null,
+    "cadence": null,
+    "volume": null
+  },
+  "derniere_donnee": "2026-09-04",
+  "derniere_seance": null,
   "journal": [],
   "alertes": []
 }

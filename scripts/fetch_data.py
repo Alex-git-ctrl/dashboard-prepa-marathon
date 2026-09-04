@@ -175,6 +175,15 @@ def main():
                 return w[champ]
         return None
 
+    def date_de(champ):
+        """Date de la derniere mesure d'un champ : chaque indicateur a son
+        propre age, la VFC d'hier et la sortie longue de samedi ne se lisent
+        pas de la meme facon."""
+        for w in reversed(serie):
+            if w.get(champ) is not None:
+                return w["date"]
+        return None
+
     def dispo(champ):
         return sum(1 for w in serie if w.get(champ) is not None)
 
@@ -201,6 +210,20 @@ def main():
         "couverture": {dst: dispo(dst) for dst in CHAMPS.values()},
         "jours_wellness": len(serie),
     }
+    metrics["dates"] = {dst: date_de(dst) for dst in CHAMPS.values()}
+    metrics["dates"]["sommeil_h"] = date_de("sommeil_h")
+    metrics["dates"]["derive_pct"] = derives[-1]["date"] if derives else None
+    metrics["dates"]["efficacite"] = efficacite[-1]["date"] if efficacite else None
+    metrics["dates"]["cadence"] = seances[-1]["date"] if seances else None
+    metrics["dates"]["volume"] = seances[-1]["date"] if seances else None
+
+    # Date de la donnee la plus recente, tous canaux confondus.
+    toutes = [d for d in metrics["dates"].values() if d]
+    if seances:
+        toutes.append(seances[-1]["date"])
+    metrics["derniere_donnee"] = max(toutes) if toutes else None
+    metrics["derniere_seance"] = seances[-1]["date"] if seances else None
+
     metrics["actuel"]["sommeil_h"] = dernier("sommeil_h")
     metrics["actuel"]["derive_pct"] = derives[-1]["derive_pct"] if derives else None
     metrics["actuel"]["efficacite"] = efficacite[-1]["valeur"] if efficacite else None
@@ -254,6 +277,7 @@ def main():
     absent = [k for k, v in metrics["couverture"].items() if not v]
     print(f"  wellness alimente : {', '.join(dispo_ok) or 'aucun'}")
     print(f"  wellness vide     : {', '.join(absent) or 'aucun'}")
+    print(f"  donnee la plus recente : {metrics['derniere_donnee'] or 'aucune'}")
     print(f"  journal : {len(journal)} entree(s) · alertes : "
           f"{len(metrics['alertes'])}")
     for a in metrics["alertes"]:

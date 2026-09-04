@@ -1,270 +1,297 @@
 <title>Sub-4 à Barcelone</title>
+<meta name="description" content="Préparation au marathon de Barcelone, 14 mars 2027.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..700&family=Geist+Mono:wght@400;500;600&display=swap">
 <style>
 /* ============================================================
-   Application de preparation marathon.
-   Geist pour l'interface, Geist Mono pour les chiffres.
-   Mode clair uniquement, palette grise Apple.
+   Bitume et haute visibilite.
+   Le volt ne sert qu'a une chose : dire ou tu en es maintenant.
+   L'effort ne sert qu'a une chose : dire ce qui demande attention.
+   Tout le reste est en gris, pour que ces deux-la portent.
    ============================================================ */
 :root{
   color-scheme:light;
-  --bg:#F2F2F7; --card:#FFFFFF; --sunk:#F5F5F7;
-  --label:#1D1D1F; --label-2:#6E6E73; --label-3:#8E8E93;
-  --sep:#E3E3E8; --fill:#EFEFF4;
-  --blue:#0071E3; --green:#1D8438; --red:#C7332B; --orange:#B45309;
-  --tint:#0071E3;
-  --s1:#007AFF; --s2:#E06C00;
-  --nav:rgba(250,250,252,.86);
-  --g1:#CBDEF7; --g2:#9DC0EF; --g3:#6C9FE4; --g4:#3E7ED4; --g5:#1B5CAE;
-  --sans:"Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --num:"Geist Mono",ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace;
-  --r:14px;
-  --sh:0 1px 2px rgba(28,28,40,.05), 0 6px 18px -8px rgba(28,28,40,.10);
+  --bitume:#16191C;
+  --craie:#F2F3F1;
+  --volt:#D6FF3E;
+  --effort:#E2452F;
+  --acier:#6B7378;
+  --surface:#FFFFFF;
+  --encre:#1B1F22;
+  --sourd:#585F63;
+  --filet:#DFE1DD;
+  --creux:#E9EBE7;
+  --data:#1B6AC9;
+  /* Rampe des blocs : monochrome, du pale au bitume, l'ordre porte le sens */
+  --b1:#D2D6D1; --b2:#AEB4AF; --b3:#868D8E; --b4:#5C6467; --b5:#343B3F;
+  --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --num:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--label);font-family:var(--sans);
-  font-size:16px;line-height:1.5;letter-spacing:-.005em;
-  -webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+body{background:var(--craie);color:var(--encre);font-family:var(--sans);
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--num);font-variant-numeric:tabular-nums}
 
-/* ---------- barre de navigation ---------- */
-.nav{position:sticky;top:0;z-index:40;background:var(--nav);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:1px solid var(--sep)}
-.nav-in{max-width:880px;margin:0 auto;padding:12px 20px;display:flex;
-  align-items:center;justify-content:space-between;gap:12px}
-.nav-t{font-size:16px;font-weight:600;letter-spacing:-.015em}
-.nav-s{font-size:12px;color:var(--label-3);font-family:var(--num)}
+/* ---------- en-tete ---------- */
+.top{position:sticky;top:0;z-index:40;background:var(--craie);
+  border-bottom:1px solid var(--filet)}
+.top-in{max-width:900px;margin:0 auto;padding:13px 20px;display:flex;
+  align-items:center;justify-content:space-between;gap:14px}
+.top-t{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.fresh{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sourd);
+  font-family:var(--num);text-align:right;line-height:1.3}
+.fresh i{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:block}
+.fresh i.ok{background:#2E8B4F}
+.fresh i.old{background:#B8860B}
+.fresh i.stale{background:var(--effort)}
 
-main{max-width:880px;margin:0 auto;
-  padding:0 20px calc(88px + env(safe-area-inset-bottom))}
+main{max-width:900px;margin:0 auto;
+  padding:0 20px calc(92px + env(safe-area-inset-bottom))}
 .tab{display:none}
-.tab.on{display:block;animation:in .3s cubic-bezier(.32,.72,0,1)}
-@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.big{font-size:33px;font-weight:600;letter-spacing:-.028em;line-height:1.14;
-  padding:20px 0 4px;text-wrap:balance}
-.lede{color:var(--label-2);font-size:15px;line-height:1.5;max-width:62ch;
-  text-wrap:pretty}
+.tab.on{display:block}
+h1{font-size:clamp(30px,7vw,40px);font-weight:700;letter-spacing:-.032em;
+  line-height:1.08;margin:24px 0 0;font-variation-settings:"wdth" 92;
+  text-wrap:balance}
+.lede{color:var(--sourd);font-size:15.5px;line-height:1.5;margin:9px 0 0;
+  max-width:60ch;text-wrap:pretty}
+h2{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--sourd);
+  margin:0 0 11px;text-transform:none}
+.sec{margin-top:34px}
 
-/* ---------- groupes ---------- */
-.grp{margin-top:28px}
-.grp-h{font-size:14px;font-weight:600;letter-spacing:-.008em;padding:0 4px 9px;
-  color:var(--label-2)}
-.grp-n{font-size:13px;color:var(--label-2);padding:10px 4px 0;line-height:1.45;
-  max-width:60ch}
-.list{background:var(--card);border-radius:var(--r);overflow:hidden;
-  box-shadow:var(--sh)}
-.li{display:flex;align-items:center;gap:14px;min-height:48px;padding:12px 16px;
-  position:relative}
-.li+.li::before{content:"";position:absolute;left:16px;right:0;top:0;height:1px;
-  background:var(--sep)}
-.li-k{flex:1;min-width:0;font-size:15.5px;font-weight:450}
-.li-sub{font-size:13px;color:var(--label-2);margin-top:2px;line-height:1.4;
-  font-weight:400}
-.li-v{font-size:15px;color:var(--label-2);font-family:var(--num);
-  font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
-.li-v.hi{color:var(--label);font-weight:500}
-
-/* ---------- cartes ---------- */
-.card{background:var(--card);border-radius:var(--r);padding:18px;
-  box-shadow:var(--sh)}
-.cards{display:grid;gap:12px}
-.c2{grid-template-columns:repeat(auto-fit,minmax(162px,1fr))}
-
-.stat{background:var(--card);border-radius:var(--r);padding:15px 17px 16px;
-  box-shadow:var(--sh)}
-.stat-l{font-size:13px;color:var(--label-2);font-weight:500}
-.stat-v{font-size:29px;font-weight:600;letter-spacing:-.032em;margin-top:6px;
-  font-family:var(--num);font-variant-numeric:tabular-nums;line-height:1.05}
-.stat-v em{font-style:normal;font-size:14px;color:var(--label-2);font-weight:500;
-  margin-left:3px;font-family:var(--sans)}
-.stat-f{font-size:12.5px;color:var(--label-3);margin-top:5px;line-height:1.35}
-.stat-w{font-size:13.5px;color:var(--label-3);margin-top:10px;line-height:1.4}
-
-/* ---------- compte a rebours ---------- */
-.hero{background:var(--card);border-radius:18px;padding:22px;box-shadow:var(--sh);
-  display:flex;align-items:center;justify-content:space-between;gap:16px}
-.hero .t{font-size:13px;color:var(--label-2);font-weight:500}
-.hero .n{font-size:23px;font-weight:600;letter-spacing:-.025em;margin-top:3px}
-.hero .d{font-size:14px;color:var(--label-2);margin-top:4px}
-.hero-r{text-align:right;flex-shrink:0}
-.hero-r .j{font-size:42px;font-weight:600;letter-spacing:-.04em;color:var(--tint);
-  font-family:var(--num);font-variant-numeric:tabular-nums;line-height:1}
-.hero-r .u{font-size:11px;color:var(--label-3);font-weight:500;margin-top:3px;
-  letter-spacing:.06em}
-
-/* ---------- badges ---------- */
-.bdg{display:inline-flex;align-items:center;font-size:12.5px;font-weight:500;
-  padding:4px 10px;border-radius:8px;background:var(--fill);color:var(--label-2);
-  white-space:nowrap;font-family:var(--num);letter-spacing:-.01em}
-.bdg.b{background:#E8F1FD;color:#0059B8}
-.bdg.g{background:#E4F4E9;color:#1D7A34}
-.bdg.r{background:#FCEAE9;color:#B32A22}
-.bdg.o{background:#FBEFE0;color:#9A5B00}
+/* ---------- bloc bitume : le present ---------- */
+.dark{background:var(--bitume);color:var(--craie);border-radius:18px;
+  padding:22px 22px 18px;margin-top:22px}
+.dark .lbl{font-family:var(--num);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--volt)}
+.dark .hd{display:flex;justify-content:space-between;align-items:flex-end;
+  gap:18px;flex-wrap:wrap}
+.dark .race{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-top:5px}
+.dark .sub{font-size:13.5px;color:#9DA5A8;margin-top:2px}
+.jhero{text-align:right;flex-shrink:0}
+.jhero .v{font-family:var(--num);font-size:clamp(44px,12vw,62px);font-weight:600;
+  letter-spacing:-.05em;line-height:.9;color:var(--volt)}
+.jhero .u{font-family:var(--num);font-size:10.5px;letter-spacing:.16em;
+  color:#7E868A;margin-top:6px}
+.ruban{margin-top:20px;overflow-x:auto;scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch}
+.ruban svg{display:block;height:112px;width:100%;min-width:640px}
+.rlg{display:flex;flex-wrap:wrap;gap:13px;margin-top:12px;font-size:11.5px;
+  color:#8B9396;font-family:var(--num)}
+.rlg span{display:flex;align-items:center;gap:6px}
+.rlg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
 
 /* ---------- alertes ---------- */
-.alert{background:var(--card);border-radius:var(--r);padding:16px 17px;
-  display:flex;gap:14px;box-shadow:var(--sh)}
-.alert .ic{width:28px;height:28px;flex-shrink:0;border-radius:9px;display:grid;
-  place-items:center;margin-top:1px}
-.alert .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;
+.alert{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
+  padding:16px 17px;display:flex;gap:14px;margin-top:10px}
+.alert.critique{border-left:4px solid var(--effort)}
+.alert.attention{border-left:4px solid #B8860B}
+.alert.calme{border-left:4px solid #2E8B4F}
+.alert.neutre{border-left:4px solid var(--filet)}
+.alert .ic{width:22px;height:22px;flex-shrink:0;margin-top:2px}
+.alert .ic svg{width:22px;height:22px;fill:none;stroke-width:1.9;
   stroke-linecap:round;stroke-linejoin:round}
-.alert.critique .ic{background:var(--red)}
-.alert.attention .ic{background:var(--orange)}
-.alert.calme .ic{background:var(--green)}
-.alert.neutre .ic{background:var(--label-3)}
-.alert .at{font-size:15.5px;font-weight:600;letter-spacing:-.015em}
-.alert .ad{font-size:14.5px;color:var(--label-2);margin-top:4px;line-height:1.45}
-.alert .aa{font-size:14px;color:var(--label-2);margin-top:11px;padding-top:11px;
-  border-top:1px solid var(--sep);line-height:1.5}
+.alert.critique .ic svg{stroke:var(--effort)}
+.alert.attention .ic svg{stroke:#B8860B}
+.alert.calme .ic svg{stroke:#2E8B4F}
+.alert.neutre .ic svg{stroke:var(--acier)}
+.alert .at{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.alert .ad{font-size:14.5px;color:var(--sourd);margin-top:4px;line-height:1.45}
+.alert .aa{font-size:14px;color:var(--sourd);margin-top:11px;padding-top:11px;
+  border-top:1px solid var(--filet);line-height:1.5}
+
+/* ---------- listes ---------- */
+.list{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
+  overflow:hidden}
+.li{display:flex;align-items:center;gap:14px;min-height:50px;padding:12px 16px}
+.li+.li{border-top:1px solid var(--filet)}
+.li-k{flex:1;min-width:0;font-size:15.5px;font-weight:500}
+.li-s{font-size:13px;color:var(--sourd);margin-top:2px;font-weight:400;
+  line-height:1.4}
+.li-v{font-family:var(--num);font-size:15px;font-weight:500;white-space:nowrap;
+  text-align:right}
+.li-v.q{color:var(--sourd);font-weight:400}
+.li.on{background:var(--bitume);color:var(--craie)}
+.li.on .li-s{color:#9DA5A8}
+.li.rest{color:var(--sourd)}
+
+/* ---------- tuiles ---------- */
+.grid{display:grid;gap:11px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
+.tile{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
+  padding:15px 16px 16px}
+.tile .l{font-size:13px;color:var(--sourd);font-weight:500;line-height:1.3}
+.tile .v{font-family:var(--num);font-size:28px;font-weight:600;letter-spacing:-.035em;
+  margin-top:7px;line-height:1}
+.tile .v em{font-style:normal;font-size:13px;color:var(--sourd);font-weight:400;
+  margin-left:3px;font-family:var(--sans)}
+.tile .d{font-size:11.5px;color:var(--acier);margin-top:6px;font-family:var(--num)}
+.tile .w{font-size:13.5px;color:var(--acier);margin-top:9px;line-height:1.4}
+
+/* ---------- colonne vertebrale des semaines ---------- */
+.band{display:flex;align-items:center;gap:11px;margin:26px 0 9px}
+.band .bar{height:5px;border-radius:3px;flex-shrink:0}
+.band .nm{font-size:13px;font-weight:600;letter-spacing:-.005em}
+.band .ds{font-size:12.5px;color:var(--acier)}
+.wk{display:grid;grid-template-columns:34px 1fr auto;gap:13px;align-items:center;
+  padding:9px 4px;border-bottom:1px solid var(--filet)}
+.wk .no{font-family:var(--num);font-size:13px;color:var(--acier);text-align:right}
+.wk .ti{font-size:14.5px;font-weight:500;line-height:1.3}
+.wk .su{font-size:12.5px;color:var(--acier);margin-top:2px;line-height:1.35}
+.wk .vo{font-family:var(--num);font-size:13.5px;color:var(--sourd);white-space:nowrap;
+  text-align:right}
+.wk.past{color:var(--acier)}
+.wk.past .ti{font-weight:400}
+.wk.race .ti{font-weight:600}
+.wk.race .no::after{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--effort);margin-left:5px;vertical-align:1px}
+.wk.now{grid-template-columns:1fr;background:var(--bitume);color:var(--craie);
+  border-radius:16px;padding:18px;border:none;margin:11px 0;gap:0}
+.wk.now .no{display:none}
+.wk.now .ti{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.wk.now .su{color:#9DA5A8;font-size:13.5px;margin-top:4px}
+.wk.now .vo{text-align:left;color:var(--volt);margin-top:12px;font-size:13px;
+  letter-spacing:.02em}
+.done{display:inline-block;height:4px;border-radius:2px;background:var(--data);
+  vertical-align:2px;margin-right:6px}
 
 /* ---------- graphiques ---------- */
-.chart{background:var(--card);border-radius:var(--r);padding:17px 18px 13px;
-  box-shadow:var(--sh)}
+.chart{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
+  padding:16px 17px 12px;margin-top:11px}
 .chart .ct{font-size:15.5px;font-weight:600;letter-spacing:-.015em}
-.chart .cs{font-size:13px;color:var(--label-2);margin-top:3px;line-height:1.4}
+.chart .cs{font-size:13px;color:var(--sourd);margin-top:3px;line-height:1.4}
 .cb{margin-top:13px;position:relative}
 .cb svg{display:block;width:100%;height:auto;overflow:visible}
-.keys{display:flex;flex-wrap:wrap;gap:15px;margin-top:11px;font-size:12.5px;
-  color:var(--label-2)}
+.keys{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;
+  color:var(--sourd);font-family:var(--num)}
 .keys span{display:flex;align-items:center;gap:6px}
 .keys i{width:14px;height:3px;border-radius:2px;display:block;flex-shrink:0}
-.keys i.sq{width:11px;height:11px;border-radius:3px}
-text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--label-3)}
-text.dl{font-family:"Geist Mono",monospace;font-size:10px;font-weight:600}
-.wait{text-align:center;color:var(--label-3);font-size:13.5px;line-height:1.55;
-  padding:26px 14px;margin-top:13px;background:var(--sunk);border-radius:11px}
-.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
-  background:var(--label);color:#fff;font-size:12px;padding:7px 11px;
-  border-radius:9px;white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
-  font-family:var(--num);line-height:1.45;font-weight:500;
-  box-shadow:0 6px 20px -6px rgba(0,0,0,.35)}
+text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
+.wait{color:var(--acier);font-size:13.5px;line-height:1.55;padding:24px 14px;
+  margin-top:12px;background:var(--creux);border-radius:11px;text-align:center}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--bitume);color:var(--craie);font-size:12px;padding:7px 11px;
+  border-radius:8px;white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
+  font-family:var(--num);line-height:1.45}
 
-/* ---------- tableau ---------- */
-.scroll{overflow-x:auto;background:var(--card);border-radius:var(--r);
-  box-shadow:var(--sh);-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%;font-size:14px;min-width:610px}
-th{font-size:12.5px;color:var(--label-2);text-align:left;padding:12px 14px;
-  font-weight:600;border-bottom:1px solid var(--sep);white-space:nowrap}
-td{padding:11px 14px;border-bottom:1px solid var(--sep);vertical-align:top}
-tbody tr:last-child td{border-bottom:none}
-td.t{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.now td{background:#EBF3FD;font-weight:600}
-tr.evt td{background:var(--sunk)}
-tr.evt td.ev{color:var(--tint);font-weight:600}
-tr.soft td{color:var(--label-2)}
-
-.code{background:var(--sunk);border-radius:9px;padding:10px 13px;margin-top:9px;
-  font-family:var(--num);font-size:12.5px;overflow-x:auto;white-space:pre;
-  color:var(--label);line-height:1.6}
+.note{font-size:13px;color:var(--sourd);margin-top:11px;line-height:1.5;
+  max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
+  padding:18px;font-size:15px;line-height:1.55;color:var(--sourd)}
+.card b{color:var(--encre);font-weight:600}
+.code{background:var(--bitume);color:var(--craie);border-radius:9px;
+  padding:10px 13px;margin-top:9px;font-family:var(--num);font-size:12.5px;
+  overflow-x:auto;white-space:pre}
+.pill{display:inline-block;font-family:var(--num);font-size:11.5px;font-weight:500;
+  padding:3px 9px;border-radius:6px;background:var(--creux);color:var(--sourd)}
+.pill.ok{background:#E4F2E8;color:#1F6B3C}
+.pill.no{background:var(--creux);color:var(--acier)}
+.pill.al{background:#FBE6E2;color:#A8321F}
 
 /* ---------- barre d'onglets ---------- */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
-  border-top:1px solid var(--sep);padding-bottom:env(safe-area-inset-bottom)}
-.tabbar-in{max-width:580px;margin:0 auto;display:grid;
-  grid-template-columns:repeat(5,1fr)}
-.tb{position:relative;appearance:none;border:0;background:none;padding:9px 2px 7px;
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
+  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
+.bar-in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tb{position:relative;appearance:none;border:0;background:none;padding:11px 2px 8px;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
-  color:var(--label-3);font-family:inherit;font-size:10.5px;font-weight:500;
-  letter-spacing:-.01em;transition:color .18s,transform .12s}
-.tb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;
-  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .18s}
-.tb[aria-selected="true"]{color:var(--tint)}
-.tb[aria-selected="true"] svg{stroke-width:2.05}
-.tb:active{transform:scale(.9)}
-.tb:focus-visible{outline:2px solid var(--tint);outline-offset:-3px;border-radius:10px}
-.dotb{position:absolute;top:6px;right:calc(50% - 17px);width:9px;height:9px;
-  border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #FAFAFC}
+  color:var(--acier);font-family:inherit;font-size:10.5px;font-weight:500;
+  transition:color .16s}
+.tb svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.65;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .16s}
+.tb::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;
+  border-radius:0 0 3px 3px;background:transparent;transition:background .16s}
+.tb[aria-selected="true"]{color:var(--encre)}
+.tb[aria-selected="true"] svg{stroke-width:2.1}
+.tb[aria-selected="true"]::before{background:var(--volt)}
+.tb:active{transform:scale(.93)}
+.tb:focus-visible{outline:2px solid var(--data);outline-offset:-3px;border-radius:9px}
+.dotb{position:absolute;top:8px;right:calc(50% - 17px);width:8px;height:8px;
+  border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--craie)}
 
-@media (prefers-reduced-motion:reduce){*{animation:none!important;
-  transition:none!important}}
+/* ---------- mobile ---------- */
+@media (max-width:640px){
+  body{font-size:17px}
+  main{padding-left:16px;padding-right:16px}
+  .top-in{padding:12px 16px}
+  .fresh{font-size:11.5px}
+  .grid{grid-template-columns:1fr 1fr;gap:9px}
+  .tile{padding:13px 14px 14px}
+  .tile .v{font-size:25px}
+  .dark{padding:18px 16px 15px;border-radius:16px}
+  .li{padding:12px 14px;min-height:54px}
+  .li-k{font-size:16px}
+  .wk{grid-template-columns:28px 1fr;gap:10px;padding:11px 2px}
+  .wk .vo{grid-column:2;text-align:left;margin-top:4px;font-size:13px}
+  .wk.now{grid-template-columns:1fr;padding:17px 16px}
+  .chart{padding:14px 14px 11px}
+}
+@media (max-width:380px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
-<nav class="nav">
-  <div class="nav-in">
-    <span class="nav-t" id="navt">Aujourd'hui</span>
-    <span class="nav-s" id="navs"></span>
+<header class="top">
+  <div class="top-in">
+    <span class="top-t" id="topt">Aujourd'hui</span>
+    <span class="fresh" id="fresh"></span>
   </div>
-</nav>
+</header>
 
 <main>
   <section class="tab on" id="t-today" role="tabpanel" aria-labelledby="b-today">
-    <h1 class="big">Aujourd'hui</h1>
-    <p class="lede" id="today-lede"></p>
-    <div class="grp"><div id="alerts" class="cards"></div></div>
-    <div class="grp"><div class="grp-h">Prochaine échéance</div>
-      <div id="hero"></div></div>
-    <div class="grp"><div class="grp-h">Cette semaine</div>
-      <div class="list" id="week"></div>
-      <div class="grp-n" id="week-n"></div></div>
-    <div class="grp"><div class="grp-h">En un coup d'œil</div>
-      <div class="cards c2" id="quick"></div></div>
+    <h1>Aujourd'hui</h1>
+    <p class="lede" id="lede"></p>
+    <div id="hero"></div>
+    <div class="sec"><h2>Surveillance</h2><div id="alerts"></div></div>
+    <div class="sec"><h2>Cette semaine</h2><div class="list" id="week"></div>
+      <p class="note" id="week-n"></p></div>
+    <div class="sec"><h2>En un coup d'œil</h2><div class="grid" id="quick"></div></div>
   </section>
 
   <section class="tab" id="t-plan" role="tabpanel" aria-labelledby="b-plan">
-    <h1 class="big">Le plan</h1>
-    <p class="lede">27 semaines, trois courses. Les deux premières servent à
-      recalibrer les allures sur du réel avant Barcelone.</p>
-    <div class="grp"><div class="grp-h">Les échéances</div>
-      <div class="cards" id="races"></div></div>
-    <div class="grp"><div class="grp-h">Feuille de route</div>
-      <div class="chart"><div class="cs">Volume hebdomadaire planifié, en kilomètres.
-        Les barres pâles sont les semaines de décharge.</div>
-        <div class="cb" id="roadmap"></div>
-        <div class="keys" id="rm-keys"></div></div></div>
-    <div class="grp"><div class="grp-h">Allures de référence</div>
-      <div class="list" id="paces"></div>
-      <div class="grp-n">Recalculées après le 10 km du 24 septembre,
-        puis après le semi du 25 octobre.</div></div>
-    <div class="grp"><div class="grp-h">Semaine par semaine</div>
-      <div class="scroll"><table id="plan"></table></div>
-      <div class="grp-n" id="plan-n"></div></div>
+    <h1>Le plan</h1>
+    <p class="lede">27 semaines vers Barcelone. Les semaines passées sont estompées,
+      la semaine en cours est en noir, celles à venir s'éclaircissent à mesure
+      qu'elles s'éloignent.</p>
+    <div class="sec"><h2>Les trois échéances</h2><div class="list" id="races"></div></div>
+    <div class="sec"><h2>Allures de référence</h2><div class="list" id="paces"></div>
+      <p class="note">Recalculées après le 10 km du 26 septembre, puis après le
+        semi du 25 octobre.</p></div>
+    <div class="sec"><h2>Les 27 semaines</h2><div id="spine"></div>
+      <p class="note" id="spine-n"></p></div>
   </section>
 
   <section class="tab" id="t-prog" role="tabpanel" aria-labelledby="b-prog">
-    <h1 class="big">Progression</h1>
+    <h1>Progression</h1>
     <p class="lede">Un indicateur isolé ne dit rien. C'est la pente sur plusieurs
       semaines qui indique si la préparation fonctionne.</p>
-    <div class="grp"><div class="grp-h">Indicateurs</div>
-      <div class="cards c2" id="kpis"></div></div>
-    <div class="grp"><div class="grp-h">Évolution</div>
-      <div class="cards" id="charts"></div></div>
+    <div class="sec"><h2>Indicateurs</h2><div class="grid" id="kpis"></div></div>
+    <div class="sec"><h2>Évolution</h2><div id="charts"></div></div>
   </section>
 
   <section class="tab" id="t-log" role="tabpanel" aria-labelledby="b-log">
-    <h1 class="big">Journal</h1>
-    <p class="lede">Ce que la montre ne peut pas mesurer : l'effort perçu et la
-      douleur. C'est le meilleur détecteur précoce de blessure, et il alimente
-      directement les alertes.</p>
-    <div class="grp" id="journal"></div>
-    <div class="grp"><div class="grp-h">Comment le remplir</div>
-      <div class="card" id="howto"></div></div>
+    <h1>Journal</h1>
+    <p class="lede">Ce que la montre ne mesure pas : l'effort perçu et la douleur.
+      Le meilleur détecteur précoce de blessure, et il alimente les alertes.</p>
+    <div class="sec"><h2>Entrées</h2><div id="journal"></div></div>
+    <div class="sec"><h2>Comment le remplir</h2><div class="card" id="howto"></div></div>
   </section>
 
   <section class="tab" id="t-data" role="tabpanel" aria-labelledby="b-data">
-    <h1 class="big">Données</h1>
+    <h1>Données</h1>
     <p class="lede">D'où viennent les chiffres, ce qui arrive réellement de la
       montre, et sur quoi repose la projection de chrono.</p>
-    <div class="grp"><div class="grp-h">L'objectif est-il atteignable ?</div>
+    <div class="sec"><h2>L'objectif est-il atteignable ?</h2>
       <div class="card" id="verdict"></div></div>
-    <div class="grp"><div class="grp-h">Le raisonnement</div>
-      <div class="list" id="vrows"></div></div>
-    <div class="grp"><div class="grp-h">Ce que la montre remonte</div>
-      <div class="list" id="cover"></div></div>
-    <div class="grp"><div class="grp-h">Confidentialité</div>
-      <div class="card" id="priv"></div></div>
+    <div class="sec"><h2>Le raisonnement</h2><div class="list" id="vrows"></div></div>
+    <div class="sec"><h2>Ce que la montre remonte</h2><div class="list" id="cover"></div></div>
+    <div class="sec"><h2>Confidentialité</h2><div class="card" id="priv"></div></div>
   </section>
 </main>
 
-<nav class="tabbar"><div class="tabbar-in" role="tablist" id="tabbar"></div></nav>
+<nav class="bar"><div class="bar-in" role="tablist" id="tabbar"></div></nav>
 
 <script>
 const PLAN = {"genere_le":"2026-09-04","athlete":"Alex Gourdou","depart":{"volume_km":12,"sortie_longue_km":6,"seances":2,"poids_kg":82,"ref_10k_min":48},"courses":[{"cle":"dix","nom":"10 km","lieu":"course locale","date":"2026-09-26","jour":"samedi","semaine":3,"distance_km":10,"cible":"46 a 48 min","allure":"4:36 a 4:48 /km","role":"Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."},{"cle":"semi","nom":"Semi-marathon","lieu":"Paris","date":"2026-10-25","jour":"dimanche","semaine":7,"distance_km":21.0975,"cible":"1h45 a 1h52","allure":"5:00 a 5:19 /km","role":"Jalon de decision : c'est lui qui fixe l'allure marathon."},{"cle":"marathon","nom":"Marathon de Barcelone","lieu":"Barcelone","date":"2027-03-14","jour":"dimanche","semaine":27,"distance_km":42.195,"cible":"sub-4h00","allure":"5:41 /km","role":"Zurich Marato de Barcelona, depart 8h30 Placa de Catalunya. Parcours plat, parmi les plus rapides au monde."}],"blocs":[{"debut":1,"fin":7,"nom":"Bloc 1","desc":"Base aerobie, 10 km et semi"},{"debut":8,"fin":12,"nom":"Bloc 2","desc":"Recuperation et fondation marathon"},{"debut":13,"fin":20,"nom":"Bloc 3","desc":"Construction specifique"},{"debut":21,"fin":24,"nom":"Bloc 4","desc":"Pic de volume et test 30K"},{"debut":25,"fin":27,"nom":"Bloc 5","desc":"Affutage"}],"semaines":[{"semaine":1,"lundi":"2026-09-07","dimanche":"2026-09-13","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":8,"seance1_min":35,"seance2_min":35,"volume_km":19.5,"course":null,"note":"Passage a 3 seances. Tout en endurance fondamentale."},{"semaine":2,"lundi":"2026-09-14","dimanche":"2026-09-20","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":10,"seance1_min":40,"seance2_min":40,"volume_km":23.1,"course":null,"note":"Premiere sortie a 10 km. Aucune acceleration."},{"semaine":3,"lundi":"2026-09-21","dimanche":"2026-09-27","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":10,"seance1_min":30,"seance2_min":30,"volume_km":19.8,"course":"dix","note":"10 KM samedi 26/09. La course tient lieu de sortie longue."},{"semaine":4,"lundi":"2026-09-28","dimanche":"2026-10-04","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":12,"seance1_min":40,"seance2_min":40,"volume_km":25.1,"course":null,"note":"Reprise apres la course. Zones recalibrees sur le chrono."},{"semaine":5,"lundi":"2026-10-05","dimanche":"2026-10-11","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":15,"seance1_min":45,"seance2_min":45,"volume_km":29.8,"course":null,"note":"Seance 2 : 3 x 6 min a allure semi, 2 min de trot entre."},{"semaine":6,"lundi":"2026-10-12","dimanche":"2026-10-18","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":18,"seance1_min":45,"seance2_min":40,"volume_km":31.9,"course":null,"note":"Plus longue sortie avant le semi, dont 5 km a allure semi."},{"semaine":7,"lundi":"2026-10-19","dimanche":"2026-10-25","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":21.1,"seance1_min":30,"seance2_min":25,"volume_km":30.1,"course":"semi","note":"SEMI-MARATHON dimanche 25/10."},{"semaine":8,"lundi":"2026-10-26","dimanche":"2026-11-01","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"recup","sortie_longue_km":10,"seance1_min":30,"seance2_min":35,"volume_km":20.7,"course":null,"note":"Recuperation. Rien au-dessus de l'endurance fondamentale."},{"semaine":9,"lundi":"2026-11-02","dimanche":"2026-11-08","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":14,"seance1_min":40,"seance2_min":40,"volume_km":27.1,"course":null,"note":"Reprise du volume avec les nouvelles zones."},{"semaine":10,"lundi":"2026-11-09","dimanche":"2026-11-15","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":16,"seance1_min":45,"seance2_min":45,"volume_km":30.8,"course":null,"note":""},{"semaine":11,"lundi":"2026-11-16","dimanche":"2026-11-22","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":18,"seance1_min":45,"seance2_min":45,"volume_km":32.8,"course":null,"note":"Premiere sortie longue a 18 km du bloc marathon."},{"semaine":12,"lundi":"2026-11-23","dimanche":"2026-11-29","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"decharge","sortie_longue_km":14,"seance1_min":35,"seance2_min":35,"volume_km":25.5,"course":null,"note":""},{"semaine":13,"lundi":"2026-11-30","dimanche":"2026-12-06","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":20,"seance1_min":45,"seance2_min":45,"volume_km":34.8,"course":null,"note":"Seance 2 : 2 x 15 min a allure marathon."},{"semaine":14,"lundi":"2026-12-07","dimanche":"2026-12-13","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":22,"seance1_min":45,"seance2_min":45,"volume_km":36.8,"course":null,"note":"Derniers 5 km de la sortie longue a allure marathon."},{"semaine":15,"lundi":"2026-12-14","dimanche":"2026-12-20","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":24,"seance1_min":45,"seance2_min":45,"volume_km":38.8,"course":null,"note":"Cap des 24 km. Tester le ravitaillement en course."},{"semaine":16,"lundi":"2026-12-21","dimanche":"2026-12-27","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":40,"volume_km":28.3,"course":null,"note":""},{"semaine":17,"lundi":"2026-12-28","dimanche":"2027-01-03","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":25,"seance1_min":45,"seance2_min":45,"volume_km":39.8,"course":null,"note":"Seance 2 : 3 x 10 min au seuil."},{"semaine":18,"lundi":"2027-01-04","dimanche":"2027-01-10","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":27,"seance1_min":45,"seance2_min":45,"volume_km":41.8,"course":null,"note":"Derniers 8 km a allure marathon."},{"semaine":19,"lundi":"2027-01-11","dimanche":"2027-01-17","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":29,"seance1_min":45,"seance2_min":45,"volume_km":43.8,"course":null,"note":"Sortie la plus longue avant le test 30K."},{"semaine":20,"lundi":"2027-01-18","dimanche":"2027-01-24","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":18,"seance1_min":35,"seance2_min":40,"volume_km":30.3,"course":null,"note":""},{"semaine":21,"lundi":"2027-01-25","dimanche":"2027-01-31","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"specifique","sortie_longue_km":26,"seance1_min":45,"seance2_min":45,"volume_km":40.8,"course":null,"note":"Repetition generale : chaussures et ravitaillement de course."},{"semaine":22,"lundi":"2027-02-01","dimanche":"2027-02-07","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"pic","sortie_longue_km":30,"seance1_min":45,"seance2_min":45,"volume_km":44.8,"course":null,"note":"Cap des 30 km. Pic de volume de la preparation."},{"semaine":23,"lundi":"2027-02-08","dimanche":"2027-02-14","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"TEST","sortie_longue_km":30,"seance1_min":45,"seance2_min":40,"volume_km":43.9,"course":null,"note":"TEST 30K a allure marathon. L'indicateur cle avant Barcelone."},{"semaine":24,"lundi":"2027-02-15","dimanche":"2027-02-21","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":35,"volume_km":27.5,"course":null,"note":"Assimilation du test."},{"semaine":25,"lundi":"2027-02-22","dimanche":"2027-02-28","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":22,"seance1_min":40,"seance2_min":40,"volume_km":35.1,"course":null,"note":"Debut de l'affutage : le volume baisse, l'intensite reste."},{"semaine":26,"lundi":"2027-03-01","dimanche":"2027-03-07","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":14,"seance1_min":35,"seance2_min":30,"volume_km":24.7,"course":null,"note":"Seance 2 : 4 x 3 min a allure marathon."},{"semaine":27,"lundi":"2027-03-08","dimanche":"2027-03-14","bloc":"Bloc 5","bloc_desc":"Affutage","type":"COURSE","sortie_longue_km":42.195,"seance1_min":25,"seance2_min":20,"volume_km":49.6,"course":"marathon","note":"MARATHON DE BARCELONE dimanche 14/03, depart 8h30."}],"pic_volume_km":44.8,"pic_sortie_longue_km":30};
-const M = {"maj":"2026-09-04T17:17:24","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":67.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":67.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":0,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"journal":[],"alertes":[]};
+const M = {"maj":"2026-09-04T17:19:53","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":67.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":67.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":345,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":0,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"dates":{"hrv":"2026-09-04","fc_repos":"2026-09-04","poids":"2026-09-02","vo2max":null,"readiness":null,"sommeil_score":"2026-09-04","fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":"2026-09-04","courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":"2026-09-04","derive_pct":null,"efficacite":null,"cadence":null,"volume":null},"derniere_donnee":"2026-09-04","derniere_seance":null,"journal":[],"alertes":[]};
 
 const $ = i => document.getElementById(i);
 const nf = n => n.toLocaleString('fr-FR');
@@ -278,15 +305,25 @@ const jrs = s => Math.round((new Date(s + 'T12:00:00') - today) / 864e5);
 const W1 = new Date(PLAN.semaines[0].lundi + 'T12:00:00');
 const cur = Math.floor((today - W1) / 6048e5) + 1;
 const nowW = PLAN.semaines.find(w => w.semaine === cur) || PLAN.semaines[0];
-const A = M.actuel, wl = M.wellness, AL = M.alertes || [];
+const A = M.actuel, D = M.dates || {}, wl = M.wellness, AL = M.alertes || [];
+const RACE = {dix:'10K', semi:'SEMI', marathon:'BCN'};
 
-/* ================= onglets =================
-   Icones dessinees a la main sur une grille de 24, trait de 1,6
-   qui s'epaissit a 2,05 sur l'onglet actif. */
+/* ---------- fraicheur des donnees ---------- */
+(function () {
+  const d = M.derniere_donnee;
+  if (!d) { $('fresh').innerHTML = '<i class="stale"></i>aucune donnée reçue'; return; }
+  const age = -jrs(d);
+  const cls = age <= 1 ? 'ok' : age <= 3 ? 'old' : 'stale';
+  const quand = age === 0 ? "aujourd'hui" : age === 1 ? 'hier'
+    : 'il y a ' + age + ' jours';
+  $('fresh').innerHTML = `<i class="${cls}"></i>Données du ${dshort(d)} · ${quand}`;
+})();
+
+/* ---------- onglets ---------- */
 const ICONS = {
-  today:'<g transform="rotate(-90 12 12)">'
-       +'<circle cx="12" cy="12" r="8.6" stroke-dasharray="43 11"/>'
-       +'<circle cx="12" cy="12" r="4.6" stroke-dasharray="21 8"/></g>',
+  today:'<g transform="rotate(-90 12 12)"><circle cx="12" cy="12" r="8.6"'
+       +' stroke-dasharray="43 11"/><circle cx="12" cy="12" r="4.6"'
+       +' stroke-dasharray="21 8"/></g>',
   plan:'<rect x="3.3" y="5" width="17.4" height="15.7" rx="3.6"/>'
       +'<path d="M3.3 9.9h17.4"/><path d="M8.2 3.3v3.4M15.8 3.3v3.4"/>'
       +'<path d="M7.6 14h3.2M7.6 17.4h6.6"/>',
@@ -294,188 +331,226 @@ const ICONS = {
       +'<circle cx="17.4" cy="12.7" r="1.9" fill="currentColor" stroke="none"/>'
       +'<path d="M3.4 20.6h17.2"/>',
   log:'<path d="M19.4 12.6v5.6a2.6 2.6 0 0 1-2.6 2.6H6.2a2.6 2.6 0 0 1-2.6-2.6V7.6'
-     +'A2.6 2.6 0 0 1 6.2 5h5.5"/>'
-     +'<path d="M16.6 3.6l3.8 3.8-6.4 6.4-4 .2.2-4z"/>',
+     +'A2.6 2.6 0 0 1 6.2 5h5.5"/><path d="M16.6 3.6l3.8 3.8-6.4 6.4-4 .2.2-4z"/>',
   data:'<ellipse cx="12" cy="6.2" rx="7.3" ry="2.9"/>'
       +'<path d="M4.7 6.2v11.6c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9V6.2"/>'
       +'<path d="M4.7 12c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9"/>',
 };
 const SYM = {
-  bang:'<path d="M12 5.5v7"/><path d="M12 17.2v.2"/>',
-  check:'<path d="M5.5 12.4l4.2 4.2 8.8-9.2"/>',
-  dot:'<path d="M12 11.9v.2"/>',
+  bang:'<path d="M12 5.6v7.2"/><circle cx="12" cy="17.6" r=".9" fill="currentColor"'
+      +' stroke="none"/><circle cx="12" cy="12" r="9.4"/>',
+  check:'<circle cx="12" cy="12" r="9.4"/><path d="M7.6 12.3l3 3 5.8-6.2"/>',
+  dot:'<circle cx="12" cy="12" r="9.4"/><path d="M8.4 12h7.2"/>',
 };
-const TABS = [
-  ['today', "Aujourd'hui", "Aujourd'hui"],
-  ['plan', 'Plan', 'Le plan'],
-  ['prog', 'Progrès', 'Progression'],
-  ['log', 'Journal', 'Journal'],
-  ['data', 'Données', 'Données'],
-];
+const TABS = [['today', "Aujourd'hui", "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
+  ['prog', 'Progrès', 'Progression'], ['log', 'Journal', 'Journal'],
+  ['data', 'Données', 'Données']];
 const urgent = AL.some(a => a.niveau === 'critique');
 $('tabbar').innerHTML = TABS.map(([id, court], i) => `
   <button class="tb" id="b-${id}" role="tab" aria-controls="t-${id}"
     aria-selected="${i === 0}">
-    <svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>
-    <span>${court}</span>
-    ${id === 'today' && urgent ? '<span class="dotb"></span>' : ''}
-  </button>`).join('');
-
+    <svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg><span>${court}</span>
+    ${id === 'today' && urgent ? '<span class="dotb"></span>' : ''}</button>`).join('');
 function show(id) {
   TABS.forEach(([t]) => {
     const on = t === id;
     $('t-' + t).classList.toggle('on', on);
     $('b-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  $('navt').textContent = TABS.find(t => t[0] === id)[2];
+  $('topt').textContent = TABS.find(t => t[0] === id)[2];
   window.scrollTo(0, 0);
   try { localStorage.setItem('onglet', id); } catch (e) {}
 }
 TABS.forEach(([id]) => $('b-' + id).addEventListener('click', () => show(id)));
-try {
-  const saved = localStorage.getItem('onglet');
-  if (saved && TABS.some(t => t[0] === saved)) show(saved);
-} catch (e) {}
+try { const s = localStorage.getItem('onglet');
+  if (s && TABS.some(t => t[0] === s)) show(s); } catch (e) {}
 
-$('navs').textContent = new Date(M.maj).toLocaleString('fr-FR',
-  {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
-
-/* ================= aujourd'hui ================= */
+/* ================= le geste : bloc bitume + ruban ================= */
 const prochaine = PLAN.courses.find(c => jrs(c.date) >= 0)
   || PLAN.courses[PLAN.courses.length - 1];
-$('today-lede').textContent = cur < 1
+$('lede').textContent = cur < 1
   ? 'Le plan démarre lundi 7 septembre. Semaine 1 sur 27.'
   : 'Semaine ' + cur + ' sur 27 · ' + nowW.bloc_desc;
 
+(function () {
+  const W = PLAN.semaines, n = W.length;
+  const VB_W = 900, VB_H = 112, T = 20, B = 22, bw = 20;
+  const step = VB_W / n, off = (step - bw) / 2;
+  const mx = Math.max(...W.map(w => w.volume_km));
+  const H = VB_H - T - B;
+  const gc = {'Bloc 1':'var(--b1)', 'Bloc 2':'var(--b2)', 'Bloc 3':'var(--b3)',
+    'Bloc 4':'var(--b4)', 'Bloc 5':'var(--b5)'};
+  const done = {};
+  Object.entries(M.semaines).forEach(([k, v]) => { done[+k] = v.km; });
+  let s = '';
+  W.forEach((w, i) => {
+    const x = i * step + off, h = Math.max(3, (w.volume_km / mx) * H), y = T + H - h;
+    const ici = w.semaine === cur;
+    s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw}"
+      height="${h.toFixed(1)}" rx="2.5" fill="${ici ? 'var(--volt)' : gc[w.bloc]}"
+      opacity="${ici ? 1 : w.semaine < cur ? .95 : .58}"/>`;
+    const r = done[w.semaine];
+    if (r) { const rh = Math.max(2, (r / mx) * H);
+      s += `<rect x="${(x + 5).toFixed(1)}" y="${(T + H - rh).toFixed(1)}"
+        width="${bw - 10}" height="${rh.toFixed(1)}" rx="2" fill="var(--data)"/>`; }
+    if (w.course) s += `<circle cx="${(x + bw / 2).toFixed(1)}" cy="${T - 9}" r="3.2"
+      fill="var(--effort)"/>
+      <text class="ax" x="${(x + bw / 2).toFixed(1)}" y="${VB_H - 6}"
+      text-anchor="middle" fill="#8B9396">${RACE[w.course]}</text>`;
+    if (ici) s += `<path d="M${(x + bw / 2 - 4).toFixed(1)} ${T - 14}h8l-4 6z"
+      fill="var(--volt)"/>`;
+  });
+  $('hero').innerHTML = `<div class="dark">
+    <div class="hd">
+      <div><div class="lbl">Prochaine échéance</div>
+        <div class="race">${prochaine.nom} · ${prochaine.cible}</div>
+        <div class="sub">${dlong(prochaine.date)} · ${prochaine.allure}</div></div>
+      <div class="jhero"><div class="v">${jrs(prochaine.date)}</div>
+        <div class="u">JOURS</div></div></div>
+    <div class="ruban"><svg viewBox="0 0 ${VB_W} ${VB_H}" role="img"
+      aria-label="Les 27 semaines du plan, volume hebdomadaire et position actuelle"
+      preserveAspectRatio="xMidYMid meet">${s}</svg></div>
+    <div class="rlg">
+      <span><i style="background:var(--volt)"></i>Semaine ${Math.max(cur, 1)}</span>
+      <span><i style="background:var(--data)"></i>Réalisé</span>
+      <span><i style="background:var(--effort);border-radius:50%"></i>Course</span>
+      <span>Bloc 1 → 5, du clair au foncé</span></div></div>`;
+  const rb = document.querySelector('.ruban');
+  if (rb) rb.scrollLeft = Math.max(0, (cur - 1) / n * rb.scrollWidth - rb.clientWidth / 2);
+})();
+
+/* ---------- alertes ---------- */
 (function () {
   const b = (cls, sym, t, d, a) => `<div class="alert ${cls}">
     <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${SYM[sym]}</svg></div>
     <div style="min-width:0"><div class="at">${t}</div><div class="ad">${d}</div>
     ${a ? `<div class="aa">${a}</div>` : ''}</div></div>`;
-  if (AL.length) {
-    $('alerts').innerHTML = AL.map(a =>
-      b(a.niveau, 'bang', a.titre, a.detail, a.quoi_faire)).join('');
-  } else if (M.nb_activites >= 3) {
-    $('alerts').innerHTML = b('calme', 'check', 'Rien à signaler',
-      'Charge, dérive cardiaque et récupération sont dans les clous. '
-      + 'Les six règles de surveillance ont été vérifiées.', '');
-  } else {
-    $('alerts').innerHTML = b('neutre', 'dot', 'Surveillance en veille',
-      'Six règles tournent à chaque mise à jour : montée de charge, dérive '
-      + 'cardiaque, variabilité cardiaque, FC de repos, douleur signalée et '
-      + 'effort perçu.',
-      'Elles restent silencieuses tant que les mesures sont trop rares pour être '
-      + 'fiables. La dérive s’active dès ta deuxième sortie longue, la charge après '
-      + '3 semaines, la variabilité après 14 nuits.');
-  }
+  if (AL.length) $('alerts').innerHTML = AL.map(a =>
+    b(a.niveau, 'bang', a.titre, a.detail, a.quoi_faire)).join('');
+  else if (M.nb_activites >= 3) $('alerts').innerHTML = b('calme', 'check',
+    'Rien à signaler', 'Charge, dérive cardiaque et récupération sont dans les '
+    + 'clous. Les six règles de surveillance ont été vérifiées.', '');
+  else $('alerts').innerHTML = b('neutre', 'dot', 'Surveillance en veille',
+    'Six règles tournent à chaque mise à jour : montée de charge, dérive cardiaque, '
+    + 'variabilité cardiaque, FC de repos, douleur signalée et effort perçu.',
+    'Elles restent silencieuses tant que les mesures sont trop rares pour être '
+    + 'fiables. La dérive s’active dès ta deuxième sortie longue, la charge après '
+    + '3 semaines, la variabilité après 14 nuits.');
 })();
 
-$('hero').innerHTML = `<div class="hero">
-  <div><div class="t">${prochaine.nom}</div>
-    <div class="n">${prochaine.cible}</div>
-    <div class="d">${dlong(prochaine.date)} · ${prochaine.allure}</div></div>
-  <div class="hero-r"><div class="j">${jrs(prochaine.date)}</div>
-    <div class="u">JOURS</div></div></div>`;
-
+/* ---------- semaine en cours ---------- */
 (function () {
   const w = nowW, st = new Date(w.lundi + 'T12:00:00');
   const dt = i => { const d = new Date(st); d.setDate(d.getDate() + i);
     return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
   const km = m => m ? 'environ ' + (m / 6.1).toFixed(1) + ' km · 6:00 à 6:30/km' : '';
   const c = PLAN.courses.find(x => x.semaine === w.semaine);
-  const jour = c ? ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche']
+  const jr = c ? ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche']
     .indexOf(c.jour) : -1;
   const L = [
-    ['Lun', 'Repos', 'ou 15 min de mobilité', ''],
+    ['Lun', 'Repos', 'ou 15 min de mobilité', 1],
     ['Mar', w.seance1_min ? 'Course · ' + w.seance1_min + ' min' : 'Repos',
-      km(w.seance1_min), w.seance1_min ? 'b' : ''],
-    ['Mer', 'Musculation', 'haut du corps, tractions, muscle-up', ''],
+      km(w.seance1_min), 0],
+    ['Mer', 'Musculation', 'haut du corps, tractions, muscle-up', 0],
     ['Jeu', w.seance2_min ? 'Course · ' + w.seance2_min + ' min' : 'Repos',
-      km(w.seance2_min), w.seance2_min ? 'b' : ''],
-    ['Ven', 'Musculation', 'gainage et travail ATR', ''],
+      km(w.seance2_min), 0],
+    ['Ven', 'Musculation', 'gainage et travail ATR', 0],
     ['Sam', 'Sortie longue · ' + w.sortie_longue_km + ' km',
-      'endurance fondamentale stricte', 'b'],
-    ['Dim', 'Repos', 'marche ou récupération active', ''],
+      'endurance fondamentale stricte', 0],
+    ['Dim', 'Repos', 'marche ou récupération active', 1],
   ];
-  if (jour >= 0) {
-    L[jour] = [L[jour][0], c.nom, 'Objectif ' + c.cible + ' · ' + c.allure, 'o'];
-    if (c.cle === 'dix') {
-      L[4] = ['Ven', 'Repos', 'veille de course', ''];
-      L[5] = ['Sam', 'Sortie longue · ' + w.sortie_longue_km + ' km',
-        'très calme, deux jours après la course', 'b'];
-    }
+  if (jr >= 0) {
+    L[jr] = [L[jr][0], c.nom + ' · ' + c.distance_km + ' km',
+      'Objectif ' + c.cible + ' · ' + c.allure, 0];
+    if (c.cle === 'dix') L[4] = ['Ven', 'Repos', 'veille de course', 1];
   }
-  $('week').innerHTML = L.map((r, i) => `<div class="li">
+  const jToday = Math.floor((today - st) / 864e5);
+  $('week').innerHTML = L.map((r, i) => `<div class="li${i === jToday ? ' on' : ''}${
+    r[3] && i !== jToday ? ' rest' : ''}">
     <div class="li-k"><div>${r[1]}</div>
-      ${r[2] ? `<div class="li-sub">${r[2]}</div>` : ''}</div>
-    <span class="bdg ${r[3]}">${r[0]} ${dt(i)}</span></div>`).join('');
+      ${r[2] ? `<div class="li-s">${r[2]}</div>` : ''}</div>
+    <div class="li-v q">${r[0]} ${dt(i)}</div></div>`).join('');
   $('week-n').textContent = 'Objectif de la semaine : ' + w.volume_km + ' km, dont '
-    + w.sortie_longue_km + ' km de sortie longue.';
+    + w.sortie_longue_km + ' km de sortie longue. ' + w.note;
 })();
 
+/* ---------- tuiles ---------- */
 const volCum = Object.values(M.semaines).reduce((s, w) => s + w.km, 0);
-const tuile = ([l, v, u, f, w]) => {
+const tuile = ([l, v, u, dt, att]) => {
   const has = v !== null && v !== undefined;
-  return `<div class="stat"><div class="stat-l">${l}</div>
-    ${has ? `<div class="stat-v">${nf(v)}<em>${u}</em></div>
-             <div class="stat-f">${f}</div>`
-          : `<div class="stat-w">${w}</div>`}</div>`;
+  return `<div class="tile"><div class="l">${l}</div>
+    ${has ? `<div class="v">${nf(v)}<em>${u}</em></div>
+      <div class="d">${dt ? dshort(dt) : ''}</div>`
+      : `<div class="w">${att}</div>`}</div>`;
 };
 $('quick').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
-   'objectif ' + nowW.volume_km + ' km', 'Première séance mardi'],
-  ['Dérive cardiaque', A.derive_pct, '%', 'dernière sortie longue',
-   'Dès la sortie de samedi'],
-  ['Variabilité cardiaque', A.hrv, 'ms', 'dernière nuit', '—'],
-  ['FC de repos', A.fc_repos, 'bpm', 'dernière nuit', '—'],
+   D.volume, 'Première séance mardi'],
+  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'Dès la sortie de samedi'],
+  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv, '—'],
+  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, '—'],
 ].map(tuile).join('');
 
 /* ================= plan ================= */
-$('races').innerHTML = PLAN.courses.map(c => `<div class="card">
-  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
-    <span style="font-size:17.5px;font-weight:600;letter-spacing:-.02em">${c.nom}</span>
-    <span class="bdg b">J-${jrs(c.date)}</span></div>
-  <div style="font-size:14px;color:var(--label-2);margin-top:4px">${dlong(c.date)}</div>
-  <div style="display:flex;gap:24px;margin-top:13px;padding-top:13px;
-    border-top:1px solid var(--sep)">
-    <div><div style="font-size:12px;color:var(--label-2)">Objectif</div>
-      <div style="font-family:var(--num);font-weight:500;font-size:15px;margin-top:2px"
-        >${c.cible}</div></div>
-    <div><div style="font-size:12px;color:var(--label-2)">Allure</div>
-      <div style="font-family:var(--num);font-weight:500;font-size:15px;margin-top:2px"
-        >${c.allure}</div></div></div>
-  <div style="font-size:13.5px;color:var(--label-2);margin-top:11px;line-height:1.5"
-    >${c.role}</div></div>`).join('');
+$('races').innerHTML = PLAN.courses.map(c => `<div class="li">
+  <div class="li-k"><div>${c.nom} · ${c.cible}</div>
+    <div class="li-s">${dlong(c.date)} · ${c.allure}<br>${c.role}</div></div>
+  <div class="li-v">J-${jrs(c.date)}</div></div>`).join('');
 
 $('paces').innerHTML = [
   ['Endurance fondamentale', '6:00 – 6:30', 'La majorité du volume'],
   ['Allure marathon', '5:35 – 5:45', 'Fractions dès la semaine 13'],
   ['Allure semi', '5:10 – 5:15', 'Semaines 5 et 6, puis le 25 octobre'],
   ['Seuil', '4:55 – 5:05', '3 × 10 min, blocs 3 et 4'],
-  ['Allure 10 km', '4:36 – 4:48', 'Course du 24 septembre'],
+  ['Allure 10 km', '4:36 – 4:48', 'Course du 26 septembre'],
 ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
-  <div class="li-sub">${r[2]}</div></div>
-  <div class="li-v hi">${r[1]}</div></div>`).join('');
+  <div class="li-s">${r[2]}</div></div><div class="li-v">${r[1]}</div></div>`).join('');
 
-$('plan').innerHTML = '<thead><tr><th>Sem.</th><th>Dates</th><th>Longue</th>'
-  + '<th>Midi</th><th>Volume</th><th>Réalisé</th><th>Consigne</th></tr></thead><tbody>'
-  + PLAN.semaines.map(w => {
-  const r = M.semaines[w.semaine];
-  const evt = w.course || w.type === 'TEST';
-  const cls = [w.semaine === cur ? 'now' : '', evt ? 'evt' : '',
-    w.type === 'decharge' ? 'soft' : ''].filter(Boolean).join(' ');
-  return `<tr class="${cls}"><td class="t">${w.semaine}</td>
-    <td class="t">${dshort(w.lundi)} – ${dshort(w.dimanche)}</td>
-    <td class="t">${nf(w.sortie_longue_km)} km</td>
-    <td class="t">${w.seance1_min}′+${w.seance2_min}′</td>
-    <td class="t">${w.volume_km} km</td>
-    <td class="t" style="color:${r ? 'var(--label)' : 'var(--label-3)'}"
-      >${r ? r.km + ' km' : '—'}</td>
-    <td class="${evt ? 'ev' : ''}" style="min-width:210px">${w.note || ''}</td></tr>`;
-}).join('') + '</tbody>';
-$('plan-n').textContent = 'Pic à ' + PLAN.pic_volume_km + ' km, sortie longue maximale '
-  + PLAN.pic_sortie_longue_km + ' km. Les semaines grisées sont les décharges : '
-  + 'elles ne sont pas facultatives.';
+(function () {
+  const gc = ['var(--b1)', 'var(--b2)', 'var(--b3)', 'var(--b4)', 'var(--b5)'];
+  const done = {};
+  Object.entries(M.semaines).forEach(([k, v]) => { done[+k] = v.km; });
+  const mxv = Math.max(...PLAN.semaines.map(w => w.volume_km));
+  let out = '';
+  PLAN.blocs.forEach((bl, bi) => {
+    const sem = PLAN.semaines.filter(w => w.semaine >= bl.debut && w.semaine <= bl.fin);
+    const tot = sem.reduce((s, w) => s + w.volume_km, 0);
+    out += `<div class="band"><span class="bar" style="background:${gc[bi]};
+      width:${Math.round(tot / 5)}px"></span>
+      <span class="nm">${bl.nom}</span><span class="ds">${bl.desc} ·
+      S${bl.debut} à ${bl.fin}</span></div>`;
+    out += sem.map(w => {
+      if (w.semaine === cur) {
+        const r = done[w.semaine];
+        return `<div class="wk now"><div>
+          <div class="ti">Semaine ${w.semaine} · en cours</div>
+          <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)} ·
+            sortie longue ${nf(w.sortie_longue_km)} km${w.note ? ' · ' + w.note : ''}</div>
+          <div class="vo">${r ? r + ' km réalisés sur ' + w.volume_km
+            : 'objectif ' + w.volume_km + ' km'}</div></div></div>`;
+      }
+      const passe = w.semaine < cur;
+      const dist = w.semaine - cur;
+      const op = passe ? 1 : Math.max(.42, 1 - dist * 0.022);
+      const r = done[w.semaine];
+      const larg = r ? Math.round(r / mxv * 46) : 0;
+      return `<div class="wk ${passe ? 'past' : ''} ${w.course || w.type === 'TEST'
+        ? 'race' : ''}" style="opacity:${op.toFixed(2)}">
+        <div class="no">${w.semaine}</div>
+        <div><div class="ti">${w.course ? PLAN.courses.find(c => c.cle === w.course).nom
+          : w.type === 'TEST' ? 'Test 30 km'
+          : 'Sortie longue ' + nf(w.sortie_longue_km) + ' km'}</div>
+          <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)}${
+            w.note ? ' · ' + w.note : ''}</div></div>
+        <div class="vo">${r ? `<span class="done" style="width:${larg}px"></span>${r}`
+          : ''} ${w.volume_km} km</div></div>`;
+    }).join('');
+  });
+  $('spine').innerHTML = out;
+  $('spine-n').textContent = 'Pic à ' + PLAN.pic_volume_km + ' km, sortie longue '
+    + 'maximale ' + PLAN.pic_sortie_longue_km + ' km. Les barres bleues montrent '
+    + 'le volume réellement couru.';
+})();
 
 /* ================= graphiques ================= */
 const tip = document.createElement('div');
@@ -485,56 +560,51 @@ function lineChart(box, series, opt) {
   opt = opt || {};
   const pts = series.filter(s => s.data.length);
   if (!pts.length || pts.every(s => s.data.length < 2)) {
-    box.innerHTML = '<div class="wait">' + (opt.wait || 'En attente de données')
-      + '</div>';
+    box.innerHTML = '<div class="wait">' + (opt.wait || 'En attente') + '</div>';
     return false;
   }
-  const W = 520, H = 152, L = 40, R = 10, T = 12, B = 26;
+  const W = 520, H = 150, L = 40, R = 10, T = 12, B = 25;
   const all = pts.flatMap(s => s.data.map(d => d.v));
   let mn = Math.min(...all), mx = Math.max(...all);
   if (opt.zero) mn = Math.min(0, mn);
-  const pad = (mx - mn) * 0.15 || 1; mn -= pad; mx += pad;
+  const pad = (mx - mn) * .15 || 1; mn -= pad; mx += pad;
   const n = Math.max(...pts.map(s => s.data.length));
   const X = i => L + (n < 2 ? 0 : i / (n - 1)) * (W - L - R);
   const Y = v => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
   const dec = opt.dec == null ? 0 : opt.dec;
-
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.alt || ''}">`;
   for (let g = 0; g <= 3; g++) {
     const v = mn + (mx - mn) * g / 3, y = Y(v);
     s += `<line x1="${L}" y1="${y.toFixed(1)}" x2="${W - R}" y2="${y.toFixed(1)}"
-      stroke="var(--sep)" stroke-width="1"/>
-      <text class="ax" x="${L - 7}" y="${(y + 3.4).toFixed(1)}"
-      text-anchor="end">${v.toFixed(dec)}</text>`;
+      stroke="var(--filet)"/><text class="ax" x="${L - 7}"
+      y="${(y + 3.4).toFixed(1)}" text-anchor="end">${v.toFixed(dec)}</text>`;
   }
   if (opt.target != null && opt.target > mn && opt.target < mx)
     s += `<line x1="${L}" y1="${Y(opt.target).toFixed(1)}" x2="${W - R}"
-      y2="${Y(opt.target).toFixed(1)}" stroke="var(--s2)" stroke-width="1.5"
+      y2="${Y(opt.target).toFixed(1)}" stroke="var(--effort)" stroke-width="1.5"
       stroke-dasharray="5 4"/>`;
   pts.forEach(se => {
     const d = se.data.map((p, i) => `${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
     s += `<polyline points="${d}" fill="none" stroke="${se.color}" stroke-width="2.4"
       stroke-linejoin="round" stroke-linecap="round"/>`;
-    const last = se.data[se.data.length - 1];
-    s += `<circle cx="${X(se.data.length - 1).toFixed(1)}" cy="${Y(last.v).toFixed(1)}"
-      r="4.2" fill="${se.color}" stroke="var(--card)" stroke-width="2.2"/>`;
+    const la = se.data[se.data.length - 1];
+    s += `<circle cx="${X(se.data.length - 1).toFixed(1)}" cy="${Y(la.v).toFixed(1)}"
+      r="4.2" fill="${se.color}" stroke="var(--surface)" stroke-width="2.2"/>`;
   });
   const f = pts[0].data;
-  s += `<text class="ax" x="${L}" y="${H - 7}">${dshort(f[0].d)}</text>
-    <text class="ax" x="${W - R}" y="${H - 7}" text-anchor="end"
+  s += `<text class="ax" x="${L}" y="${H - 6}">${dshort(f[0].d)}</text>
+    <text class="ax" x="${W - R}" y="${H - 6}" text-anchor="end"
     >${dshort(f[f.length - 1].d)}</text></svg>`;
   box.innerHTML = s;
-
   const svg = box.querySelector('svg');
   svg.addEventListener('pointermove', e => {
-    const r = svg.getBoundingClientRect();
-    if (!r.width) return;
+    const r = svg.getBoundingClientRect(); if (!r.width) return;
     const j = Math.max(0, Math.min(n - 1, Math.round(
       ((e.clientX - r.left) / r.width * W - L) / (W - L - R) * (n - 1))));
-    const lines = pts.filter(se => se.data[j])
+    const li = pts.filter(se => se.data[j])
       .map(se => se.name + ' ' + se.data[j].v.toFixed(dec) + (opt.unit || ''));
-    if (!lines.length) return;
-    tip.innerHTML = dshort(pts[0].data[j].d) + '<br>' + lines.join('<br>');
+    if (!li.length) return;
+    tip.innerHTML = dshort(pts[0].data[j].d) + '<br>' + li.join('<br>');
     tip.style.left = (r.left + window.scrollX + (X(j) / W) * r.width) + 'px';
     tip.style.top = (r.top + window.scrollY) + 'px';
     tip.style.opacity = 1;
@@ -543,67 +613,18 @@ function lineChart(box, series, opt) {
   return true;
 }
 
-function volChart(box, plan, done) {
-  const W = 1040, H = 196, L = 32, R = 8, T = 16, B = 36;
-  const mx = Math.ceil(Math.max(...plan.map(p => p.v)) / 10) * 10;
-  const n = plan.length, step = (W - L - R) / n, bw = Math.min(23, step - 5);
-  const Y = v => T + (1 - v / mx) * (H - T - B);
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img"
-    aria-label="Volume hebdomadaire planifié sur 27 semaines">`;
-  for (let g = 10; g <= mx; g += 10)
-    s += `<line x1="${L}" y1="${Y(g).toFixed(1)}" x2="${W - R}" y2="${Y(g).toFixed(1)}"
-      stroke="var(--sep)" stroke-width="1"/><text class="ax" x="${L - 7}"
-      y="${(Y(g) + 3.6).toFixed(1)}" text-anchor="end">${g}</text>`;
-  plan.forEach((p, i) => {
-    const x = L + i * step + (step - bw) / 2, y = Y(p.v), h = H - B - y;
-    s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}"
-      height="${h.toFixed(1)}" rx="3.5" fill="${p.fill}"
-      opacity="${p.dim ? .55 : 1}"/>`;
-    const r = done[p.sem];
-    if (r) s += `<rect x="${(x + bw / 4).toFixed(1)}" y="${Y(r).toFixed(1)}"
-      width="${(bw / 2).toFixed(1)}" height="${(H - B - Y(r)).toFixed(1)}" rx="2.5"
-      fill="var(--s2)"/>`;
-    if (p.race) s += `<circle cx="${(x + bw / 2).toFixed(1)}" cy="${T - 6}" r="3.4"
-      fill="var(--s2)"/>`;
-    if (p.sem % 2 === 1 || p.race)
-      s += `<text class="ax" x="${(x + bw / 2).toFixed(1)}" y="${H - 19}"
-        text-anchor="middle">${p.sem}</text>`;
-    if (p.race) s += `<text class="dl" x="${(x + bw / 2).toFixed(1)}" y="${H - 5}"
-      text-anchor="middle" fill="var(--s2)">${p.race}</text>`;
-  });
-  box.innerHTML = s + '</svg>';
-}
-
-(function () {
-  const gc = {'Bloc 1':'var(--g1)', 'Bloc 2':'var(--g2)', 'Bloc 3':'var(--g3)',
-    'Bloc 4':'var(--g4)', 'Bloc 5':'var(--g5)'};
-  const lbl = {dix:'10K', semi:'SEMI', marathon:'BCN'};
-  const done = {};
-  Object.entries(M.semaines).forEach(([k, v]) => { done[+k] = v.km; });
-  volChart($('roadmap'), PLAN.semaines.map(w => ({
-    sem:w.semaine, v:w.volume_km, fill:gc[w.bloc],
-    dim:w.type === 'decharge', race:w.course ? lbl[w.course] : null})), done);
-  $('rm-keys').innerHTML = PLAN.blocs.map(b =>
-    `<span><i class="sq" style="background:${gc[b.nom]}"></i>${b.nom} · ${b.desc}</span>`
-  ).join('') + '<span><i class="sq" style="background:var(--s2)"></i>Réalisé</span>';
-})();
-
-/* ================= progression ================= */
 $('kpis').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
-   'objectif ' + nowW.volume_km + ' km', 'Première séance mardi 8 septembre'],
-  ['Variabilité cardiaque', A.hrv, 'ms', 'dernière nuit mesurée', '—'],
-  ['FC de repos', A.fc_repos, 'bpm', 'doit baisser avec le volume', '—'],
-  ['Poids', A.poids, 'kg', 'référence de départ', '—'],
-  ['Dérive cardiaque', A.derive_pct, '%', 'dernière sortie longue',
-   'À partir de samedi 12 septembre'],
-  ['VO2max', A.vo2max, '', 'estimation Garmin', 'Après 2 à 3 courses'],
-  ['Forme de fond', A.ctl, '', 'charge chronique, CTL', 'Après environ 4 semaines'],
-  ['Sommeil', A.sommeil_h, 'h', 'dernière nuit', 'Dès la prochaine nuit'],
-  ['Cadence moyenne', A.cadence, 'ppm', 'sur toutes les courses',
-   'À la première course'],
-  ['Kilomètres cumulés', volCum || null, 'km', 'depuis la semaine 1',
-   'Le plan démarre le 7 septembre'],
+   D.volume, 'Première séance mardi 8 septembre'],
+  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv, '—'],
+  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, '—'],
+  ['Poids', A.poids, 'kg', D.poids, '—'],
+  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'À partir du 12 septembre'],
+  ['VO2max', A.vo2max, '', D.vo2max, 'Après 2 à 3 courses'],
+  ['Forme de fond', A.ctl, '', D.ctl, 'Après environ 4 semaines'],
+  ['Sommeil', A.sommeil_h, 'h', D.sommeil_h, 'Dès la prochaine nuit'],
+  ['Cadence moyenne', A.cadence, 'ppm', D.cadence, 'À la première course'],
+  ['Kilomètres cumulés', volCum || null, 'km', D.volume, 'Le plan démarre le 7/09'],
 ].map(tuile).join('');
 
 (function () {
@@ -612,50 +633,53 @@ $('kpis').innerHTML = [
   const sk = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
   const CH = [
     {t:'Volume hebdomadaire', s:'Réalisé contre planifié, en kilomètres',
-     k:[['Réalisé', 'var(--s2)'], ['Planifié', 'var(--s1)']],
+     k:[['Réalisé', 'var(--data)'], ['Planifié', 'var(--acier)']],
      draw(b) {
        if (!sk.length) { b.innerHTML = '<div class="wait">Se remplit dès la première '
          + 'séance. Le plan démarre lundi 7 septembre.</div>'; return false; }
        return lineChart(b, [
-         {name:'Réalisé', color:'var(--s2)',
+         {name:'Réalisé', color:'var(--data)',
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi, v:M.semaines[k].km}))},
-         {name:'Planifié', color:'var(--s1)',
+         {name:'Planifié', color:'var(--acier)',
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi,
-                             v:PLAN.semaines[k - 1].volume_km}))}],
-         {unit:' km', zero:true});
+            v:PLAN.semaines[k - 1].volume_km}))}], {unit:' km', zero:true});
      }},
     {t:'Forme et fatigue', s:'CTL la forme de fond, ATL la fatigue récente',
-     k:[['Forme', 'var(--s1)'], ['Fatigue', 'var(--s2)']],
-     draw:b => lineChart(b, [{name:'Forme', color:'var(--s1)', data:g('ctl')},
-       {name:'Fatigue', color:'var(--s2)', data:g('atl')}],
+     k:[['Forme', 'var(--data)'], ['Fatigue', 'var(--effort)']],
+     draw:b => lineChart(b, [{name:'Forme', color:'var(--data)', data:g('ctl')},
+       {name:'Fatigue', color:'var(--effort)', data:g('atl')}],
        {wait:'Se construit sur environ 4 semaines de séances. La forme monte '
         + 'lentement, la fatigue vite : leur écart dit si la charge est tenable.'})},
     {t:'FC de repos', s:'Elle baisse quand le cœur se renforce',
-     draw:b => lineChart(b, [{name:'FC repos', color:'var(--s1)', data:g('fc_repos')}],
-       {unit:' bpm', wait:'Deux nuits mesurées. La courbe devient lisible vers '
+     draw:b => lineChart(b, [{name:'FC repos', color:'var(--data)', data:g('fc_repos')}],
+       {unit:' bpm', wait:'Trois nuits mesurées. La courbe devient lisible vers '
         + '3 semaines de données.'})},
     {t:'Variabilité cardiaque', s:'VFC rMSSD, indicateur de récupération',
-     draw:b => lineChart(b, [{name:'VFC', color:'var(--s1)', data:g('hrv')}],
-       {unit:' ms', wait:'Une seule nuit mesurée. Ce qui compte n’est pas la valeur '
-        + 'brute mais sa moyenne glissante sur 7 jours.'})},
+     draw:b => lineChart(b, [{name:'VFC', color:'var(--data)', data:g('hrv')}],
+       {unit:' ms', wait:'Ce qui compte n’est pas la valeur brute mais sa moyenne '
+        + 'glissante sur 7 jours. Encore trop peu de nuits.'})},
+    {t:'Sommeil', s:'Durée par nuit, en heures',
+     draw:b => lineChart(b, [{name:'Sommeil', color:'var(--data)', data:g('sommeil_h')}],
+       {unit:' h', dec:1, wait:'La courbe apparaît après quelques nuits '
+        + 'synchronisées.'})},
     {t:'Poids', s:'Chaque kilo vaut environ 2 à 3 minutes sur marathon',
-     draw:b => lineChart(b, [{name:'Poids', color:'var(--s1)', data:g('poids')}],
+     draw:b => lineChart(b, [{name:'Poids', color:'var(--data)', data:g('poids')}],
        {unit:' kg', dec:1, wait:'Une seule pesée. Monte sur la balance régulièrement '
         + 'pour voir la tendance.'})},
     {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur sorties longues',
-     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--s2)']],
-     draw:b => lineChart(b, [{name:'Dérive', color:'var(--s1)',
+     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']],
+     draw:b => lineChart(b, [{name:'Dérive', color:'var(--data)',
        data:M.derives.map(x => ({d:x.date, v:x.derive_pct}))}],
-       {unit:' %', dec:1, target:5,
-        wait:'L’indicateur le plus parlant de la préparation. Il se calcule '
-         + 'automatiquement dès ta première sortie longue, samedi 12 septembre.'})},
+       {unit:' %', dec:1, target:5, wait:'L’indicateur le plus parlant de la '
+        + 'préparation. Il se calcule dès ta première sortie longue, '
+        + 'samedi 12 septembre.'})},
     {t:'Efficacité aérobie', s:'Vitesse rapportée au coût cardiaque',
-     draw:b => lineChart(b, [{name:'Indice', color:'var(--s1)',
+     draw:b => lineChart(b, [{name:'Indice', color:'var(--data)',
        data:M.efficacite.map(x => ({d:x.date, v:x.valeur}))}],
        {dec:2, wait:'Se calcule sur chaque course avec cardio. Trois à quatre '
         + 'séances suffisent pour voir une tendance.'})},
     {t:'VO2max', s:'Estimation Garmin, mise à jour à chaque course',
-     draw:b => lineChart(b, [{name:'VO2max', color:'var(--s1)', data:g('vo2max')}],
+     draw:b => lineChart(b, [{name:'VO2max', color:'var(--data)', data:g('vo2max')}],
        {wait:'Garmin a besoin de 2 à 3 courses avec cardio et GPS avant de produire '
         + 'une première estimation.'})},
   ];
@@ -672,56 +696,51 @@ $('kpis').innerHTML = [
 /* ================= journal ================= */
 (function () {
   const J = M.journal || [];
-  $('howto').innerHTML = `<div style="font-size:15px;line-height:1.55">
-    <b>Depuis le téléphone</b>, dans Intervals.icu : le RPE se note sur la séance,
-    le ressenti et la douleur dans le <i>wellness</i> du jour.</div>
-    <div style="font-size:15px;line-height:1.55;margin-top:13px"><b>Depuis
-    l'ordinateur</b>, en une ligne :</div>
+  $('howto').innerHTML = `<div><b>Depuis le téléphone</b>, dans Intervals.icu :
+    le RPE se note sur la séance, le ressenti et la douleur dans le
+    <i>wellness</i> du jour.</div>
+    <div style="margin-top:13px"><b>Depuis l'ordinateur</b>, en une ligne :</div>
     <div class="code">python scripts/journal.py --rpe 4</div>
     <div class="code">python scripts/journal.py --rpe 7 --douleur "genou droit"</div>
-    <div style="font-size:14px;color:var(--label-2);margin-top:14px;line-height:1.5">
-    Le <b>RPE</b> est l'effort perçu de 1 à 10. En endurance fondamentale il doit
-    tourner autour de 3 ou 4 : au-delà, tu cours tes séances faciles trop vite,
-    et l'alerte se déclenche.</div>`;
+    <div style="margin-top:14px">Le <b>RPE</b> est l'effort perçu de 1 à 10.
+    En endurance fondamentale il doit tourner autour de 3 ou 4 : au-delà, tu cours
+    tes séances faciles trop vite, et l'alerte se déclenche.</div>`;
   if (!J.length) {
-    $('journal').innerHTML = '<div class="grp-h">Entrées</div><div class="card">'
-      + '<div class="wait" style="margin:0">Aucune entrée pour l\'instant. '
-      + 'Ta première séance est mardi 8 septembre.</div></div>';
+    $('journal').innerHTML = '<div class="wait" style="margin:0">Aucune entrée pour '
+      + "l'instant. Ta première séance est mardi 8 septembre.</div>";
     return;
   }
   const all = s => s == null ? null
     : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + '/km';
-  $('journal').innerHTML = '<div class="grp-h">Entrées</div><div class="list">'
-    + J.slice().reverse().map(j => {
+  $('journal').innerHTML = '<div class="list">' + J.slice().reverse().map(j => {
     const sous = [j.km != null ? j.km + ' km' : null, all(j.allure_s_km),
       j.fc_moy ? j.fc_moy + ' bpm' : null,
       j.derive_pct != null ? 'dérive ' + j.derive_pct + ' %' : null,
-      j.douleur ? '<b style="color:var(--red)">' + j.douleur + '</b>' : null,
+      j.douleur ? '<b style="color:var(--effort)">' + j.douleur + '</b>' : null,
       j.notes].filter(Boolean).join(' · ');
-    const cl = j.rpe == null ? '' : j.rpe >= 8 ? 'r' : j.rpe >= 6 ? 'o' : 'g';
     return `<div class="li"><div class="li-k"><div>${dlong(j.date)}</div>
-      <div class="li-sub">${sous || 'note du jour'}</div></div>
-      ${j.rpe != null ? `<span class="bdg ${cl}">RPE ${j.rpe}</span>` : ''}</div>`;
+      <div class="li-s">${sous || 'note du jour'}</div></div>
+      ${j.rpe != null ? `<span class="pill ${j.rpe >= 8 ? 'al' : ''}">RPE ${j.rpe}
+      </span>` : ''}</div>`;
   }).join('') + '</div>';
 })();
 
 /* ================= données ================= */
 const rg = d => 48 * Math.pow(d / 10, 1.06);
 const hm = m => Math.floor(m / 60) + 'h' + String(Math.round(m % 60)).padStart(2, '0');
-const pc = (m, d) => { const s = m * 60 / d;
+const pcl = (m, d) => { const s = m * 60 / d;
   return Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0') + '/km'; };
 
-$('verdict').innerHTML = `<span class="bdg ${M.nb_activites ? 'b' : 'g'}">`
+$('verdict').innerHTML = `<span class="pill ${M.nb_activites ? '' : 'ok'}">`
   + (M.nb_activites ? 'Suivi en cours' : 'Crédible, à confirmer') + '</span>'
-  + '<div style="font-size:15px;line-height:1.55;color:var(--label-2);margin-top:13px">'
-  + (M.nb_activites
+  + '<div style="margin-top:13px">' + (M.nb_activites
     ? 'Projections recalculées sur les séances réellement enregistrées.'
-    : 'Le sub-4h demande 5:41/km. Depuis le 10 km en 48 min, la théorie projette '
-      + hm(rg(42.195)) + ' : la marge existe. Mais cette projection suppose une '
+    : 'Le sub-4h demande 5:41/km. Depuis le 10 km en 48 min, la théorie projette <b>'
+      + hm(rg(42.195)) + '</b> : la marge existe. Mais cette projection suppose une '
       + "endurance spécifique qui reste à construire. La contrainte n'est pas la "
       + "vitesse, c'est le volume : passer de 12 à " + PLAN.pic_volume_km
       + ' km par semaine est le vrai chantier.<br><br>Deux rendez-vous tranchent la '
-      + 'question. Le 10 km du 24 septembre vérifie que la référence de 48 min tient '
+      + 'question. Le 10 km du 26 septembre vérifie que la référence de 48 min tient '
       + 'toujours. Le semi du 25 octobre décide de tout : sous 1h48, une cible plus '
       + 'ambitieuse devient discutable ; au-delà de 1h52, on garde le sub-4h et on '
       + 'renforce le volume.') + '</div>';
@@ -729,13 +748,13 @@ $('verdict').innerHTML = `<span class="bdg ${M.nb_activites ? 'b' : 'g'}">`
 $('vrows').innerHTML = [
   ['Référence de départ', '10 km en 48:00'],
   ['VDOT estimé', '≈ 41'],
-  ['Projection semi', hm(rg(21.0975)) + ' · ' + pc(rg(21.0975), 21.0975)],
-  ['Projection marathon', hm(rg(42.195)) + ' · ' + pc(rg(42.195), 42.195)],
+  ['Projection semi', hm(rg(21.0975)) + ' · ' + pcl(rg(21.0975), 21.0975)],
+  ['Projection marathon', hm(rg(42.195)) + ' · ' + pcl(rg(42.195), 42.195)],
   ['Cible retenue', 'sub-4h00 · 5:41/km'],
   ['Volume, départ → pic', '12 → ' + PLAN.pic_volume_km + ' km'],
   ['Sortie longue, départ → pic', '6 → ' + PLAN.pic_sortie_longue_km + ' km'],
 ].map(r => `<div class="li"><div class="li-k">${r[0]}</div>
-  <div class="li-v hi">${r[1]}</div></div>`).join('');
+  <div class="li-v">${r[1]}</div></div>`).join('');
 
 (function () {
   const cv = M.couverture || {};
@@ -757,18 +776,16 @@ $('vrows').innerHTML = [
     ['SpO2 et respiration', 'Signal de surcharge', !!cv.spo2],
     ['Effort perçu et douleur', 'Journal, saisie manuelle', !!(M.journal || []).length],
     ['Body Battery', 'Non exposé par l’API Intervals.icu', null],
-  ].map(r => `<div class="li">
-    <div class="li-k"><div>${r[0]}</div><div class="li-sub">${r[1]}</div></div>
-    <span class="bdg ${r[2] ? 'g' : ''}">${r[2] === null ? 'Indisponible'
+  ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
+    <div class="li-s">${r[1]}</div></div>
+    <span class="pill ${r[2] ? 'ok' : 'no'}">${r[2] === null ? 'Indisponible'
       : r[2] ? 'Reçue' : 'En attente'}</span></div>`).join('');
 })();
 
-$('priv').innerHTML = `<div style="font-size:15px;line-height:1.55;color:var(--label-2)">
-  Les données viennent de la montre Garmin, synchronisées vers Intervals.icu puis
-  agrégées. <b style="color:var(--label)">Aucune coordonnée GPS ni trace de parcours
-  n'est publiée sur cette page.</b><br><br>
-  Les projections utilisent la formule de Riegel, exposant 1,06, appliquée au 10 km
-  en 48 min. Elles supposent une endurance spécifique déjà construite : à lire comme
-  une borne optimiste tant que les courses de calibration n'ont pas eu lieu.<br><br>
-  Mise à jour automatique à 7h et 21h.</div>`;
+$('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées vers
+  Intervals.icu puis agrégées. <b>Aucune coordonnée GPS ni trace de parcours n'est
+  publiée sur cette page.</b><br><br>Les projections utilisent la formule de Riegel,
+  exposant 1,06, appliquée au 10 km en 48 min. Elles supposent une endurance
+  spécifique déjà construite : à lire comme une borne optimiste tant que les courses
+  de calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
 </script>
