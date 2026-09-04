@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-04T21:03:43",
+  "maj": "2026-09-04T21:32:06",
   "nb_activites": 0,
   "semaines": {},
   "seances": [],
@@ -204,12 +204,6 @@
         "nom": "SpO2",
         "unite": "%",
         "dec": 0
-      },
-      {
-        "cle": "respiration",
-        "nom": "Respiration",
-        "unite": "/min",
-        "dec": 1
       }
     ],
     "jours": [
@@ -221,7 +215,6 @@
         "hrv": null,
         "poids": 82.0,
         "spo2": null,
-        "respiration": null,
         "date": "2026-09-02",
         "fatigue_indice": null
       },
@@ -233,7 +226,6 @@
         "hrv": 76.0,
         "poids": null,
         "spo2": null,
-        "respiration": null,
         "date": "2026-09-03",
         "fatigue_indice": null
       },
@@ -245,7 +237,6 @@
         "hrv": 40.0,
         "poids": null,
         "spo2": 98.0,
-        "respiration": null,
         "date": "2026-09-04",
         "fatigue_indice": null
       }
@@ -266,9 +257,7 @@
       "poids": 82.0,
       "poids_date": "2026-09-02",
       "spo2": 98.0,
-      "spo2_date": "2026-09-04",
-      "respiration": null,
-      "respiration_date": null
+      "spo2_date": "2026-09-04"
     },
     "reference_jours": 28,
     "minimum_jours": 14
@@ -290,7 +279,7 @@
         "usage": "La majorité du volume, sorties longues comprises",
         "lent_s_km": 402,
         "rapide_s_km": 363,
-        "texte": "6:03 – 6:42"
+        "texte": "6:03 à 6:42"
       },
       {
         "cle": "marathon",
@@ -298,7 +287,7 @@
         "usage": "Fractions spécifiques à partir de la semaine 13",
         "lent_s_km": 336,
         "rapide_s_km": 319,
-        "texte": "5:19 – 5:36"
+        "texte": "5:19 à 5:36"
       },
       {
         "cle": "seuil",
@@ -306,7 +295,7 @@
         "usage": "Séances de 3 × 10 min, blocs 3 et 4",
         "lent_s_km": 308,
         "rapide_s_km": 298,
-        "texte": "4:58 – 5:08"
+        "texte": "4:58 à 5:08"
       },
       {
         "cle": "dix",
@@ -314,7 +303,7 @@
         "usage": "Rythme de course sur 10 km",
         "lent_s_km": 295,
         "rapide_s_km": 285,
-        "texte": "4:45 – 4:55"
+        "texte": "4:45 à 4:55"
       }
     ],
     "projections": {

@@ -15,237 +15,328 @@
 <style>
 /* ============================================================
    Bitume et haute visibilite.
-   Le volt ne sert qu'a une chose : dire ou tu en es maintenant.
-   L'effort ne sert qu'a une chose : dire ce qui demande attention.
-   Tout le reste est en gris, pour que ces deux-la portent.
+
+   ROLES DE COULEUR. Deux teintes portent du sens, tout le reste est gris.
+     --volt    : ou tu en es maintenant. Nulle part ailleurs.
+     --effort  : ce qui demande une decision, en trait ou en aplat graphique.
+   Trois roles derives, parce que le sens l'exige et pas par gout :
+     --mesure  : la donnee realisee, opposee au planifie. Ruban, courbes, barres.
+     --ok / --veille / --alerte : les trois etats de surveillance, en versions
+       assombries pour rester lisibles en texte sur fond clair.
+   --focus est un etat d'interface, jamais une donnee : il ne partage sa teinte
+   avec rien. C'est la separation que l'ancien fichier n'avait pas, ou le meme
+   bleu servait au realise et a l'anneau de focus clavier.
+
+   LE GESTE. Le fond bitume plein ne dit qu'une chose : le present. Deux
+   endroits, jamais sur le meme ecran, le hero d'Aujourd'hui et la semaine en
+   cours du Plan. Tout ce qui etait noir sans etre le present (blocs de code,
+   infobulles, ligne du jour) passe en gris pour ne pas lui voler sa valeur.
+
+   LES ECHELLES. Six pas de typo, six pas d'espacement, trois rayons. Le mobile
+   ne redeclare pas les composants un par un : il deplace les tokens, et tout
+   suit. Une valeur hors echelle reste possible, mais porte sa raison en
+   commentaire.
    ============================================================ */
 :root{
   color-scheme:light;
+
+  /* --- neutres --- */
   --bitume:#16191C;
   --craie:#F2F3F1;
-  --volt:#D6FF3E;
-  --effort:#E2452F;
-  --acier:#6B7378;
   --surface:#FFFFFF;
   --encre:#1B1F22;
   --sourd:#585F63;
+  --acier:#6B7378;
   --filet:#DFE1DD;
   --creux:#E9EBE7;
-  --data:#1B6AC9;
+  /* Deux gris pour le texte pose sur le bitume, la ou --sourd disparaitrait. */
+  --sur-bitume:#9DA5A8;
+  --sur-bitume-faible:#7E868A;
+
+  /* --- porteuses de sens --- */
+  --volt:#D6FF3E;
+  --effort:#E2452F;
+  --mesure:#1B6AC9;
+
+  /* --- etats de surveillance --- */
+  --ok:#1F6B3C;        --ok-fond:#E4F2E8;
+  --veille:#8A6512;
+  --alerte:#A8321F;    --alerte-fond:#FBE6E2;
+
+  /* --- interface, sans rapport avec la donnee --- */
+  --focus:#16191C;
+
   /* Rampe des blocs : monochrome, du pale au bitume, l'ordre porte le sens */
   --b1:#D2D6D1; --b2:#AEB4AF; --b3:#868D8E; --b4:#5C6467; --b5:#343B3F;
+
+  /* --- echelle typographique --- */
+  --t1:11px;    /* micro : unites, legendes, etiquettes d'axe */
+  --t2:12.5px;  /* secondaire : notes, sous-titres, dates */
+  --t3:14px;    /* texte courant secondaire */
+  --t4:15.5px;  /* texte courant */
+  --t5:17.5px;  /* titre de bloc */
+  --t6:26px;    /* chiffre de tuile */
+
+  /* --- echelle d'espacement --- */
+  --s1:3px; --s2:6px; --s3:11px; --s4:16px; --s5:22px; --s6:32px;
+
+  /* --- rayons --- */
+  --r1:7px;   /* petits elements : pilules, code, infobulle, barres */
+  --r2:12px;  /* cartes, listes, tuiles, graphiques */
+  --r3:18px;  /* blocs de premier plan */
+
   --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --num:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--craie);color:var(--encre);font-family:var(--sans);
-  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  font-size:var(--t4);line-height:1.5;-webkit-font-smoothing:antialiased}
 .mono{font-family:var(--num);font-variant-numeric:tabular-nums}
 
 /* ---------- en-tete ---------- */
 .top{position:sticky;top:0;z-index:40;background:var(--craie);
   border-bottom:1px solid var(--filet)}
-.top-in{max-width:900px;margin:0 auto;padding:13px 20px;display:flex;
-  align-items:center;justify-content:space-between;gap:14px}
-.top-t{font-size:16px;font-weight:600;letter-spacing:-.015em}
-.fresh{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sourd);
-  font-family:var(--num);text-align:right;line-height:1.3}
+.top-in{max-width:900px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;
+  align-items:center;justify-content:space-between;gap:var(--s4)}
+.top-t{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
+.fresh{display:flex;align-items:center;gap:var(--s2);font-size:var(--t2);
+  color:var(--sourd);font-family:var(--num);text-align:right;line-height:1.3}
 .fresh i{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:block}
-.fresh i.ok{background:#2E8B4F}
-.fresh i.old{background:#B8860B}
+.fresh i.ok{background:var(--ok)}
+.fresh i.old{background:var(--veille)}
 .fresh i.stale{background:var(--effort)}
 
 main{max-width:900px;margin:0 auto;
-  padding:0 20px calc(104px + env(safe-area-inset-bottom))}
+  padding:0 var(--s5) calc(104px + env(safe-area-inset-bottom))}
 .tab{display:none}
 .tab.on{display:block}
+/* Hors echelle, et c'est voulu : le titre de page est le seul element qui se
+   redimensionne avec la fenetre. Une valeur fixe le rendrait trop gros sur
+   360 px ou trop timide sur 900. */
 h1{font-size:clamp(30px,7vw,40px);font-weight:700;letter-spacing:-.032em;
-  line-height:1.08;margin:24px 0 0;font-variation-settings:"wdth" 92;
+  line-height:1.08;margin:var(--s5) 0 0;font-variation-settings:"wdth" 92;
   text-wrap:balance}
-.lede{color:var(--sourd);font-size:15.5px;line-height:1.5;margin:9px 0 0;
+.lede{color:var(--sourd);font-size:var(--t4);line-height:1.5;margin:var(--s2) 0 0;
   max-width:60ch;text-wrap:pretty}
-h2{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--sourd);
-  margin:0 0 11px;text-transform:none}
-.sec{margin-top:34px}
+h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
+  margin:0 0 var(--s3);text-transform:none}
+.sec{margin-top:var(--s6)}
 
 /* ---------- bloc bitume : le present ---------- */
-.dark{background:var(--bitume);color:var(--craie);border-radius:18px;
-  padding:22px 22px 18px;margin-top:22px}
-.dark .lbl{font-family:var(--num);font-size:10.5px;letter-spacing:.16em;
+.dark{background:var(--bitume);color:var(--craie);border-radius:var(--r3);
+  padding:var(--s5) var(--s5) var(--s4);margin-top:var(--s5)}
+.dark .lbl{font-family:var(--num);font-size:var(--t1);letter-spacing:.16em;
   text-transform:uppercase;color:var(--volt)}
 .dark .hd{display:flex;justify-content:space-between;align-items:flex-end;
-  gap:18px;flex-wrap:wrap}
-.dark .race{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-top:5px}
-.dark .sub{font-size:13.5px;color:#9DA5A8;margin-top:2px}
+  gap:var(--s4);flex-wrap:wrap}
+.dark .race{font-size:var(--t5);font-weight:600;letter-spacing:-.02em;
+  margin-top:var(--s1)}
+.dark .sub{font-size:var(--t3);color:var(--sur-bitume);margin-top:2px}
 .jhero{text-align:right;flex-shrink:0}
+/* Hors echelle : c'est la donnee hero, le seul chiffre de la page qui a le
+   droit d'ecraser ce qui l'entoure. */
 .jhero .v{font-family:var(--num);font-size:clamp(44px,12vw,62px);font-weight:600;
   letter-spacing:-.05em;line-height:.9;color:var(--volt)}
-.jhero .u{font-family:var(--num);font-size:10.5px;letter-spacing:.16em;
-  color:#7E868A;margin-top:6px}
-.ruban{margin-top:20px;overflow-x:auto;scrollbar-width:thin;
+.jhero .u{font-family:var(--num);font-size:var(--t1);letter-spacing:.16em;
+  color:var(--sur-bitume-faible);margin-top:var(--s2)}
+.ruban{margin-top:var(--s5);overflow-x:auto;scrollbar-width:thin;
   -webkit-overflow-scrolling:touch}
 .ruban svg{display:block;height:112px;width:100%;min-width:640px}
-.rlg{display:flex;flex-wrap:wrap;gap:13px;margin-top:12px;font-size:11.5px;
-  color:#8B9396;font-family:var(--num)}
-.rlg span{display:flex;align-items:center;gap:6px}
+.rlg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
+  font-size:var(--t1);color:var(--sur-bitume-faible);font-family:var(--num)}
+.rlg span{display:flex;align-items:center;gap:var(--s2)}
 .rlg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
 
 /* ---------- alertes ---------- */
-.alert{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
-  padding:16px 17px;display:flex;gap:14px;margin-top:10px}
+.alert{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4);display:flex;gap:var(--s4);
+  margin-top:var(--s3)}
 .alert.critique{border-left:4px solid var(--effort)}
-.alert.attention{border-left:4px solid #B8860B}
-.alert.calme{border-left:4px solid #2E8B4F}
+.alert.attention{border-left:4px solid var(--veille)}
+.alert.calme{border-left:4px solid var(--ok)}
 .alert.neutre{border-left:4px solid var(--filet)}
 .alert .ic{width:22px;height:22px;flex-shrink:0;margin-top:2px}
 .alert .ic svg{width:22px;height:22px;fill:none;stroke-width:1.9;
   stroke-linecap:round;stroke-linejoin:round}
 .alert.critique .ic svg{stroke:var(--effort)}
-.alert.attention .ic svg{stroke:#B8860B}
-.alert.calme .ic svg{stroke:#2E8B4F}
+.alert.attention .ic svg{stroke:var(--veille)}
+.alert.calme .ic svg{stroke:var(--ok)}
 .alert.neutre .ic svg{stroke:var(--acier)}
-.alert .at{font-size:16px;font-weight:600;letter-spacing:-.015em}
-.alert .ad{font-size:14.5px;color:var(--sourd);margin-top:4px;line-height:1.45}
-.alert .aa{font-size:14px;color:var(--sourd);margin-top:11px;padding-top:11px;
-  border-top:1px solid var(--filet);line-height:1.5}
+.alert .at{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
+.alert .ad{font-size:var(--t3);color:var(--sourd);margin-top:var(--s1);
+  line-height:1.45}
+.alert .aa{font-size:var(--t3);color:var(--sourd);margin-top:var(--s3);
+  padding-top:var(--s3);border-top:1px solid var(--filet);line-height:1.5}
 
 /* ---------- listes ---------- */
-.list{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
-  overflow:hidden}
-.li{display:flex;align-items:center;gap:14px;min-height:50px;padding:12px 16px}
+.list{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);overflow:hidden}
+/* Le filet de gauche est present partout, transparent par defaut : la ligne du
+   jour le colore sans decaler d'un pixel le contenu des autres lignes. */
+.li{display:flex;align-items:center;gap:var(--s4);min-height:50px;
+  padding:var(--s3) var(--s4);border-left:3px solid transparent}
 .li+.li{border-top:1px solid var(--filet)}
-.li-k{flex:1;min-width:0;font-size:15.5px;font-weight:500}
-.li-s{font-size:13px;color:var(--sourd);margin-top:2px;font-weight:400;
+.li-k{flex:1;min-width:0;font-size:var(--t4);font-weight:500}
+.li-s{font-size:var(--t2);color:var(--sourd);margin-top:2px;font-weight:400;
   line-height:1.4}
-.li-v{font-family:var(--num);font-size:15px;font-weight:500;white-space:nowrap;
-  text-align:right}
+.li-v{font-family:var(--num);font-size:var(--t4);font-weight:500;
+  white-space:nowrap;text-align:right}
 .li-v.q{color:var(--sourd);font-weight:400}
-.li.on{background:var(--bitume);color:var(--craie)}
-.li.on .li-s{color:#9DA5A8}
+/* Le jour en cours : reperable, mais pas en bitume plein. Ce fond-la est
+   reserve au present de premier plan, et il y en a deja un sur cet ecran. */
+.li.on{background:var(--creux);border-left-color:var(--bitume)}
+.li.on .li-k{font-weight:600}
 .li.rest{color:var(--sourd)}
 
 /* ---------- tuiles ---------- */
-.grid{display:grid;gap:11px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
-.tile{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
-  padding:15px 16px 16px}
-.tile .l{font-size:13px;color:var(--sourd);font-weight:500;line-height:1.3}
-.tile .v{font-family:var(--num);font-size:28px;font-weight:600;letter-spacing:-.035em;
-  margin-top:7px;line-height:1}
-.tile .v em{font-style:normal;font-size:13px;color:var(--sourd);font-weight:400;
-  margin-left:3px;font-family:var(--sans)}
-.tile .d{font-size:11.5px;color:var(--acier);margin-top:6px;font-family:var(--num)}
-.tile .w{font-size:13.5px;color:var(--acier);margin-top:9px;line-height:1.4}
+.grid{display:grid;gap:var(--s3);
+  grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
+.tile{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4)}
+.tile .l{font-size:var(--t2);color:var(--sourd);font-weight:500;line-height:1.3}
+.tile .v{font-family:var(--num);font-size:var(--t6);font-weight:600;
+  letter-spacing:-.035em;margin-top:var(--s2);line-height:1}
+.tile .v em{font-style:normal;font-size:var(--t2);color:var(--sourd);
+  font-weight:400;margin-left:var(--s1);font-family:var(--sans)}
+.tile .d{font-size:var(--t1);color:var(--acier);margin-top:var(--s2);
+  font-family:var(--num)}
+.tile .w{font-size:var(--t2);color:var(--acier);margin-top:var(--s2);
+  line-height:1.4}
 
 /* ---------- derniere seance ---------- */
-.seance{background:var(--surface);border:1px solid var(--filet);border-radius:16px;
-  padding:18px;margin-top:11px}
+.seance{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4);margin-top:var(--s3)}
 .seance .hd{display:flex;justify-content:space-between;align-items:baseline;
-  gap:12px;flex-wrap:wrap}
-.seance .ti{font-size:17px;font-weight:600;letter-spacing:-.02em}
-.seance .dt{font-size:13px;color:var(--acier);font-family:var(--num)}
+  gap:var(--s3);flex-wrap:wrap}
+.seance .ti{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+.seance .dt{font-size:var(--t2);color:var(--acier);font-family:var(--num)}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));
-  gap:14px;margin-top:15px;padding-bottom:15px;border-bottom:1px solid var(--filet)}
-.chiffres div .n{font-family:var(--num);font-size:23px;font-weight:600;
+  gap:var(--s4);margin-top:var(--s4);padding-bottom:var(--s4);
+  border-bottom:1px solid var(--filet)}
+.chiffres div .n{font-family:var(--num);font-size:var(--t6);font-weight:600;
   letter-spacing:-.035em;line-height:1}
-.chiffres div .n em{font-style:normal;font-size:12px;color:var(--sourd);
+.chiffres div .n em{font-style:normal;font-size:var(--t2);color:var(--sourd);
   font-weight:400;margin-left:2px;font-family:var(--sans)}
-.chiffres div .c{font-size:12px;color:var(--acier);margin-top:5px}
-.zbar{display:flex;height:26px;border-radius:6px;overflow:hidden;margin-top:15px;
-  background:var(--creux)}
+.chiffres div .c{font-size:var(--t2);color:var(--acier);margin-top:var(--s1)}
+.zbar{display:flex;height:26px;border-radius:var(--r1);overflow:hidden;
+  margin-top:var(--s4);background:var(--creux)}
 .zbar span{display:block;transition:none}
-.zlg{display:flex;flex-wrap:wrap;gap:13px;margin-top:11px;font-size:12px;
-  color:var(--sourd);font-family:var(--num)}
-.zlg span{display:flex;align-items:center;gap:6px}
+.zlg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
+  font-size:var(--t2);color:var(--sourd);font-family:var(--num)}
+.zlg span{display:flex;align-items:center;gap:var(--s2)}
 .zlg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
-.bilan{font-size:14.5px;line-height:1.5;margin-top:14px;padding-top:14px;
-  border-top:1px solid var(--filet)}
+.bilan{font-size:var(--t3);line-height:1.5;margin-top:var(--s4);
+  padding-top:var(--s4);border-top:1px solid var(--filet)}
 .bilan b{font-weight:600}
-.bilan.ok b{color:#1F6B3C}
-.bilan.ko b{color:var(--effort)}
+.bilan.ok b{color:var(--ok)}
+.bilan.ko b{color:var(--alerte)}
 
 /* ---------- colonne vertebrale des semaines ---------- */
-.band{display:flex;align-items:center;gap:11px;margin:26px 0 9px}
+.band{display:flex;align-items:center;gap:var(--s3);margin:var(--s5) 0 var(--s2)}
+/* 3px et 2px ci-dessous : rayons de formes de 3 a 5 px de haut. --r1 les
+   transformerait en gelules. Un rayon doit rester inferieur a la demi-hauteur. */
 .band .bar{height:5px;border-radius:3px;flex-shrink:0}
-.band .nm{font-size:13px;font-weight:600;letter-spacing:-.005em}
-.band .ds{font-size:12.5px;color:var(--acier)}
-.wk{display:grid;grid-template-columns:34px 1fr auto;gap:13px;align-items:center;
-  padding:9px 4px 9px 14px;border-bottom:1px solid var(--filet);
-  border-left:2px solid var(--filet)}
+.band .nm{font-size:var(--t2);font-weight:600;letter-spacing:-.005em}
+.band .ds{font-size:var(--t2);color:var(--acier)}
+.wk{display:grid;grid-template-columns:34px 1fr auto;gap:var(--s3);
+  align-items:center;padding:var(--s2) var(--s1) var(--s2) var(--s3);
+  border-bottom:1px solid var(--filet);border-left:2px solid var(--filet)}
 .wk.futur{border-left-style:dashed}
-.wk .no{font-family:var(--num);font-size:13px;color:var(--acier);text-align:right}
-.wk .ti{font-size:14.5px;font-weight:500;line-height:1.3}
-.wk .su{font-size:12.5px;color:var(--acier);margin-top:2px;line-height:1.35}
-.wk .vo{font-family:var(--num);font-size:13.5px;color:var(--sourd);white-space:nowrap;
+.wk .no{font-family:var(--num);font-size:var(--t2);color:var(--acier);
   text-align:right}
+.wk .ti{font-size:var(--t3);font-weight:500;line-height:1.3}
+.wk .su{font-size:var(--t2);color:var(--acier);margin-top:2px;line-height:1.35}
+.wk .vo{font-family:var(--num);font-size:var(--t2);color:var(--sourd);
+  white-space:nowrap;text-align:right}
 .wk.past{color:var(--sourd)}
 .wk.past .ti{font-weight:400}
 .wk.past .no,.wk.past .su,.wk.past .vo{color:var(--sourd)}
 .wk.race .ti{font-weight:600}
 .wk.race .no::after{content:"";display:inline-block;width:6px;height:6px;
-  border-radius:50%;background:var(--effort);margin-left:5px;vertical-align:1px}
+  border-radius:50%;background:var(--effort);margin-left:var(--s1);
+  vertical-align:1px}
 .wk.now{grid-template-columns:1fr;background:var(--bitume);color:var(--craie);
-  border-radius:16px;padding:18px;border:none;margin:11px 0;gap:0}
+  border-radius:var(--r3);padding:var(--s4);border:none;margin:var(--s3) 0;gap:0}
 .wk.now .no{display:none}
-.wk.now .ti{font-size:18px;font-weight:600;letter-spacing:-.02em}
-.wk.now .su{color:#9DA5A8;font-size:13.5px;margin-top:4px}
-.wk.now .vo{text-align:left;color:var(--volt);margin-top:12px;font-size:13px;
-  letter-spacing:.02em}
-.done{display:inline-block;height:4px;border-radius:2px;background:var(--data);
-  vertical-align:2px;margin-right:6px}
+.wk.now .ti{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+.wk.now .su{color:var(--sur-bitume);font-size:var(--t3);margin-top:var(--s1)}
+.wk.now .vo{text-align:left;color:var(--volt);margin-top:var(--s3);
+  font-size:var(--t2);letter-spacing:.02em}
+.done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
+  vertical-align:2px;margin-right:var(--s2)}
 
 /* ---------- selecteur de periode ---------- */
-.seg{display:flex;background:var(--creux);border-radius:11px;padding:3px;gap:3px;
-  margin-bottom:16px}
-.seg button{flex:1;appearance:none;border:0;background:none;padding:9px 4px;
-  border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;
-  color:var(--sourd);cursor:pointer;transition:background .15s,color .15s;
-  letter-spacing:-.01em}
+.seg{display:flex;background:var(--creux);border-radius:var(--r2);padding:3px;
+  gap:3px;margin-bottom:var(--s4)}
+.seg button{flex:1;appearance:none;border:0;background:none;
+  padding:var(--s2) var(--s1);border-radius:var(--r1);font-family:inherit;
+  font-size:var(--t3);font-weight:500;color:var(--sourd);cursor:pointer;
+  transition:background .15s,color .15s;letter-spacing:-.01em}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
   font-weight:600;box-shadow:0 1px 2px rgba(22,25,28,.10)}
 .seg button:active{transform:scale(.97)}
-.seg button:focus-visible{outline:2px solid var(--data);outline-offset:-2px}
+.seg button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
 
 /* ---------- graphiques ---------- */
-.chart{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
-  padding:16px 17px 12px;margin-top:11px}
-.chart .ct{font-size:15.5px;font-weight:600;letter-spacing:-.015em}
-.chart .cs{font-size:13px;color:var(--sourd);margin-top:3px;line-height:1.4}
-.cb{margin-top:13px;position:relative}
+.chart{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4) var(--s4) var(--s3);
+  margin-top:var(--s3)}
+.chart .ct{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
+.chart .cs{font-size:var(--t2);color:var(--sourd);margin-top:var(--s1);
+  line-height:1.4}
+.cb{margin-top:var(--s3);position:relative}
 .cb svg{display:block;width:100%;height:auto;overflow:visible}
-.keys{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;
-  color:var(--sourd);font-family:var(--num)}
-.keys span{display:flex;align-items:center;gap:6px}
+.keys{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
+  font-size:var(--t2);color:var(--sourd);font-family:var(--num)}
+.keys span{display:flex;align-items:center;gap:var(--s2)}
 .keys i{width:14px;height:3px;border-radius:2px;display:block;flex-shrink:0}
+/* Hors echelle, et obligatoirement : ce texte vit dans le viewBox du SVG,
+   pas dans les pixels de l'ecran. Le brancher sur --t1 le ferait grossir
+   avec l'echelle mobile alors que le graphique, lui, ne grossit pas. */
 text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
-.wait{color:var(--acier);font-size:13.5px;line-height:1.55;padding:24px 14px;
-  margin-top:12px;background:var(--creux);border-radius:11px;text-align:center}
-.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
-  background:var(--bitume);color:var(--craie);font-size:12px;padding:7px 11px;
-  border-radius:8px;white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
+line.grille{stroke:var(--filet)}
+line.grad{stroke:var(--filet)}
+line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
+.wait{color:var(--acier);font-size:var(--t2);line-height:1.55;
+  padding:var(--s5) var(--s3);margin-top:var(--s3);background:var(--creux);
+  border-radius:var(--r1);text-align:center}
+/* Infobulle : position fixed, donc en coordonnees d'ecran. Elle ne derive plus
+   au defilement, ni dans un conteneur qui defile. Fond clair borde de bitume,
+   parce que le bitume plein est reserve au present. */
+.tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--surface);color:var(--encre);border:1px solid var(--bitume);
+  font-size:var(--t1);padding:var(--s2) var(--s3);border-radius:var(--r1);
+  white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
   font-family:var(--num);line-height:1.45}
 
-.note{font-size:13px;color:var(--sourd);margin-top:11px;line-height:1.5;
+.note{font-size:var(--t2);color:var(--sourd);margin-top:var(--s3);line-height:1.5;
   max-width:60ch}
-.card{background:var(--surface);border:1px solid var(--filet);border-radius:14px;
-  padding:18px;font-size:15px;line-height:1.55;color:var(--sourd)}
+.card{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4);font-size:var(--t4);line-height:1.55;
+  color:var(--sourd)}
 .card b{color:var(--encre);font-weight:600}
-.code{background:var(--bitume);color:var(--craie);border-radius:9px;
-  padding:10px 13px;margin-top:9px;font-family:var(--num);font-size:12.5px;
+/* Le bloc de code etait en bitume plein. Il ne represente pas le present :
+   il redescend en gris, avec un filet a gauche pour rester identifiable. */
+.code{background:var(--creux);color:var(--encre);border-radius:var(--r1);
+  border-left:3px solid var(--acier);padding:var(--s2) var(--s3);
+  margin-top:var(--s2);font-family:var(--num);font-size:var(--t2);
   overflow-x:auto;white-space:pre}
-.pill{display:inline-block;font-family:var(--num);font-size:11.5px;font-weight:500;
-  padding:3px 9px;border-radius:6px;background:var(--creux);color:var(--sourd)}
-.pill.ok{background:#E4F2E8;color:#1F6B3C}
+.pill{display:inline-block;font-family:var(--num);font-size:var(--t1);
+  font-weight:500;padding:var(--s1) var(--s2);border-radius:var(--r1);
+  background:var(--creux);color:var(--sourd)}
+.pill.ok{background:var(--ok-fond);color:var(--ok)}
 .pill.no{background:var(--creux);color:var(--acier)}
-.pill.al{background:#FBE6E2;color:#A8321F}
+.pill.al{background:var(--alerte-fond);color:var(--alerte)}
 
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
-.bar-in{max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
-.tb{position:relative;appearance:none;border:0;background:none;padding:12px 2px 10px;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
-  color:var(--acier);font-family:inherit;font-size:11.5px;font-weight:500;
-  transition:color .16s}
+.bar-in{max-width:620px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(6,1fr)}
+.tb{position:relative;appearance:none;border:0;background:none;
+  padding:var(--s3) 2px var(--s2);cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:var(--s1);color:var(--acier);
+  font-family:inherit;font-size:var(--t1);font-weight:500;transition:color .16s}
 .tb svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.65;
   stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .16s}
 .tb::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;
@@ -254,47 +345,33 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
 .tb[aria-selected="true"] svg{stroke-width:2.1}
 .tb[aria-selected="true"]::before{background:var(--volt)}
 .tb:active{transform:scale(.93)}
-.tb:focus-visible{outline:2px solid var(--data);outline-offset:-3px;border-radius:9px}
+.tb:focus-visible{outline:2px solid var(--focus);outline-offset:-3px;
+  border-radius:var(--r1)}
 .dotb{position:absolute;top:8px;right:calc(50% - 17px);width:8px;height:8px;
   border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--craie)}
 
-/* ---------- mobile ---------- */
+/* ---------- mobile ----------
+   Le mobile ne retouche plus une vingtaine de composants un par un : il
+   deplace l'echelle d'un cran vers le haut, et tout ce qui s'y appuie suit. */
 @media (max-width:640px){
-  body{font-size:17.5px}
-  h2{font-size:14.5px}
-  .lede{font-size:16px}
-  .note{font-size:14px}
-  .fresh{font-size:12.5px}
-  .li-s{font-size:14px}
-  .tile .l{font-size:14px}
-  .tile .d{font-size:12.5px}
-  .tile .w{font-size:14.5px}
-  .wk .ti{font-size:15.5px}
-  .wk .su{font-size:13.5px}
-  .wk .no{font-size:14px}
-  .wk .vo{font-size:14px}
-  .keys,.zlg,.rlg{font-size:13px}
-  .chiffres div .c{font-size:13px}
-  .alert .ad{font-size:15px}
-  .alert .aa{font-size:14.5px}
-  .seance .dt{font-size:13.5px}
-  .dark .sub{font-size:14.5px}
-  .tb{padding:12px 2px 11px;font-size:12px;gap:4px}
+  :root{
+    --t1:12px; --t2:13.5px; --t3:15px; --t4:16.5px; --t5:18.5px; --t6:25px;
+    --s5:18px; --s6:28px;
+  }
+  main{padding-left:var(--s4);padding-right:var(--s4)}
+  .top-in{padding:var(--s3) var(--s4)}
+  .fresh{font-size:var(--t1)}
+  .grid{grid-template-columns:1fr 1fr;gap:var(--s2)}
+  .tile{padding:var(--s3)}
+  .dark{padding:var(--s4) var(--s4) var(--s3);border-radius:var(--r2)}
+  .li{padding:var(--s3) var(--s4);min-height:54px}
+  .wk{grid-template-columns:28px 1fr;gap:var(--s3);padding:var(--s3) 2px}
+  .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
+  .wk.now{grid-template-columns:1fr;padding:var(--s4)}
+  .chart{padding:var(--s3)}
+  .tb{padding:var(--s3) 2px;gap:var(--s1)}
   .tb svg{width:28px;height:28px;stroke-width:1.75}
   .tb[aria-selected="true"] svg{stroke-width:2.2}
-  main{padding-left:16px;padding-right:16px}
-  .top-in{padding:12px 16px}
-  .fresh{font-size:11.5px}
-  .grid{grid-template-columns:1fr 1fr;gap:9px}
-  .tile{padding:13px 14px 14px}
-  .tile .v{font-size:25px}
-  .dark{padding:18px 16px 15px;border-radius:16px}
-  .li{padding:12px 14px;min-height:54px}
-  .li-k{font-size:16px}
-  .wk{grid-template-columns:28px 1fr;gap:10px;padding:11px 2px}
-  .wk .vo{grid-column:2;text-align:left;margin-top:4px;font-size:13px}
-  .wk.now{grid-template-columns:1fr;padding:17px 16px}
-  .chart{padding:14px 14px 11px}
 }
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -377,7 +454,7 @@ text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
 
 <script>
 const PLAN = {"genere_le":"2026-09-04","athlete":"Alex Gourdou","depart":{"volume_km":12,"sortie_longue_km":6,"seances":2,"poids_kg":82,"ref_10k_min":48},"courses":[{"cle":"dix","nom":"10 km","lieu":"course locale","date":"2026-09-26","jour":"samedi","semaine":3,"distance_km":10,"cible":"46 a 48 min","allure":"4:36 a 4:48 /km","role":"Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."},{"cle":"semi","nom":"Semi-marathon","lieu":"Paris","date":"2026-10-25","jour":"dimanche","semaine":7,"distance_km":21.0975,"cible":"1h45 a 1h52","allure":"5:00 a 5:19 /km","role":"Jalon de decision : c'est lui qui fixe l'allure marathon."},{"cle":"marathon","nom":"Marathon de Barcelone","lieu":"Barcelone","date":"2027-03-14","jour":"dimanche","semaine":27,"distance_km":42.195,"cible":"sub-4h00","allure":"5:41 /km","role":"Zurich Marato de Barcelona, depart 8h30 Placa de Catalunya. Parcours plat, parmi les plus rapides au monde."}],"blocs":[{"debut":1,"fin":7,"nom":"Bloc 1","desc":"Base aerobie, 10 km et semi"},{"debut":8,"fin":12,"nom":"Bloc 2","desc":"Recuperation et fondation marathon"},{"debut":13,"fin":20,"nom":"Bloc 3","desc":"Construction specifique"},{"debut":21,"fin":24,"nom":"Bloc 4","desc":"Pic de volume et test 30K"},{"debut":25,"fin":27,"nom":"Bloc 5","desc":"Affutage"}],"semaines":[{"semaine":1,"lundi":"2026-09-07","dimanche":"2026-09-13","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":8,"seance1_min":35,"seance2_min":35,"volume_km":19.5,"course":null,"note":"Passage a 3 seances. Tout en endurance fondamentale."},{"semaine":2,"lundi":"2026-09-14","dimanche":"2026-09-20","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":10,"seance1_min":40,"seance2_min":40,"volume_km":23.1,"course":null,"note":"Premiere sortie a 10 km. Aucune acceleration."},{"semaine":3,"lundi":"2026-09-21","dimanche":"2026-09-27","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":10,"seance1_min":30,"seance2_min":30,"volume_km":19.8,"course":"dix","note":"10 KM samedi 26/09. La course tient lieu de sortie longue."},{"semaine":4,"lundi":"2026-09-28","dimanche":"2026-10-04","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"base","sortie_longue_km":12,"seance1_min":40,"seance2_min":40,"volume_km":25.1,"course":null,"note":"Reprise apres la course. Zones recalibrees sur le chrono."},{"semaine":5,"lundi":"2026-10-05","dimanche":"2026-10-11","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":15,"seance1_min":45,"seance2_min":45,"volume_km":29.8,"course":null,"note":"Seance 2 : 3 x 6 min a allure semi, 2 min de trot entre."},{"semaine":6,"lundi":"2026-10-12","dimanche":"2026-10-18","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"specifique","sortie_longue_km":18,"seance1_min":45,"seance2_min":40,"volume_km":31.9,"course":null,"note":"Plus longue sortie avant le semi, dont 5 km a allure semi."},{"semaine":7,"lundi":"2026-10-19","dimanche":"2026-10-25","bloc":"Bloc 1","bloc_desc":"Base aerobie, 10 km et semi","type":"COURSE","sortie_longue_km":21.1,"seance1_min":30,"seance2_min":25,"volume_km":30.1,"course":"semi","note":"SEMI-MARATHON dimanche 25/10."},{"semaine":8,"lundi":"2026-10-26","dimanche":"2026-11-01","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"recup","sortie_longue_km":10,"seance1_min":30,"seance2_min":35,"volume_km":20.7,"course":null,"note":"Recuperation. Rien au-dessus de l'endurance fondamentale."},{"semaine":9,"lundi":"2026-11-02","dimanche":"2026-11-08","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":14,"seance1_min":40,"seance2_min":40,"volume_km":27.1,"course":null,"note":"Reprise du volume avec les nouvelles zones."},{"semaine":10,"lundi":"2026-11-09","dimanche":"2026-11-15","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":16,"seance1_min":45,"seance2_min":45,"volume_km":30.8,"course":null,"note":""},{"semaine":11,"lundi":"2026-11-16","dimanche":"2026-11-22","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"base","sortie_longue_km":18,"seance1_min":45,"seance2_min":45,"volume_km":32.8,"course":null,"note":"Premiere sortie longue a 18 km du bloc marathon."},{"semaine":12,"lundi":"2026-11-23","dimanche":"2026-11-29","bloc":"Bloc 2","bloc_desc":"Recuperation et fondation marathon","type":"decharge","sortie_longue_km":14,"seance1_min":35,"seance2_min":35,"volume_km":25.5,"course":null,"note":""},{"semaine":13,"lundi":"2026-11-30","dimanche":"2026-12-06","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":20,"seance1_min":45,"seance2_min":45,"volume_km":34.8,"course":null,"note":"Seance 2 : 2 x 15 min a allure marathon."},{"semaine":14,"lundi":"2026-12-07","dimanche":"2026-12-13","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":22,"seance1_min":45,"seance2_min":45,"volume_km":36.8,"course":null,"note":"Derniers 5 km de la sortie longue a allure marathon."},{"semaine":15,"lundi":"2026-12-14","dimanche":"2026-12-20","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":24,"seance1_min":45,"seance2_min":45,"volume_km":38.8,"course":null,"note":"Cap des 24 km. Tester le ravitaillement en course."},{"semaine":16,"lundi":"2026-12-21","dimanche":"2026-12-27","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":40,"volume_km":28.3,"course":null,"note":""},{"semaine":17,"lundi":"2026-12-28","dimanche":"2027-01-03","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":25,"seance1_min":45,"seance2_min":45,"volume_km":39.8,"course":null,"note":"Seance 2 : 3 x 10 min au seuil."},{"semaine":18,"lundi":"2027-01-04","dimanche":"2027-01-10","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":27,"seance1_min":45,"seance2_min":45,"volume_km":41.8,"course":null,"note":"Derniers 8 km a allure marathon."},{"semaine":19,"lundi":"2027-01-11","dimanche":"2027-01-17","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"specifique","sortie_longue_km":29,"seance1_min":45,"seance2_min":45,"volume_km":43.8,"course":null,"note":"Sortie la plus longue avant le test 30K."},{"semaine":20,"lundi":"2027-01-18","dimanche":"2027-01-24","bloc":"Bloc 3","bloc_desc":"Construction specifique","type":"decharge","sortie_longue_km":18,"seance1_min":35,"seance2_min":40,"volume_km":30.3,"course":null,"note":""},{"semaine":21,"lundi":"2027-01-25","dimanche":"2027-01-31","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"specifique","sortie_longue_km":26,"seance1_min":45,"seance2_min":45,"volume_km":40.8,"course":null,"note":"Repetition generale : chaussures et ravitaillement de course."},{"semaine":22,"lundi":"2027-02-01","dimanche":"2027-02-07","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"pic","sortie_longue_km":30,"seance1_min":45,"seance2_min":45,"volume_km":44.8,"course":null,"note":"Cap des 30 km. Pic de volume de la preparation."},{"semaine":23,"lundi":"2027-02-08","dimanche":"2027-02-14","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"TEST","sortie_longue_km":30,"seance1_min":45,"seance2_min":40,"volume_km":43.9,"course":null,"note":"TEST 30K a allure marathon. L'indicateur cle avant Barcelone."},{"semaine":24,"lundi":"2027-02-15","dimanche":"2027-02-21","bloc":"Bloc 4","bloc_desc":"Pic de volume et test 30K","type":"decharge","sortie_longue_km":16,"seance1_min":35,"seance2_min":35,"volume_km":27.5,"course":null,"note":"Assimilation du test."},{"semaine":25,"lundi":"2027-02-22","dimanche":"2027-02-28","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":22,"seance1_min":40,"seance2_min":40,"volume_km":35.1,"course":null,"note":"Debut de l'affutage : le volume baisse, l'intensite reste."},{"semaine":26,"lundi":"2027-03-01","dimanche":"2027-03-07","bloc":"Bloc 5","bloc_desc":"Affutage","type":"affutage","sortie_longue_km":14,"seance1_min":35,"seance2_min":30,"volume_km":24.7,"course":null,"note":"Seance 2 : 4 x 3 min a allure marathon."},{"semaine":27,"lundi":"2027-03-08","dimanche":"2027-03-14","bloc":"Bloc 5","bloc_desc":"Affutage","type":"COURSE","sortie_longue_km":42.195,"seance1_min":25,"seance2_min":20,"volume_km":49.6,"course":"marathon","note":"MARATHON DE BARCELONE dimanche 14/03, depart 8h30."}],"pic_volume_km":44.8,"pic_sortie_longue_km":30};
-const M = {"maj":"2026-09-04T21:03:43","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":40.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":40.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":1,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"dates":{"hrv":"2026-09-04","fc_repos":"2026-09-04","poids":"2026-09-02","vo2max":null,"readiness":null,"sommeil_score":"2026-09-04","fc_sommeil":null,"spo2":"2026-09-04","respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":"2026-09-04","courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":"2026-09-04","derive_pct":null,"efficacite":null,"cadence":null,"volume":null},"derniere_donnee":"2026-09-04","derniere_seance":null,"journal":[],"sante":{"champs":[{"cle":"pas","nom":"Pas","unite":"pas","dec":0},{"cle":"sommeil_h","nom":"Sommeil","unite":"h","dec":1},{"cle":"sommeil_score","nom":"Score de sommeil","unite":"/100","dec":0},{"cle":"fatigue_indice","nom":"Indice de fatigue","unite":"/100","dec":0},{"cle":"fc_repos","nom":"FC de repos","unite":"bpm","dec":0},{"cle":"hrv","nom":"Variabilité cardiaque","unite":"ms","dec":0},{"cle":"poids","nom":"Poids","unite":"kg","dec":1},{"cle":"spo2","nom":"SpO2","unite":"%","dec":0},{"cle":"respiration","nom":"Respiration","unite":"/min","dec":1}],"jours":[{"pas":150,"sommeil_h":null,"sommeil_score":null,"fc_repos":69,"hrv":null,"poids":82.0,"spo2":null,"respiration":null,"date":"2026-09-02","fatigue_indice":null},{"pas":4339,"sommeil_h":null,"sommeil_score":null,"fc_repos":49,"hrv":76.0,"poids":null,"spo2":null,"respiration":null,"date":"2026-09-03","fatigue_indice":null},{"pas":2488,"sommeil_h":5.8,"sommeil_score":70.0,"fc_repos":53,"hrv":40.0,"poids":null,"spo2":98.0,"respiration":null,"date":"2026-09-04","fatigue_indice":null}],"actuel":{"pas":2488,"pas_date":"2026-09-04","sommeil_h":5.8,"sommeil_h_date":"2026-09-04","sommeil_score":70.0,"sommeil_score_date":"2026-09-04","fatigue_indice":null,"fatigue_indice_date":null,"fc_repos":53,"fc_repos_date":"2026-09-04","hrv":40.0,"hrv_date":"2026-09-04","poids":82.0,"poids_date":"2026-09-02","spo2":98.0,"spo2_date":"2026-09-04","respiration":null,"respiration_date":null},"reference_jours":28,"minimum_jours":14},"calibration":{"reference":{"source":"10 km de référence","date":null,"estime":true,"distance_km":10.0,"temps":"48:00","allure":"4:48/km"},"vdot":42.0,"zones":[{"cle":"ef","nom":"Endurance fondamentale","usage":"La majorité du volume, sorties longues comprises","lent_s_km":402,"rapide_s_km":363,"texte":"6:03 – 6:42"},{"cle":"marathon","nom":"Allure marathon","usage":"Fractions spécifiques à partir de la semaine 13","lent_s_km":336,"rapide_s_km":319,"texte":"5:19 – 5:36"},{"cle":"seuil","nom":"Seuil","usage":"Séances de 3 × 10 min, blocs 3 et 4","lent_s_km":308,"rapide_s_km":298,"texte":"4:58 – 5:08"},{"cle":"dix","nom":"Allure 10 km","usage":"Rythme de course sur 10 km","lent_s_km":295,"rapide_s_km":285,"texte":"4:45 – 4:55"}],"projections":{"dix":{"temps_s":2880,"texte":"48:00","allure":"4:48/km"},"semi":{"temps_s":6354,"texte":"1h45","allure":"5:01/km"},"marathon":{"temps_s":13249,"texte":"3h40","allure":"5:14/km"}},"cible_marathon":{"allure":"5:41/km","temps":"3h59"},"marge_marathon_s":27},"alertes":[]};
+const M = {"maj":"2026-09-04T21:32:06","nb_activites":0,"semaines":{},"seances":[],"wellness":[{"date":"2026-09-02","hrv":null,"fc_repos":69,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":150,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-03","hrv":76.0,"fc_repos":49,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":null,"fc_sommeil":null,"spo2":null,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":4339,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":null},{"date":"2026-09-04","hrv":40.0,"fc_repos":53,"poids":null,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8}],"derives":[],"efficacite":[],"zones_fc_pct":{},"zones_allure_pct":{},"dynamique":{},"actuel":{"hrv":40.0,"fc_repos":53,"poids":82.0,"vo2max":null,"readiness":null,"sommeil_score":70.0,"fc_sommeil":null,"spo2":98.0,"respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":2488,"courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":5.8,"derive_pct":null,"efficacite":null,"cadence":null},"couverture":{"hrv":2,"fc_repos":3,"poids":1,"vo2max":0,"readiness":0,"sommeil_score":1,"fc_sommeil":0,"spo2":1,"respiration":0,"masse_grasse":0,"ctl":0,"atl":0,"ramp_rate":0,"pas":3,"courbatures":0,"fatigue":0,"moral":0,"douleur_niveau":0,"commentaire":0},"jours_wellness":3,"dates":{"hrv":"2026-09-04","fc_repos":"2026-09-04","poids":"2026-09-02","vo2max":null,"readiness":null,"sommeil_score":"2026-09-04","fc_sommeil":null,"spo2":"2026-09-04","respiration":null,"masse_grasse":null,"ctl":null,"atl":null,"ramp_rate":null,"pas":"2026-09-04","courbatures":null,"fatigue":null,"moral":null,"douleur_niveau":null,"commentaire":null,"sommeil_h":"2026-09-04","derive_pct":null,"efficacite":null,"cadence":null,"volume":null},"derniere_donnee":"2026-09-04","derniere_seance":null,"journal":[],"sante":{"champs":[{"cle":"pas","nom":"Pas","unite":"pas","dec":0},{"cle":"sommeil_h","nom":"Sommeil","unite":"h","dec":1},{"cle":"sommeil_score","nom":"Score de sommeil","unite":"/100","dec":0},{"cle":"fatigue_indice","nom":"Indice de fatigue","unite":"/100","dec":0},{"cle":"fc_repos","nom":"FC de repos","unite":"bpm","dec":0},{"cle":"hrv","nom":"Variabilité cardiaque","unite":"ms","dec":0},{"cle":"poids","nom":"Poids","unite":"kg","dec":1},{"cle":"spo2","nom":"SpO2","unite":"%","dec":0}],"jours":[{"pas":150,"sommeil_h":null,"sommeil_score":null,"fc_repos":69,"hrv":null,"poids":82.0,"spo2":null,"date":"2026-09-02","fatigue_indice":null},{"pas":4339,"sommeil_h":null,"sommeil_score":null,"fc_repos":49,"hrv":76.0,"poids":null,"spo2":null,"date":"2026-09-03","fatigue_indice":null},{"pas":2488,"sommeil_h":5.8,"sommeil_score":70.0,"fc_repos":53,"hrv":40.0,"poids":null,"spo2":98.0,"date":"2026-09-04","fatigue_indice":null}],"actuel":{"pas":2488,"pas_date":"2026-09-04","sommeil_h":5.8,"sommeil_h_date":"2026-09-04","sommeil_score":70.0,"sommeil_score_date":"2026-09-04","fatigue_indice":null,"fatigue_indice_date":null,"fc_repos":53,"fc_repos_date":"2026-09-04","hrv":40.0,"hrv_date":"2026-09-04","poids":82.0,"poids_date":"2026-09-02","spo2":98.0,"spo2_date":"2026-09-04"},"reference_jours":28,"minimum_jours":14},"calibration":{"reference":{"source":"10 km de référence","date":null,"estime":true,"distance_km":10.0,"temps":"48:00","allure":"4:48/km"},"vdot":42.0,"zones":[{"cle":"ef","nom":"Endurance fondamentale","usage":"La majorité du volume, sorties longues comprises","lent_s_km":402,"rapide_s_km":363,"texte":"6:03 à 6:42"},{"cle":"marathon","nom":"Allure marathon","usage":"Fractions spécifiques à partir de la semaine 13","lent_s_km":336,"rapide_s_km":319,"texte":"5:19 à 5:36"},{"cle":"seuil","nom":"Seuil","usage":"Séances de 3 × 10 min, blocs 3 et 4","lent_s_km":308,"rapide_s_km":298,"texte":"4:58 à 5:08"},{"cle":"dix","nom":"Allure 10 km","usage":"Rythme de course sur 10 km","lent_s_km":295,"rapide_s_km":285,"texte":"4:45 à 4:55"}],"projections":{"dix":{"temps_s":2880,"texte":"48:00","allure":"4:48/km"},"semi":{"temps_s":6354,"texte":"1h45","allure":"5:01/km"},"marathon":{"temps_s":13249,"texte":"3h40","allure":"5:14/km"}},"cible_marathon":{"allure":"5:41/km","temps":"3h59"},"marge_marathon_s":27},"alertes":[]};
 
 const $ = i => document.getElementById(i);
 const nf = n => n.toLocaleString('fr-FR');
@@ -483,11 +560,11 @@ $('lede').textContent = cur < 1
     const r = done[w.semaine];
     if (r) { const rh = Math.max(2, (r / mx) * H);
       s += `<rect x="${(x + 5).toFixed(1)}" y="${(T + H - rh).toFixed(1)}"
-        width="${bw - 10}" height="${rh.toFixed(1)}" rx="2" fill="var(--data)"/>`; }
+        width="${bw - 10}" height="${rh.toFixed(1)}" rx="2" fill="var(--mesure)"/>`; }
     if (w.course) s += `<circle cx="${(x + bw / 2).toFixed(1)}" cy="${T - 9}" r="3.2"
       fill="var(--effort)"/>
       <text class="ax" x="${(x + bw / 2).toFixed(1)}" y="${VB_H - 6}"
-      text-anchor="middle" fill="#8B9396">${RACE[w.course]}</text>`;
+      text-anchor="middle" fill="var(--sur-bitume-faible)">${RACE[w.course]}</text>`;
     if (ici) s += `<path d="M${(x + bw / 2 - 4).toFixed(1)} ${T - 14}h8l-4 6z"
       fill="var(--volt)"/>`;
   });
@@ -503,7 +580,7 @@ $('lede').textContent = cur < 1
       preserveAspectRatio="xMidYMid meet">${s}</svg></div>
     <div class="rlg">
       <span><i style="background:var(--volt)"></i>Semaine ${Math.max(cur, 1)}</span>
-      <span><i style="background:var(--data)"></i>Réalisé</span>
+      <span><i style="background:var(--mesure)"></i>Réalisé</span>
       <span><i style="background:var(--effort);border-radius:50%"></i>Course</span>
       <span>Bloc 1 → 5, du clair au foncé</span></div></div>`;
   const rb = document.querySelector('.ruban');
@@ -538,9 +615,9 @@ $('lede').textContent = cur < 1
   // Repartition du temps par zone de FC : le retour le plus actionnable.
   const Z = s.zones_fc || {};
   const G = [
-    ['Endurance', (Z.z1 || 0) + (Z.z2 || 0), 'var(--data)'],
+    ['Endurance', (Z.z1 || 0) + (Z.z2 || 0), 'var(--mesure)'],
     ['Tempo', Z.z3 || 0, 'var(--acier)'],
-    ['Seuil', Z.z4 || 0, '#B8860B'],
+    ['Seuil', Z.z4 || 0, 'var(--veille)'],
     ['VO2max', (Z.z5 || 0) + (Z.z6 || 0) + (Z.z7 || 0), 'var(--effort)'],
   ];
   const tot = G.reduce((t, g) => t + g[1], 0);
@@ -571,10 +648,10 @@ $('lede').textContent = cur < 1
   }
 
   const N = [
-    [s.km != null ? nf(s.km) : '\u2014', 'km', 'distance'],
-    [s.minutes != null ? s.minutes : '\u2014', 'min', 'durée'],
-    [allure(s.allure_s_km) || '\u2014', '/km', 'allure moyenne'],
-    [s.fc_moy || '\u2014', 'bpm', 'FC moyenne'],
+    [s.km != null ? nf(s.km) : '\u00b7', 'km', 'distance'],
+    [s.minutes != null ? s.minutes : '\u00b7', 'min', 'durée'],
+    [allure(s.allure_s_km) || '\u00b7', '/km', 'allure moyenne'],
+    [s.fc_moy || '\u00b7', 'bpm', 'FC moyenne'],
   ];
   if (s.derive_pct != null) N.push([s.derive_pct, '%', 'dérive cardiaque']);
   if (s.charge) N.push([Math.round(s.charge), '', 'charge']);
@@ -655,8 +732,9 @@ $('quick').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
    D.volume, 'Première séance mardi'],
   ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'Dès la sortie de samedi'],
-  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv, '—'],
-  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, '—'],
+  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv,
+   'Mesurée chaque nuit portée'],
+  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, 'Mesurée chaque nuit portée'],
 ].map(tuile).join('');
 
 /* ================= plan ================= */
@@ -737,67 +815,167 @@ tip.className = 'tip'; document.body.appendChild(tip);
 
 function lineChart(box, series, opt) {
   opt = opt || {};
-  const pts = series.filter(s => s.data.length);
+  const ms = s => Date.parse(s + 'T12:00:00');
+  // Series triees par date. L'ordre du tableau d'entree ne fait plus foi.
+  const pts = series.filter(s => s.data && s.data.length).map(s => ({
+    name:s.name, color:s.color,
+    data:s.data.slice().sort((a, b) => ms(a.d) - ms(b.d)),
+  }));
   if (!pts.length || pts.every(s => s.data.length < 2)) {
     box.innerHTML = '<div class="wait">' + (opt.wait || 'En attente') + '</div>';
     return false;
   }
-  const W = 520, H = 150, L = 40, R = 10, T = 12, B = 25;
+
+  // ---- l'axe X est une echelle de temps, pas un rang ----
+  // Le domaine est l'union des dates de toutes les series. Une periode sans
+  // mesure occupe donc sa vraie largeur, la pente est juste, et deux series de
+  // longueurs differentes se superposent par date et non par position.
+  const dates = [...new Set(pts.flatMap(s => s.data.map(p => p.d)))].sort();
+  const ts = dates.map(ms);
+  const t0 = ts[0], t1 = ts[ts.length - 1], span = (t1 - t0) || 1;
+
+  const W = 520, H = 150, L = 40, R = 10, TP = 12, B = 25;
   const all = pts.flatMap(s => s.data.map(d => d.v));
   let mn = Math.min(...all), mx = Math.max(...all);
   if (opt.zero) mn = Math.min(0, mn);
-  const pad = (mx - mn) * .15 || 1; mn -= pad; mx += pad;
-  const n = Math.max(...pts.map(s => s.data.length));
-  const X = i => L + (n < 2 ? 0 : i / (n - 1)) * (W - L - R);
-  const Y = v => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
+  const bas = mn, pad = (mx - mn) * .15 || 1;
+  mn -= pad; mx += pad;
+  // Une grandeur qui ne peut pas etre negative ne doit pas avoir d'axe negatif.
+  // Sans ca, un graphique de pas affiche une graduation a -478.
+  if (bas >= 0 && mn < 0) mn = 0;
+  const X = t => L + (t - t0) / span * (W - L - R);
+  const Y = v => TP + (1 - (v - mn) / (mx - mn)) * (H - TP - B);
   const dec = opt.dec == null ? 0 : opt.dec;
+
+  // Format des dates : trois crans, du plus large au plus fin. L'etendue donne
+  // le point de depart, mais on descend d'un cran tant que deux graduations
+  // porteraient le meme libelle. Sans ca, deux ans d'historique affichent
+  // 2025, 2025, 2025, 2026, 2026 : cinq reperes pour deux informations.
+  const jours = span / 864e5;
+  const FMT = [
+    d => String(new Date(d + 'T12:00:00').getFullYear()),
+    d => new Date(d + 'T12:00:00')
+      .toLocaleDateString('fr-FR', {month:'short', year:'2-digit'}),
+    dshort,
+  ];
+  let ifmt = jours > 400 ? 0 : jours > 70 ? 1 : 2;
+  let fmt = FMT[ifmt];
+
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.alt || ''}">`;
   for (let g = 0; g <= 3; g++) {
     const v = mn + (mx - mn) * g / 3, y = Y(v);
-    s += `<line x1="${L}" y1="${y.toFixed(1)}" x2="${W - R}" y2="${y.toFixed(1)}"
-      stroke="var(--filet)"/><text class="ax" x="${L - 7}"
+    s += `<line class="grille" x1="${L}" y1="${y.toFixed(1)}" x2="${W - R}"
+      y2="${y.toFixed(1)}"/><text class="ax" x="${L - 7}"
       y="${(y + 3.4).toFixed(1)}" text-anchor="end">${v.toFixed(dec)}</text>`;
   }
   if (opt.target != null && opt.target > mn && opt.target < mx)
     s += `<line x1="${L}" y1="${Y(opt.target).toFixed(1)}" x2="${W - R}"
       y2="${Y(opt.target).toFixed(1)}" stroke="var(--effort)" stroke-width="1.5"
       stroke-dasharray="5 4"/>`;
+
+  // ---- graduations datees ----
+  // On vise cinq reperes, cales sur des dates reellement mesurees, puis on
+  // retire ceux qui se chevaucheraient. La largeur d'une etiquette est estimee
+  // a six unites par caractere : Geist Mono a une chasse fixe de 0.6 em, et le
+  // texte d'axe est a 10 px. Le dernier repere est prioritaire, c'est la date
+  // la plus utile a lire.
+  const proche = t => {
+    let d = dates[0], e = Infinity;
+    ts.forEach((x, k) => { const y = Math.abs(x - t); if (y < e) { e = y; d = dates[k]; } });
+    return d;
+  };
+  const brut = [];
+  for (let i = 0; i < 5; i++) {
+    const d = proche(t0 + span * i / 4);
+    if (!brut.includes(d)) brut.push(d);
+  }
+  const larg = d => fmt(d).length * 6;
+  const ecart = (a, b) => (larg(a) + larg(b)) / 2 + 10;
+  const filtre = () => {
+    const out = [];
+    brut.forEach(d => {
+      const p = out[out.length - 1];
+      if (!p || X(ms(d)) - X(ms(p)) >= ecart(p, d)) out.push(d);
+    });
+    const dern = brut[brut.length - 1];
+    if (out[out.length - 1] !== dern) {
+      while (out.length && X(ms(dern)) - X(ms(out[out.length - 1]))
+             < ecart(out[out.length - 1], dern)) out.pop();
+      out.push(dern);
+    }
+    return out;
+  };
+  let grads = filtre();
+  while (ifmt < 2 && new Set(grads.map(fmt)).size < grads.length) {
+    fmt = FMT[++ifmt];
+    grads = filtre();
+  }
+  grads.forEach((d, i) => {
+    const x = X(ms(d));
+    const anc = i === 0 && x < L + 14 ? 'start'
+      : i === grads.length - 1 && x > W - R - 14 ? 'end' : 'middle';
+    s += `<line class="grad" x1="${x.toFixed(1)}" y1="${Y(mn).toFixed(1)}"
+      x2="${x.toFixed(1)}" y2="${(Y(mn) + 4).toFixed(1)}"/>
+      <text class="ax" x="${x.toFixed(1)}" y="${H - 6}"
+      text-anchor="${anc}">${fmt(d)}</text>`;
+  });
+
+  s += `<line class="curseur" data-cur="1" x1="0" y1="${TP}" x2="0"
+    y2="${Y(mn).toFixed(1)}" style="opacity:0"/>`;
+
   pts.forEach(se => {
-    const d = se.data.map((p, i) => `${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+    const d = se.data.map(p => `${X(ms(p.d)).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
     s += `<polyline points="${d}" fill="none" stroke="${se.color}" stroke-width="2.4"
       stroke-linejoin="round" stroke-linecap="round"/>`;
     const la = se.data[se.data.length - 1];
-    s += `<circle cx="${X(se.data.length - 1).toFixed(1)}" cy="${Y(la.v).toFixed(1)}"
+    s += `<circle cx="${X(ms(la.d)).toFixed(1)}" cy="${Y(la.v).toFixed(1)}"
       r="4.2" fill="${se.color}" stroke="var(--surface)" stroke-width="2.2"/>`;
   });
-  const f = pts[0].data;
-  s += `<text class="ax" x="${L}" y="${H - 6}">${dshort(f[0].d)}</text>
-    <text class="ax" x="${W - R}" y="${H - 6}" text-anchor="end"
-    >${dshort(f[f.length - 1].d)}</text></svg>`;
+  s += '</svg>';
   box.innerHTML = s;
+
+  // ---- survol : on cherche la date la plus proche, pas le rang ----
   const svg = box.querySelector('svg');
+  const cur = svg.querySelector('[data-cur]');
   svg.addEventListener('pointermove', e => {
     const r = svg.getBoundingClientRect(); if (!r.width) return;
-    const j = Math.max(0, Math.min(n - 1, Math.round(
-      ((e.clientX - r.left) / r.width * W - L) / (W - L - R) * (n - 1))));
-    const li = pts.filter(se => se.data[j])
-      .map(se => se.name + ' ' + se.data[j].v.toFixed(dec) + (opt.unit || ''));
-    if (!li.length) return;
-    tip.innerHTML = dshort(pts[0].data[j].d) + '<br>' + li.join('<br>');
-    tip.style.left = (r.left + window.scrollX + (X(j) / W) * r.width) + 'px';
-    tip.style.top = (r.top + window.scrollY) + 'px';
+    const vx = (e.clientX - r.left) / r.width * W;
+    const d = proche(t0 + (vx - L) / (W - L - R) * span);
+    // Une serie n'apparait que si elle a bien une valeur ce jour-la.
+    const li = pts.map(se => {
+      const p = se.data.find(q => q.d === d);
+      return p ? se.name + ' ' + p.v.toFixed(dec) + (opt.unit || '') : null;
+    }).filter(Boolean);
+    if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0; return; }
+    const x = X(ms(d));
+    cur.setAttribute('x1', x.toFixed(1)); cur.setAttribute('x2', x.toFixed(1));
+    cur.style.opacity = 1;
+    // L'infobulle nomme toujours le jour, meme quand l'axe ne montre
+    // que des annees : c'est la valeur d'un point qu'on lit, pas une periode.
+    tip.innerHTML = (jours > 400 ? dshort(d) + ' '
+      + new Date(d + 'T12:00:00').getFullYear() : dshort(d))
+      + '<br>' + li.join('<br>');
+    // Coordonnees d'ecran : l'infobulle est en position fixed, donc rien a
+    // ajouter pour le defilement, et rien a corriger dans un conteneur qui defile.
+    const px = r.left + (x / W) * r.width;
+    tip.style.left = Math.round(Math.min(Math.max(px, 62),
+      document.documentElement.clientWidth - 62)) + 'px';
+    tip.style.top = Math.round(r.top) + 'px';
     tip.style.opacity = 1;
   });
-  svg.addEventListener('pointerleave', () => { tip.style.opacity = 0; });
+  svg.addEventListener('pointerleave', () => {
+    tip.style.opacity = 0; cur.style.opacity = 0;
+  });
   return true;
 }
 
 $('kpis').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
    D.volume, 'Première séance mardi 8 septembre'],
-  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv, '—'],
-  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, '—'],
-  ['Poids', A.poids, 'kg', D.poids, '—'],
+  ['Variabilité cardiaque', A.hrv, 'ms', D.hrv,
+   'Mesurée chaque nuit portée'],
+  ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, 'Mesurée chaque nuit portée'],
+  ['Poids', A.poids, 'kg', D.poids, 'À chaque pesée'],
   ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'À partir du 12 septembre'],
   ['VO2max', A.vo2max, '', D.vo2max, 'Après 2 à 3 courses'],
   ['Forme de fond', A.ctl, '', D.ctl, 'Après environ 4 semaines'],
@@ -812,53 +990,53 @@ $('kpis').innerHTML = [
   const sk = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
   const CH = [
     {t:'Volume hebdomadaire', s:'Réalisé contre planifié, en kilomètres',
-     k:[['Réalisé', 'var(--data)'], ['Planifié', 'var(--acier)']],
+     k:[['Réalisé', 'var(--mesure)'], ['Planifié', 'var(--acier)']],
      draw(b) {
        if (!sk.length) { b.innerHTML = '<div class="wait">Se remplit dès la première '
          + 'séance. Le plan démarre lundi 7 septembre.</div>'; return false; }
        return lineChart(b, [
-         {name:'Réalisé', color:'var(--data)',
+         {name:'Réalisé', color:'var(--mesure)',
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi, v:M.semaines[k].km}))},
          {name:'Planifié', color:'var(--acier)',
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi,
             v:PLAN.semaines[k - 1].volume_km}))}], {unit:' km', zero:true});
      }},
     {t:'Forme et fatigue', s:'CTL la forme de fond, ATL la fatigue récente',
-     k:[['Forme', 'var(--data)'], ['Fatigue', 'var(--effort)']],
-     draw:b => lineChart(b, [{name:'Forme', color:'var(--data)', data:g('ctl')},
+     k:[['Forme', 'var(--mesure)'], ['Fatigue', 'var(--effort)']],
+     draw:b => lineChart(b, [{name:'Forme', color:'var(--mesure)', data:g('ctl')},
        {name:'Fatigue', color:'var(--effort)', data:g('atl')}],
        {wait:'Se construit sur environ 4 semaines de séances. La forme monte '
         + 'lentement, la fatigue vite : leur écart dit si la charge est tenable.'})},
     {t:'FC de repos', s:'Elle baisse quand le cœur se renforce',
-     draw:b => lineChart(b, [{name:'FC repos', color:'var(--data)', data:g('fc_repos')}],
+     draw:b => lineChart(b, [{name:'FC repos', color:'var(--mesure)', data:g('fc_repos')}],
        {unit:' bpm', wait:'Trois nuits mesurées. La courbe devient lisible vers '
         + '3 semaines de données.'})},
     {t:'Variabilité cardiaque', s:'VFC rMSSD, indicateur de récupération',
-     draw:b => lineChart(b, [{name:'VFC', color:'var(--data)', data:g('hrv')}],
+     draw:b => lineChart(b, [{name:'VFC', color:'var(--mesure)', data:g('hrv')}],
        {unit:' ms', wait:'Ce qui compte n’est pas la valeur brute mais sa moyenne '
         + 'glissante sur 7 jours. Encore trop peu de nuits.'})},
     {t:'Sommeil', s:'Durée par nuit, en heures',
-     draw:b => lineChart(b, [{name:'Sommeil', color:'var(--data)', data:g('sommeil_h')}],
+     draw:b => lineChart(b, [{name:'Sommeil', color:'var(--mesure)', data:g('sommeil_h')}],
        {unit:' h', dec:1, wait:'La courbe apparaît après quelques nuits '
         + 'synchronisées.'})},
     {t:'Poids', s:'Chaque kilo vaut environ 2 à 3 minutes sur marathon',
-     draw:b => lineChart(b, [{name:'Poids', color:'var(--data)', data:g('poids')}],
+     draw:b => lineChart(b, [{name:'Poids', color:'var(--mesure)', data:g('poids')}],
        {unit:' kg', dec:1, wait:'Une seule pesée. Monte sur la balance régulièrement '
         + 'pour voir la tendance.'})},
     {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur sorties longues',
      k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']],
-     draw:b => lineChart(b, [{name:'Dérive', color:'var(--data)',
+     draw:b => lineChart(b, [{name:'Dérive', color:'var(--mesure)',
        data:M.derives.map(x => ({d:x.date, v:x.derive_pct}))}],
        {unit:' %', dec:1, target:5, wait:'L’indicateur le plus parlant de la '
         + 'préparation. Il se calcule dès ta première sortie longue, '
         + 'samedi 12 septembre.'})},
     {t:'Efficacité aérobie', s:'Vitesse rapportée au coût cardiaque',
-     draw:b => lineChart(b, [{name:'Indice', color:'var(--data)',
+     draw:b => lineChart(b, [{name:'Indice', color:'var(--mesure)',
        data:M.efficacite.map(x => ({d:x.date, v:x.valeur}))}],
        {dec:2, wait:'Se calcule sur chaque course avec cardio. Trois à quatre '
         + 'séances suffisent pour voir une tendance.'})},
     {t:'VO2max', s:'Estimation Garmin, mise à jour à chaque course',
-     draw:b => lineChart(b, [{name:'VO2max', color:'var(--data)', data:g('vo2max')}],
+     draw:b => lineChart(b, [{name:'VO2max', color:'var(--mesure)', data:g('vo2max')}],
        {wait:'Garmin a besoin de 2 à 3 courses avec cardio et GPS avant de produire '
         + 'une première estimation.'})},
   ];
@@ -947,7 +1125,7 @@ $('kpis').innerHTML = [
       + '<div class="cb" id="sc' + i + '"></div></div>').join('');
     S.champs.forEach((c, i) => {
       const data = agrege(c.cle, mode);
-      lineChart($('sc' + i), [{name:c.nom, color:'var(--data)', data:data}],
+      lineChart($('sc' + i), [{name:c.nom, color:'var(--mesure)', data:data}],
         {unit:' ' + c.unite.replace('/100', ''), dec:c.dec,
          target:c.cle === 'fatigue_indice' ? 50 : null,
          wait:ATTENTE[mode]});
@@ -1061,10 +1239,13 @@ $('vrows').innerHTML = [
     ['FC de repos', 'Adaptation cardiaque', !!cv.fc_repos],
     ['Poids', 'Suivi de tendance', !!cv.poids],
     ['Sommeil', 'Récupération', !!cv.sommeil_score],
-    ['VO2max', 'Projection de chrono', !!cv.vo2max],
-    ['Training Readiness', 'Décision du jour', !!cv.readiness],
-    ['SpO2 et respiration', 'Signal de surcharge', !!cv.spo2],
+    ['VO2max', 'Calculé par Garmin dès la 2e course', !!cv.vo2max],
+    ['SpO2 nocturne', 'Signal de surcharge', !!cv.spo2],
+    ['Masse grasse', 'Nécessite une balance connectée', !!cv.masse_grasse],
     ['Effort perçu et douleur', 'Journal, saisie manuelle', !!(M.journal || []).length],
+    ['Training Readiness', 'Non transmis par Garmin à des tiers', null],
+    ['Fréquence respiratoire', 'Hors des champs poussés par Garmin', null],
+    ['FC de sommeil', 'Hors des champs poussés par Garmin', null],
     ['Body Battery', 'Non exposé par l’API Intervals.icu', null],
   ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
     <div class="li-s">${r[1]}</div></div>

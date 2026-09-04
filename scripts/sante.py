@@ -22,8 +22,11 @@ CHAMPS = [
     ("hrv", "Variabilité cardiaque", "ms", 0),
     ("poids", "Poids", "kg", 1),
     ("spo2", "SpO2", "%", 0),
-    ("respiration", "Respiration", "/min", 1),
 ]
+# Pas de frequence respiratoire ni de FC de sommeil : Garmin ne les pousse pas
+# vers Intervals.icu. La liste qu'il envoie vraiment est icu_garmin_wellness_keys
+# sur le profil, et ces deux champs n'y sont pas. Les afficher serait promettre
+# une courbe qui ne viendra jamais.
 
 JOURS_REFERENCE = 28   # fenetre de la moyenne de reference
 JOURS_MINIMUM = 14     # en dessous, on ne dit rien plutot que n'importe quoi

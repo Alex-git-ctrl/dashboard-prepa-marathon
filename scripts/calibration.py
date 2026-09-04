@@ -80,7 +80,7 @@ def allures(v_max):
         rapide = 1000 / (v_max * haut) * 60
         out.append({"cle": cle, "nom": nom, "usage": usage,
                     "lent_s_km": round(lent), "rapide_s_km": round(rapide),
-                    "texte": f"{mmss(rapide)} – {mmss(lent)}"})
+                    "texte": f"{mmss(rapide)} à {mmss(lent)}"})
     return out
 
 
