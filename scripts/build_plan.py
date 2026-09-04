@@ -6,7 +6,7 @@ Contraintes reelles d'Alex :
   - sortie longue le samedi
   - depart : 12 km/sem, plus longue sortie 6 km, 10 km de reference en 48 min
 
-Courses : 10 km le jeudi 24/09/2026 (S3), semi le 25/10/2026 (S7),
+Courses : 10 km le samedi 26/09/2026 (S3), semi le 25/10/2026 (S7),
 Zurich Marato de Barcelona le 14/03/2027 (S27).
 """
 
@@ -19,9 +19,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 COURSES = [
     {"cle": "dix", "nom": "10 km", "lieu": "course locale",
-     "date": "2026-09-24", "jour": "jeudi", "semaine": 3, "distance_km": 10,
+     "date": "2026-09-26", "jour": "samedi", "semaine": 3, "distance_km": 10,
      "cible": "46 a 48 min", "allure": "4:36 a 4:48 /km",
-     "role": "Premiere calibration reelle. Negative split, pas de depart rapide."},
+     "role": "Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."},
     {"cle": "semi", "nom": "Semi-marathon", "lieu": "Paris",
      "date": "2026-10-25", "jour": "dimanche", "semaine": 7, "distance_km": 21.0975,
      "cible": "1h45 a 1h52", "allure": "5:00 a 5:19 /km",
@@ -39,7 +39,7 @@ COURSES = [
 WEEKS = [
     (1,  8,   35, 35, "base",      "Passage a 3 seances. Tout en endurance fondamentale."),
     (2,  10,  40, 40, "base",      "Premiere sortie a 10 km. Aucune acceleration."),
-    (3,  10,  30, 0,  "COURSE",    "10 KM jeudi 24/09. Mardi allege, sortie longue calme samedi."),
+    (3,  10,  30, 30, "COURSE",    "10 KM samedi 26/09. La course tient lieu de sortie longue."),
     (4,  12,  40, 40, "base",      "Reprise apres la course. Zones recalibrees sur le chrono."),
     (5,  15,  45, 45, "specifique","Seance 2 : 3 x 6 min a allure semi, 2 min de trot entre."),
     (6,  18,  45, 40, "specifique","Plus longue sortie avant le semi, dont 5 km a allure semi."),
@@ -91,10 +91,9 @@ def main():
         lundi = S1 + timedelta(weeks=n - 1)
         km_sem = round((m1 + m2) / EF_PACE, 1)
         course = par_semaine.get(n)
-        # Une semaine de course : la distance de course s'ajoute au volume,
-        # sauf pour le semi et le marathon ou elle EST la sortie longue.
-        extra = course["distance_km"] if (course and course["cle"] == "dix") else 0
-        total = round(km_sem + longue + extra, 1)
+        # Sur une semaine de course, l'epreuve tient lieu de sortie longue :
+        # la distance est deja comptee dans sortie_longue_km.
+        total = round(km_sem + longue, 1)
         nom, desc = bloc_of(n)
         weeks.append({
             "semaine": n,

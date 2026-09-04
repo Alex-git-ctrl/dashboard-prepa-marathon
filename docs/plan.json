@@ -13,13 +13,13 @@
       "cle": "dix",
       "nom": "10 km",
       "lieu": "course locale",
-      "date": "2026-09-24",
-      "jour": "jeudi",
+      "date": "2026-09-26",
+      "jour": "samedi",
       "semaine": 3,
       "distance_km": 10,
       "cible": "46 a 48 min",
       "allure": "4:36 a 4:48 /km",
-      "role": "Premiere calibration reelle. Negative split, pas de depart rapide."
+      "role": "Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."
     },
     {
       "cle": "semi",
@@ -116,10 +116,10 @@
       "type": "COURSE",
       "sortie_longue_km": 10,
       "seance1_min": 30,
-      "seance2_min": 0,
-      "volume_km": 24.9,
+      "seance2_min": 30,
+      "volume_km": 19.8,
       "course": "dix",
-      "note": "10 KM jeudi 24/09. Mardi allege, sortie longue calme samedi."
+      "note": "10 KM samedi 26/09. La course tient lieu de sortie longue."
     },
     {
       "semaine": 4,
