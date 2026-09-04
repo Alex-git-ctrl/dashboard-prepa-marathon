@@ -117,7 +117,7 @@ def main():
         print(f"Plus ancienne : {oldest[:10]}")
         with open(os.path.join(RAW, "activities.json"), "w", encoding="utf-8") as fh:
             json.dump(activities, fh, indent=2, ensure_ascii=False)
-        print(f"-> sauvegarde dans data/raw/activities.json")
+        print("-> sauvegarde dans data/raw/activities.json")
 
     # --- 3. Champs presents sur une activite ---
     sample = runs[0] if runs else (activities[0] if activities else None)

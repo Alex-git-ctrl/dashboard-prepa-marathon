@@ -19,8 +19,13 @@ import calibration
 
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-S1 = date(2026, 9, 7)      # lundi de la semaine 1 du plan
 OLDEST = date(2026, 3, 1)
+
+# La semaine 1 vient du plan : une seule source de verite, sinon les deux
+# fichiers derivent le jour ou la date de depart change.
+with open(os.path.join(ROOT, "docs", "plan.json"), encoding="utf-8") as _fh:
+    PLAN = json.load(_fh)
+S1 = date.fromisoformat(PLAN["semaines"][0]["lundi"])
 
 # Dynamique de course : ces streams viennent de la ceinture HRM-Pro Plus.
 DYN = ["cadence", "stride_length", "ground_time", "vertical_oscillation",
@@ -271,12 +276,10 @@ def main():
     metrics["journal"] = journal[-40:]
 
     # ---- Calibration : zones et projections issues des courses reelles ----
-    with open(os.path.join(ROOT, "docs", "plan.json"), encoding="utf-8") as fh:
-        plan_cal = json.load(fh)
-    metrics["calibration"] = calibration.calcule(seances, plan_cal["courses"])
+    metrics["calibration"] = calibration.calcule(seances, PLAN["courses"])
 
     # ---- Alertes ----
-    plan = plan_cal
+    plan = PLAN
     sem_courante = (today - S1).days // 7 + 1
     metrics["alertes"] = alerts.compute(metrics, plan, sem_courante)
 

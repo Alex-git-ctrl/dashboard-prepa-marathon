@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "maj": "2026-09-04T09:36:16",
+=======
+  "maj": "2026-09-04T17:50:01",
+>>>>>>> 83959e8 (Corrige l'affichage mobile et trois defauts trouves a l'audit)
   "nb_activites": 0,
   "semaines": {},
   "seances": [],

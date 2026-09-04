@@ -12,7 +12,7 @@ Toutes les regles renvoient None tant qu'il n'y a pas assez de donnees.
 Mieux vaut ne rien dire que dire n'importe quoi sur trois mesures.
 """
 
-from statistics import mean, pstdev
+from statistics import mean
 
 NIVEAUX = {"critique": 3, "attention": 2, "info": 1}
 
