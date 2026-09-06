@@ -414,6 +414,12 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
    information. Elle s'efface sans disparaitre. */
 .gz .zv.vide{color:var(--acier)}
 
+/* Legende sous un graphique, hors du trace. */
+.gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
+  font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
+.gc-lg span{display:flex;align-items:center;gap:var(--s2)}
+.gc-lg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
+
 /* ---------- selecteur de seance ---------- */
 #sea-choix select{width:100%;appearance:none;font-family:inherit;
   font-size:var(--t4);font-weight:500;color:var(--encre);
@@ -534,6 +540,9 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
     <p class="lede">Ce qui rend l'entraînement possible. Un plan casse presque
       toujours sur le sommeil et la récupération, rarement sur les séances.</p>
     <div class="sec"><h2>Aujourd'hui</h2><div class="grid" id="sante-tuiles"></div></div>
+    <div class="sec"><h2>La nuit</h2>
+      <div class="gc" id="nuits"></div>
+      <p class="note" id="nuits-n"></p></div>
     <div class="sec"><h2>Évolution</h2>
       <div class="seg" id="sante-seg" role="group"
         aria-label="Période d'agrégation"></div>
@@ -1691,6 +1700,215 @@ $('kpis').innerHTML = [
   });
 })();
 
+/* ---------- la nuit ----------
+   Garmin ne transmet ni Body Battery ni les phases de sommeil : ni l'un ni
+   l'autre n'existe dans le schema wellness d'Intervals.icu, et le champ
+   `stress` dont Body Battery derive n'est pas dans la liste que Garmin
+   pousse. On construit donc la meilleure lecture possible avec ce qui arrive
+   vraiment : la duree, le score, et les deux mesures prises pendant cette
+   nuit-la, la variabilite cardiaque et la fréquence cardiaque de repos.
+   C'est ce trio qui dit si la nuit a servi a quelque chose. */
+
+const CIBLE_SOMMEIL = 7;      // heures, sous lesquelles la progression ralentit
+const NUITS_VUE = 21;         // trois semaines, assez pour voir un rythme
+
+/** Couleur d'une nuit selon son score, sur les etats deja definis. */
+function couleurNuit(score) {
+  if (score == null) return 'var(--acier)';
+  return score >= 70 ? 'var(--ok)' : score >= 50 ? 'var(--veille)' : 'var(--alerte)';
+}
+
+function nuits(box) {
+  const J = ((M.sante || {}).jours || [])
+    .filter(j => j.sommeil_h != null).slice(-NUITS_VUE);
+  if (J.length < 2) {
+    box.innerHTML = '<div class="wait">Il faut au moins deux nuits mesurées '
+      + 'pour tracer cette vue. Porte la montre la nuit et elle se remplit '
+      + 'toute seule.</div>';
+    return false;
+  }
+
+  const PAN = [
+    {cle:'sommeil_h', nom:'Durée de sommeil', barres:true, h:96,
+     fmt:v => heuresMin(v), cible:CIBLE_SOMMEIL},
+    {cle:'hrv', nom:'Variabilité cardiaque au réveil', col:'var(--m-allure)',
+     h:76, fmt:v => Math.round(v) + ' ms'},
+    {cle:'fc_repos', nom:'Fréquence cardiaque de repos', col:'var(--m-fc)',
+     h:76, fmt:v => Math.round(v) + ' bpm', inv:true},
+  ].filter(p => J.some(j => j[p.cle] != null));
+
+  const W = 520, L = 44, R = 12, ENTETE = 18, ECART = 22, AX = 26;
+  const H = PAN.reduce((t, p) => t + p.h + ENTETE, 0)
+    + ECART * (PAN.length - 1) + AX;
+  const n = J.length;
+  const pas = (W - L - R) / n;
+  const cx = i => L + pas * (i + .5);
+
+  let y = 0;
+  PAN.forEach(p => {
+    p.yEnt = y; p.y0 = y + ENTETE; y += ENTETE + p.h + ECART;
+    const vals = J.map(j => j[p.cle]).filter(v => v != null);
+    if (p.barres) { p.mn = 0; p.mx = Math.max(9, Math.max(...vals) + .5); }
+    else {
+      const mn = Math.min(...vals), mx = Math.max(...vals);
+      const pad = (mx - mn) * .18 || 2;
+      p.mn = Math.max(0, mn - pad); p.mx = mx + pad;
+    }
+    p.moy = vals.reduce((a, b) => a + b, 0) / vals.length;
+    // La FC de repos se lit a l'envers : plus bas vaut mieux, donc en haut.
+    p.Y = v => p.y0 + (p.inv ? (v - p.mn) / (p.mx - p.mn)
+      : 1 - (v - p.mn) / (p.mx - p.mn)) * p.h;
+  });
+
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Durée de `
+    + `sommeil, variabilité cardiaque et fréquence cardiaque de repos par nuit">`;
+
+  PAN.forEach(p => {
+    const bas = p.y0 + p.h;
+    g += `<text class="gl" x="${L}" y="${p.yEnt + 11}"
+      fill="${p.col || 'var(--encre)'}">${p.nom}</text>
+      <text class="gv" x="${W - R}" y="${p.yEnt + 11}" text-anchor="end"
+      >moyenne ${p.fmt(p.moy)}</text>`;
+    g += `<line class="gg" x1="${L}" y1="${p.y0}" x2="${W - R}" y2="${p.y0}"/>`
+       + `<line class="gg" x1="${L}" y1="${bas}" x2="${W - R}" y2="${bas}"/>`;
+
+    if (p.barres) {
+      // Ligne de reference a 7 h : le seuil sous lequel la recuperation
+      // decroche, quelle que soit la qualite des seances.
+      const yc = p.Y(p.cible);
+      g += `<line x1="${L}" y1="${yc.toFixed(1)}" x2="${W - R}"
+        y2="${yc.toFixed(1)}" stroke="var(--effort)" stroke-width="1.5"
+        stroke-dasharray="5 4"/>
+        <text class="gv" x="${L + 4}" y="${(yc - 4).toFixed(1)}"
+        fill="var(--effort)">${p.cible} h</text>`;
+      const larg = Math.max(4, Math.min(22, pas - 4));
+      J.forEach((j, i) => {
+        const v = j[p.cle];
+        if (v == null) return;
+        const hb = Math.max(2, bas - p.Y(v));
+        g += `<rect x="${(cx(i) - larg / 2).toFixed(1)}"
+          y="${p.Y(v).toFixed(1)}" width="${larg.toFixed(1)}"
+          height="${hb.toFixed(1)}" rx="2"
+          fill="${couleurNuit(j.sommeil_score)}"/>`;
+      });
+    } else {
+      const segs = []; let cur = [];
+      J.forEach((j, i) => {
+        const v = j[p.cle];
+        if (v == null) { if (cur.length > 1) segs.push(cur); cur = []; return; }
+        cur.push([cx(i), p.Y(v)]);
+      });
+      if (cur.length > 1) segs.push(cur);
+      segs.forEach(sg => {
+        const pts = sg.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
+        g += `<path d="M${sg[0][0].toFixed(1)},${bas} L${pts.replace(/ /g, ' L')}`
+          + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" fill="${p.col}"
+            fill-opacity=".13" stroke="none"/>`
+          + `<polyline points="${pts}" fill="none" stroke="${p.col}"
+            stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>`;
+        sg.forEach(q => { g += `<circle cx="${q[0].toFixed(1)}"
+          cy="${q[1].toFixed(1)}" r="2.6" fill="${p.col}"/>`; });
+      });
+    }
+
+    const haut = p.inv ? p.mn : p.mx, low = p.inv ? p.mx : p.mn;
+    g += `<text class="gv" x="${L - 6}" y="${p.y0 + 8}" text-anchor="end"
+      >${p.fmt(haut).replace(/ (ms|bpm)$/, '')}</text>
+      <text class="gv" x="${L - 6}" y="${bas - 1}" text-anchor="end"
+      >${p.fmt(low).replace(/ (ms|bpm)$/, '')}</text>`;
+  });
+
+  // Dates : une sur deux au-dela de dix nuits, pour ne pas empiler.
+  const bas = H - AX;
+  const saut = n > 14 ? 3 : n > 8 ? 2 : 1;
+  J.forEach((j, i) => {
+    if (i % saut && i !== n - 1) return;
+    g += `<text class="gv" x="${cx(i).toFixed(1)}" y="${bas + 16}"
+      text-anchor="middle">${dshort(j.date)}</text>`;
+  });
+  g += `<line class="gx" data-cur x1="0" y1="0" x2="0" y2="${bas}"
+    style="opacity:0"/></svg>`;
+  box.innerHTML = g;
+
+  const svg = box.querySelector('svg'), cur = svg.querySelector('[data-cur]');
+  svg.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect(); if (!r.width) return;
+    const i = Math.max(0, Math.min(n - 1,
+      Math.floor(((e.clientX - r.left) / r.width * W - L) / pas)));
+    const j = J[i];
+    const li = PAN.filter(p => j[p.cle] != null)
+      .map(p => p.nom.split(' ')[0] + ' ' + p.fmt(j[p.cle]));
+    if (j.sommeil_score != null) li.push('Score ' + Math.round(j.sommeil_score));
+    cur.setAttribute('x1', cx(i).toFixed(1));
+    cur.setAttribute('x2', cx(i).toFixed(1));
+    cur.style.opacity = 1;
+    tip.innerHTML = dlong(j.date) + '<br>' + li.join('<br>');
+    tip.style.left = Math.round(Math.min(Math.max(
+      r.left + cx(i) / W * r.width, 82),
+      document.documentElement.clientWidth - 82)) + 'px';
+    tip.style.top = Math.round(r.top + r.height * .45) + 'px';
+    tip.style.opacity = 1;
+  });
+  svg.addEventListener('pointerleave', () => {
+    tip.style.opacity = 0; cur.style.opacity = 0;
+  });
+
+  box.insertAdjacentHTML('beforeend', '<div class="gc-lg">'
+    + [['Score 70 et plus', 'var(--ok)'], ['50 à 69', 'var(--veille)'],
+       ['Sous 50', 'var(--alerte)']].map(([t, c]) =>
+      '<span><i style="background:' + c + '"></i>' + t + '</span>').join('')
+    + '</div>');
+  return true;
+}
+
+/** Heures et minutes, jamais 5,8 h : personne ne dort en decimales. */
+function heuresMin(h) {
+  const m = Math.round(h * 60);
+  return Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0');
+}
+
+/** Ce que les nuits disent, quand il y a assez de nuits pour le dire. */
+function lectureNuits() {
+  const J = ((M.sante || {}).jours || []).filter(j => j.sommeil_h != null);
+  // Sous quatre nuits on ne compare rien, mais on dit quand meme ou on en est
+  // et ce qu'il manque : une note vide n'apprend rien.
+  if (J.length < 4) {
+    const d = J.reduce((t, j) => t + (CIBLE_SOMMEIL - j.sommeil_h), 0);
+    return J.length + (J.length > 1 ? ' nuits mesurées' : ' nuit mesurée')
+      + ', ' + (d > 0 ? '<b>' + heuresMin(d) + ' sous la cible</b> de '
+        + CIBLE_SOMMEIL + ' heures' : '<b>' + heuresMin(-d)
+        + ' au-dessus de la cible</b>')
+      + '. À partir de quatre nuits, cette note compare ta récupération '
+      + 'après une nuit courte et après une nuit pleine.';
+  }
+  const courtes = J.filter(j => j.sommeil_h < CIBLE_SOMMEIL);
+  const longues = J.filter(j => j.sommeil_h >= CIBLE_SOMMEIL);
+  const moy = (a, k) => {
+    const v = a.map(x => x[k]).filter(x => x != null);
+    return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null;
+  };
+  const dette = J.reduce((t, j) => t + (CIBLE_SOMMEIL - j.sommeil_h), 0);
+  let out = 'Sur ' + J.length + ' nuits mesurées, ' + courtes.length
+    + (courtes.length > 1 ? ' sont' : ' est') + ' sous ' + CIBLE_SOMMEIL
+    + ' heures. Le cumul par rapport à cette cible est de '
+    + (dette >= 0 ? '<b>' + heuresMin(Math.abs(dette)) + ' de dette</b>'
+       : '<b>' + heuresMin(Math.abs(dette)) + ' d’avance</b>') + '.';
+  // La comparaison ne vaut que si les deux groupes existent vraiment.
+  if (courtes.length >= 2 && longues.length >= 2) {
+    const hc = moy(courtes, 'hrv'), hl = moy(longues, 'hrv');
+    const fc = moy(courtes, 'fc_repos'), fl = moy(longues, 'fc_repos');
+    if (hc && hl) out += ' Après une nuit courte ta variabilité tourne autour de '
+      + Math.round(hc) + ' ms, contre ' + Math.round(hl)
+      + ' ms après une nuit pleine.';
+    if (fc && fl) out += ' Ta FC de repos suit : ' + Math.round(fc)
+      + ' bpm contre ' + Math.round(fl) + ' bpm.';
+  } else {
+    out += ' Il faut au moins deux nuits de chaque côté des '
+      + CIBLE_SOMMEIL + ' heures pour comparer les deux régimes.';
+  }
+  return out;
+}
+
 /* ================= sante ================= */
 (function () {
   const S = M.sante;
@@ -1710,11 +1928,19 @@ $('kpis').innerHTML = [
     const dt = S.actuel[cle + '_date'];
     if (v == null) return '<div class="tile"><div class="l">' + nom + '</div>'
       + '<div class="w">' + att + '</div></div>';
+    // Une durée de sommeil se dit en heures et minutes. Personne ne dort 4,2 h.
+    if (cle === 'sommeil_h') return '<div class="tile"><div class="l">' + nom
+      + '</div><div class="v">' + heuresMin(v).replace(' h ', '<em>h</em>')
+      + '<em>min</em></div><div class="d">' + (dt ? dshort(dt) : '')
+      + '</div></div>';
     return '<div class="tile"><div class="l">' + nom + '</div>'
       + '<div class="v">' + nf(dec ? Number(v.toFixed(dec)) : Math.round(v))
       + '<em>' + u + '</em></div>'
       + '<div class="d">' + (dt ? dshort(dt) : '') + '</div></div>';
   }).join('');
+
+  if (nuits($('nuits'))) $('nuits-n').innerHTML = lectureNuits();
+  else $('nuits-n').textContent = '';
 
   /* --- agregation par periode --- */
   const PERIODES = [['jour', 'Jour', 30], ['semaine', 'Semaine', 12],
@@ -1854,9 +2080,10 @@ $('vrows').innerHTML = [
     ['Masse grasse', 'Nécessite une balance connectée', !!cv.masse_grasse],
     ['Effort perçu et douleur', 'Journal, saisie manuelle', !!(M.journal || []).length],
     ['Training Readiness', 'Non transmis par Garmin à des tiers', null],
+    ['Body Battery', 'Absent du schéma, et le stress dont il dérive aussi', null],
+    ['Phases du sommeil', 'Seules la durée et le score sont transmis', null],
     ['Fréquence respiratoire', 'Hors des champs poussés par Garmin', null],
     ['FC de sommeil', 'Hors des champs poussés par Garmin', null],
-    ['Body Battery', 'Non exposé par l’API Intervals.icu', null],
   ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
     <div class="li-s">${r[1]}</div></div>
     <span class="pill ${r[2] ? 'ok' : 'no'}">${r[2] === null ? 'Indisponible'
