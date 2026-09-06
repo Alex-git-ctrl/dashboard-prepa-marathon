@@ -5,31 +5,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..700&family=Geist+Mono:wght@400;500;600&display=swap">
 <style>
 /* ============================================================
-   Bitume et haute visibilite.
+   LE RELEVE. Bitume et haute visibilite.
 
-   ROLES DE COULEUR. Deux teintes portent du sens, tout le reste est gris.
-     --volt    : ou tu en es maintenant. Nulle part ailleurs.
-     --effort  : ce qui demande une decision, en trait ou en aplat graphique.
-   Trois roles derives, parce que le sens l'exige et pas par gout :
-     --mesure  : la donnee realisee, opposee au planifie. Ruban, courbes, barres.
-     --ok / --veille / --alerte : les trois etats de surveillance, en versions
-       assombries pour rester lisibles en texte sur fond clair.
-   --focus est un etat d'interface, jamais une donnee : il ne partage sa teinte
-   avec rien. C'est la separation que l'ancien fichier n'avait pas, ou le meme
-   bleu servait au realise et a l'anneau de focus clavier.
+   LA STRUCTURE. La carte n'est plus le contenant par defaut. Avant, tuiles,
+   listes, graphiques, cartes et alertes etaient le meme objet : fond blanc,
+   bordure grise, meme rayon. Quand tout est une carte, la carte ne dit plus
+   rien, et 80 % de la page ressemblait a n'importe quel tableau de bord.
+   Le contenu se pose maintenant directement sur la craie, organise par des
+   filets, des chiffres suspendus dans la marge et un rythme vertical. Les
+   SEULS objets fermes sont les deux blocs bitume, et les deux controles qui
+   doivent avoir l'air d'etre pressables : le selecteur de periode et le
+   selecteur de seance.
 
    LE GESTE. Le fond bitume plein ne dit qu'une chose : le present. Deux
    endroits, jamais sur le meme ecran, le hero d'Aujourd'hui et la semaine en
-   cours du Plan. Tout ce qui etait noir sans etre le present (blocs de code,
-   infobulles, ligne du jour) passe en gris pour ne pas lui voler sa valeur.
+   cours du Plan. En clair il est le plus sombre de la page, en sombre aussi :
+   c'est la meme regle dans les deux themes, il gagne juste un filet en mode
+   sombre ou l'ecart de luminance ne suffit plus.
 
-   LES ECHELLES. Six pas de typo, six pas d'espacement, trois rayons. Le mobile
-   ne redeclare pas les composants un par un : il deplace les tokens, et tout
-   suit. Une valeur hors echelle reste possible, mais porte sa raison en
-   commentaire.
+   LES COULEURS. Deux teintes portent du sens, --volt pour l'instant present
+   et --effort pour ce qui demande une decision. Trois roles derives, parce
+   que le sens l'exige : --mesure pour la donnee realisee, et --ok / --veille
+   / --alerte pour les trois etats de surveillance. --focus est un etat
+   d'interface et ne partage sa teinte avec rien. Les teintes de metrique et
+   la rampe des zones ne servent QUE dans les graphiques de seance.
+
+   LES ECHELLES. Six pas de typo, six d'espacement, trois rayons. Le mobile
+   deplace les tokens au lieu de redeclarer les composants.
+
+   LES DEUX THEMES. La palette claire complete est sur :root nu. Le bloc
+   prefers-color-scheme ne redefinit QUE des tokens, garde par
+   :root:not([data-theme="light"]) pour qu'un choix explicite gagne. Aucune
+   couleur n'a sa seule definition dans un bloc de theme.
    ============================================================ */
 :root{
-  color-scheme:light;
+  color-scheme:light dark;
 
   /* --- neutres --- */
   --bitume:#16191C;
@@ -37,12 +47,22 @@
   --surface:#FFFFFF;
   --encre:#1B1F22;
   --sourd:#585F63;
-  --acier:#6B7378;
-  --filet:#DFE1DD;
-  --creux:#E9EBE7;
+  /* Ces trois valeurs sont calculees, pas choisies : --acier atteint 4,60
+     sur la craie, le minimum pour du petit texte, et --filet monte a 1,40
+     parce qu'en direction A c'est lui qui porte la structure a la place des
+     cartes. A 1,18 il disparaissait. */
+  --acier:#676F74;
+  --filet:#CED0CC;
+  --creux:#E5E7E3;
   /* Deux gris pour le texte pose sur le bitume, la ou --sourd disparaitrait. */
   --sur-bitume:#9DA5A8;
   --sur-bitume-faible:#7E868A;
+  /* Filet du bloc bitume. En clair, l'ecart de luminance suffit largement :
+     15,85 contre le fond, le filet est inutile. En sombre il n'y a plus que
+     1,18 d'ecart, et le remonter obligerait a eclaircir le fond jusqu'au
+     gris. C'est donc le filet qui porte la separation, a 1,55 contre le
+     fond, ce qui se voit. */
+  --bord-present:transparent;
 
   /* --- porteuses de sens --- */
   --volt:#D6FF3E;
@@ -57,8 +77,25 @@
   /* --- interface, sans rapport avec la donnee --- */
   --focus:#16191C;
 
-  /* Rampe des blocs : monochrome, du pale au bitume, l'ordre porte le sens */
+  /* Rampe des blocs : monochrome, l'ordre porte le sens. Du pale au bitume
+     en clair, du sombre au pale en sombre : dans les deux cas on va du fond
+     vers le premier plan. */
   --b1:#D2D6D1; --b2:#AEB4AF; --b3:#868D8E; --b4:#5C6467; --b5:#343B3F;
+
+  /* --- graphiques de seance, direction Garmin ---
+     Une teinte par metrique, une rampe fixe aux zones : c'est ce qu'un
+     coureur lit deja sur sa montre. Les trois metriques tracees passent les
+     six controles de palette dans les deux modes. La rampe des zones est
+     ordinale et non categorielle : ce qui est verifie sur elle est la clarte
+     strictement monotone avec un ecart mini de 0,06 entre pas adjacents, pour
+     qu'elle se lise aussi en niveaux de gris. Chaque barre porte de toute
+     facon son nom, ses bornes et son temps. */
+  --m-allure:#1B6AC9;
+  --m-fc:#D9432F;
+  --m-puissance:#7A4FBF;
+  --m-alt:#6B7378;
+  --z1:#B9BFC2; --z2:#6FAAE4; --z3:#40A360; --z4:#976B1B;
+  --z5:#9E352A; --z6:#7C261D; --z7:#591B17;
 
   /* --- echelle typographique --- */
   --t1:11px;    /* micro : unites, legendes, etiquettes d'axe */
@@ -71,18 +108,74 @@
   /* --- echelle d'espacement --- */
   --s1:3px; --s2:6px; --s3:11px; --s4:16px; --s5:22px; --s6:32px;
 
-  /* --- rayons --- */
-  --r1:7px;   /* petits elements : pilules, code, infobulle, barres */
-  --r2:12px;  /* cartes, listes, tuiles, graphiques */
+  /* --- rayons, reserves aux rares objets fermes --- */
+  --r1:7px;   /* pilules, code, infobulle, petites barres */
+  --r2:12px;  /* controles */
   --r3:18px;  /* blocs de premier plan */
 
   --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --num:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
+
+/* ------------------------------------------------------------
+   MODE SOMBRE. On ne redefinit que des tokens, jamais un composant.
+   Le garde :not([data-theme="light"]) laisse gagner un choix explicite de
+   theme clair sur un systeme regle en sombre.
+   ------------------------------------------------------------ */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bitume:#0A0C0E;
+    --craie:#1B1F22;
+    --surface:#242829;
+    --encre:#E9EBE8;
+    --sourd:#A2AAAD;
+    --acier:#8B9498;
+    --filet:#3A3F41;
+    --creux:#282D30;
+    --bord-present:#3A3F41;
+    --effort:#F2634E;
+    --mesure:#4A93DC;
+    --ok:#4FBF7D;        --ok-fond:#16301F;
+    --veille:#D5A02B;
+    --alerte:#F08872;    --alerte-fond:#3A211C;
+    --focus:#E9EBE8;
+    --b1:#2E3336; --b2:#414749; --b3:#5A6165; --b4:#798185; --b5:#9EA6AA;
+    --m-allure:#4A93DC;
+    --m-fc:#E4593F;
+    --m-puissance:#9E7ED8;
+    --m-alt:#8B9498;
+    --z1:#4D5458; --z2:#2E68A5; --z3:#2A9055; --z4:#B9892A;
+    --z5:#F08C73; --z6:#F4AD9D; --z7:#F5CDC2;
+  }
+}
+:root[data-theme="dark"]{
+  --bitume:#0A0C0E;
+  --craie:#1B1F22;
+  --surface:#242829;
+  --encre:#E9EBE8;
+  --sourd:#A2AAAD;
+  --acier:#8B9498;
+  --filet:#3A3F41;
+  --creux:#282D30;
+  --bord-present:#3A3F41;
+  --effort:#F2634E;
+  --mesure:#4A93DC;
+  --ok:#4FBF7D;        --ok-fond:#16301F;
+  --veille:#D5A02B;
+  --alerte:#F08872;    --alerte-fond:#3A211C;
+  --focus:#E9EBE8;
+  --b1:#2E3336; --b2:#414749; --b3:#5A6165; --b4:#798185; --b5:#9EA6AA;
+  --m-allure:#4A93DC;
+  --m-fc:#E4593F;
+  --m-puissance:#9E7ED8;
+  --m-alt:#8B9498;
+  --z1:#4D5458; --z2:#2E68A5; --z3:#2A9055; --z4:#B9892A;
+  --z5:#F08C73; --z6:#F4AD9D; --z7:#F5CDC2;
+}
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--craie);color:var(--encre);font-family:var(--sans);
   font-size:var(--t4);line-height:1.5;-webkit-font-smoothing:antialiased}
-.mono{font-family:var(--num);font-variant-numeric:tabular-nums}
 
 /* ---------- en-tete ---------- */
 .top{position:sticky;top:0;z-index:40;background:var(--craie);
@@ -102,19 +195,21 @@ main{max-width:900px;margin:0 auto;
 .tab{display:none}
 .tab.on{display:block}
 /* Hors echelle, et c'est voulu : le titre de page est le seul element qui se
-   redimensionne avec la fenetre. Une valeur fixe le rendrait trop gros sur
-   360 px ou trop timide sur 900. */
+   redimensionne avec la fenetre. */
 h1{font-size:clamp(30px,7vw,40px);font-weight:700;letter-spacing:-.032em;
   line-height:1.08;margin:var(--s5) 0 0;font-variation-settings:"wdth" 92;
   text-wrap:balance}
 .lede{color:var(--sourd);font-size:var(--t4);line-height:1.5;margin:var(--s2) 0 0;
   max-width:60ch;text-wrap:pretty}
+/* Le titre de section devient une etiquette suspendue au-dessus d'un filet :
+   c'est le filet qui separe, pas une bordure de carte. */
 h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
-  margin:0 0 var(--s3);text-transform:none}
+  margin:0 0 var(--s3);text-transform:none;text-wrap:balance}
 .sec{margin-top:var(--s6)}
 
 /* ---------- bloc bitume : le present ---------- */
 .dark{background:var(--bitume);color:var(--craie);border-radius:var(--r3);
+  border:1px solid var(--bord-present);
   padding:var(--s5) var(--s5) var(--s4);margin-top:var(--s5)}
 .dark .lbl{font-family:var(--num);font-size:var(--t1);letter-spacing:.16em;
   text-transform:uppercase;color:var(--volt)}
@@ -138,14 +233,17 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .rlg span{display:flex;align-items:center;gap:var(--s2)}
 .rlg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
 
-/* ---------- alertes ---------- */
-.alert{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4);display:flex;gap:var(--s4);
+/* ---------- alertes ----------
+   Le filet de gauche portait deja le sens. La boite autour ne portait rien :
+   elle disparait, le filet reste. */
+.alert{background:none;border:0;border-left:3px solid var(--filet);
+  border-bottom:1px solid var(--filet);border-radius:0;
+  padding:var(--s3) 0 var(--s4) var(--s4);display:flex;gap:var(--s4);
   margin-top:var(--s3)}
-.alert.critique{border-left:4px solid var(--effort)}
-.alert.attention{border-left:4px solid var(--veille)}
-.alert.calme{border-left:4px solid var(--ok)}
-.alert.neutre{border-left:4px solid var(--filet)}
+.alert.critique{border-left-color:var(--effort)}
+.alert.attention{border-left-color:var(--veille)}
+.alert.calme{border-left-color:var(--ok)}
+.alert.neutre{border-left-color:var(--filet)}
 .alert .ic{width:22px;height:22px;flex-shrink:0;margin-top:2px}
 .alert .ic svg{width:22px;height:22px;fill:none;stroke-width:1.9;
   stroke-linecap:round;stroke-linejoin:round}
@@ -159,44 +257,46 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .alert .aa{font-size:var(--t3);color:var(--sourd);margin-top:var(--s3);
   padding-top:var(--s3);border-top:1px solid var(--filet);line-height:1.5}
 
-/* ---------- listes ---------- */
-.list{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);overflow:hidden}
-/* Le filet de gauche est present partout, transparent par defaut : la ligne du
-   jour le colore sans decaler d'un pixel le contenu des autres lignes. */
+/* ---------- listes : une reglure, pas une carte ---------- */
+.list{background:none;border:0;border-top:1px solid var(--filet);
+  border-radius:0;overflow:visible}
 .li{display:flex;align-items:center;gap:var(--s4);min-height:50px;
-  padding:var(--s3) var(--s4);border-left:3px solid transparent}
-.li+.li{border-top:1px solid var(--filet)}
+  padding:var(--s3) 0;border-bottom:1px solid var(--filet);
+  border-left:3px solid transparent}
 .li-k{flex:1;min-width:0;font-size:var(--t4);font-weight:500}
 .li-s{font-size:var(--t2);color:var(--sourd);margin-top:2px;font-weight:400;
   line-height:1.4}
 .li-v{font-family:var(--num);font-size:var(--t4);font-weight:500;
   white-space:nowrap;text-align:right}
 .li-v.q{color:var(--sourd);font-weight:400}
-/* Le jour en cours : reperable, mais pas en bitume plein. Ce fond-la est
-   reserve au present de premier plan, et il y en a deja un sur cet ecran. */
-.li.on{background:var(--creux);border-left-color:var(--bitume)}
+/* Le jour en cours : le seul aplat de la liste, et un filet a gauche. */
+.li.on{background:var(--creux);border-left-color:var(--bitume);
+  padding-left:var(--s3);padding-right:var(--s3);margin-left:calc(var(--s3) * -1);
+  margin-right:calc(var(--s3) * -1)}
 .li.on .li-k{font-weight:600}
 .li.rest{color:var(--sourd)}
 
-/* ---------- tuiles ---------- */
-.grid{display:grid;gap:var(--s3);
+/* ---------- tuiles : des colonnes d'un releve ----------
+   Chaque tuile est une cellule sous un filet, pas une carte. Le libelle a une
+   hauteur plancher pour que les valeurs d'une meme rangee tombent sur la meme
+   ligne de base, meme quand un libelle passe sur deux lignes. */
+.grid{display:grid;gap:0 var(--s5);
   grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
-.tile{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4)}
-.tile .l{font-size:var(--t2);color:var(--sourd);font-weight:500;line-height:1.3}
+.tile{border-top:1px solid var(--filet);padding:var(--s3) 0 var(--s4)}
+.tile .l{font-size:var(--t2);color:var(--sourd);font-weight:500;line-height:1.3;
+  min-height:2.6em}
 .tile .v{font-family:var(--num);font-size:var(--t6);font-weight:600;
-  letter-spacing:-.035em;margin-top:var(--s2);line-height:1}
+  letter-spacing:-.035em;margin-top:var(--s1);line-height:1}
 .tile .v em{font-style:normal;font-size:var(--t2);color:var(--sourd);
   font-weight:400;margin-left:var(--s1);font-family:var(--sans)}
 .tile .d{font-size:var(--t1);color:var(--acier);margin-top:var(--s2);
   font-family:var(--num)}
-.tile .w{font-size:var(--t2);color:var(--acier);margin-top:var(--s2);
+.tile .w{font-size:var(--t2);color:var(--acier);margin-top:var(--s1);
   line-height:1.4}
 
 /* ---------- derniere seance ---------- */
-.seance{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4);margin-top:var(--s3)}
+.seance{background:none;border:0;border-top:1px solid var(--filet);
+  border-radius:0;padding:var(--s4) 0 0;margin-top:var(--s3)}
 .seance .hd{display:flex;justify-content:space-between;align-items:baseline;
   gap:var(--s3);flex-wrap:wrap}
 .seance .ti{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
@@ -222,19 +322,23 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .bilan.ok b{color:var(--ok)}
 .bilan.ko b{color:var(--alerte)}
 
-/* ---------- colonne vertebrale des semaines ---------- */
-.band{display:flex;align-items:center;gap:var(--s3);margin:var(--s5) 0 var(--s2)}
-/* 3px et 2px ci-dessous : rayons de formes de 3 a 5 px de haut. --r1 les
-   transformerait en gelules. Un rayon doit rester inferieur a la demi-hauteur. */
+/* ---------- colonne vertebrale des semaines ----------
+   Les numeros sortent dans la marge, a gauche du filet : le filet devient une
+   vraie colonne vertebrale et le regard suit une seule verticale. Le
+   changement de bloc se marque par un filet plus epais et un blanc plus large,
+   pas par une couleur. */
+.band{display:flex;align-items:center;gap:var(--s3);margin:var(--s6) 0 var(--s3);
+  padding-top:var(--s3);border-top:2px solid var(--filet)}
 .band .bar{height:5px;border-radius:3px;flex-shrink:0}
 .band .nm{font-size:var(--t2);font-weight:600;letter-spacing:-.005em}
 .band .ds{font-size:var(--t2);color:var(--acier)}
-.wk{display:grid;grid-template-columns:34px 1fr auto;gap:var(--s3);
-  align-items:center;padding:var(--s2) var(--s1) var(--s2) var(--s3);
+.wk{position:relative;margin-left:34px;display:grid;
+  grid-template-columns:1fr auto;gap:var(--s3);align-items:center;
+  padding:var(--s3) 0 var(--s3) var(--s4);
   border-bottom:1px solid var(--filet);border-left:2px solid var(--filet)}
 .wk.futur{border-left-style:dashed}
-.wk .no{font-family:var(--num);font-size:var(--t2);color:var(--acier);
-  text-align:right}
+.wk .no{position:absolute;left:-34px;top:var(--s3);width:26px;text-align:right;
+  font-family:var(--num);font-size:var(--t2);color:var(--acier)}
 .wk .ti{font-size:var(--t3);font-weight:500;line-height:1.3}
 .wk .su{font-size:var(--t2);color:var(--acier);margin-top:2px;line-height:1.35}
 .wk .vo{font-family:var(--num);font-size:var(--t2);color:var(--sourd);
@@ -247,7 +351,8 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   border-radius:50%;background:var(--effort);margin-left:var(--s1);
   vertical-align:1px}
 .wk.now{grid-template-columns:1fr;background:var(--bitume);color:var(--craie);
-  border-radius:var(--r3);padding:var(--s4);border:none;margin:var(--s3) 0;gap:0}
+  border:1px solid var(--bord-present);border-radius:var(--r3);
+  padding:var(--s4);margin:var(--s3) 0 var(--s3) 34px;gap:0}
 .wk.now .no{display:none}
 .wk.now .ti{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
 .wk.now .su{color:var(--sur-bitume);font-size:var(--t3);margin-top:var(--s1)}
@@ -256,25 +361,40 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
   vertical-align:2px;margin-right:var(--s2)}
 
-/* ---------- selecteur de periode ---------- */
+/* ---------- controles ----------
+   Le selecteur de periode et le selecteur de seance gardent leur boite : ce
+   sont les deux seules choses de la page sur lesquelles on appuie, et elles
+   doivent en avoir l'air. */
 .seg{display:flex;background:var(--creux);border-radius:var(--r2);padding:3px;
   gap:3px;margin-bottom:var(--s4)}
 .seg button{flex:1;appearance:none;border:0;background:none;
   padding:var(--s2) var(--s1);border-radius:var(--r1);font-family:inherit;
   font-size:var(--t3);font-weight:500;color:var(--sourd);cursor:pointer;
   transition:background .15s,color .15s;letter-spacing:-.01em}
+.seg button:hover{color:var(--encre)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
-  font-weight:600;box-shadow:0 1px 2px rgba(22,25,28,.10)}
+  font-weight:600}
 .seg button:active{transform:scale(.97)}
 .seg button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+#sea-choix select{width:100%;appearance:none;font-family:inherit;
+  font-size:var(--t4);font-weight:500;color:var(--encre);
+  background-color:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s3) var(--s5) var(--s3) var(--s4);
+  cursor:pointer;line-height:1.4;transition:border-color .15s;
+  background-image:linear-gradient(45deg,transparent 50%,var(--acier) 50%),
+    linear-gradient(135deg,var(--acier) 50%,transparent 50%);
+  background-position:calc(100% - 19px) 50%,calc(100% - 13px) 50%;
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+#sea-choix select:hover{border-color:var(--acier)}
+#sea-choix select:focus-visible{outline:2px solid var(--focus);
+  outline-offset:-2px}
 
-/* ---------- graphiques ---------- */
-.chart{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4) var(--s4) var(--s3);
-  margin-top:var(--s3)}
+/* ---------- graphiques : un filet, pas un cadre ---------- */
+.chart{background:none;border:0;border-top:1px solid var(--filet);
+  border-radius:0;padding:var(--s4) 0 0;margin-top:var(--s5)}
 .chart .ct{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
 .chart .cs{font-size:var(--t2);color:var(--sourd);margin-top:var(--s1);
-  line-height:1.4}
+  line-height:1.4;max-width:62ch}
 .cb{margin-top:var(--s3);position:relative}
 .cb svg{display:block;width:100%;height:auto;overflow:visible}
 .keys{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
@@ -285,29 +405,35 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
    pas dans les pixels de l'ecran. Le brancher sur --t1 le ferait grossir
    avec l'echelle mobile alors que le graphique, lui, ne grossit pas. */
 text.ax{font-family:"Geist Mono",monospace;font-size:10px;fill:var(--acier)}
-line.grille{stroke:var(--filet)}
-line.grad{stroke:var(--filet)}
+text.gl{font-family:"Geist Mono",monospace;font-size:10.5px;font-weight:500}
+text.gv{font-family:"Geist Mono",monospace;font-size:10.5px;fill:var(--sourd)}
+text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
+line.grille,line.grad,line.gg{stroke:var(--filet)}
 line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
+line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
+.gc{margin-top:var(--s3);margin-bottom:var(--s5);position:relative}
+.gc svg{display:block;width:100%;height:auto;overflow:visible}
+.gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
+  font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
+.gc-lg span{display:flex;align-items:center;gap:var(--s2)}
+.gc-lg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
 .wait{color:var(--acier);font-size:var(--t2);line-height:1.55;
   padding:var(--s5) var(--s3);margin-top:var(--s3);background:var(--creux);
-  border-radius:var(--r1);text-align:center}
-/* Infobulle : position fixed, donc en coordonnees d'ecran. Elle ne derive plus
-   au defilement, ni dans un conteneur qui defile. Fond clair borde de bitume,
-   parce que le bitume plein est reserve au present. */
+  border-radius:var(--r1);text-align:center;text-wrap:pretty}
+/* Infobulle : position fixed, donc en coordonnees d'ecran. Elle ne derive pas
+   au defilement, ni dans un conteneur qui defile. */
 .tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;
-  background:var(--surface);color:var(--encre);border:1px solid var(--bitume);
+  background:var(--surface);color:var(--encre);border:1px solid var(--encre);
   font-size:var(--t1);padding:var(--s2) var(--s3);border-radius:var(--r1);
   white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
   font-family:var(--num);line-height:1.45}
 
 .note{font-size:var(--t2);color:var(--sourd);margin-top:var(--s3);line-height:1.5;
-  max-width:60ch}
-.card{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4);font-size:var(--t4);line-height:1.55;
-  color:var(--sourd)}
+  max-width:62ch;text-wrap:pretty}
+.card{background:none;border:0;border-top:1px solid var(--filet);
+  border-radius:0;padding:var(--s4) 0 0;font-size:var(--t4);line-height:1.55;
+  color:var(--sourd);max-width:66ch}
 .card b{color:var(--encre);font-weight:600}
-/* Le bloc de code etait en bitume plein. Il ne represente pas le present :
-   il redescend en gris, avec un filet a gauche pour rester identifiable. */
 .code{background:var(--creux);color:var(--encre);border-radius:var(--r1);
   border-left:3px solid var(--acier);padding:var(--s2) var(--s3);
   margin-top:var(--s2);font-family:var(--num);font-size:var(--t2);
@@ -319,27 +445,11 @@ line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
 .pill.no{background:var(--creux);color:var(--acier)}
 .pill.al{background:var(--alerte-fond);color:var(--alerte)}
 
-/* ---------- historique des seances ---------- */
-.sc{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);margin-top:var(--s3)}
-.sc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;
-  gap:var(--s3);padding:var(--s3) var(--s4)}
-.sc>summary::-webkit-details-marker{display:none}
-.sc>summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;
-  border-radius:var(--r2)}
-.sc-k{flex:1;min-width:0}
-.sc-t{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
-.sc-s{font-size:var(--t2);color:var(--sourd);margin-top:2px;line-height:1.4}
-.sc-v{font-family:var(--num);font-size:var(--t2);text-align:right;
-  white-space:nowrap;color:var(--sourd);line-height:1.5}
-.sc .chev{width:16px;height:16px;flex-shrink:0;stroke:var(--acier);fill:none;
-  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.sc[open]>summary{border-bottom:1px solid var(--filet)}
-.sc[open] .chev{transform:rotate(180deg)}
-.sc-d{padding:var(--s4)}
+/* ---------- detail d'une seance ---------- */
+.sc-ouvert{margin-top:var(--s5)}
 .sc-h{font-size:var(--t2);font-weight:600;color:var(--sourd);
-  margin:var(--s4) 0 var(--s2)}
-.sc-d>.sc-h:first-child{margin-top:0}
+  margin:var(--s5) 0 var(--s3);padding-top:var(--s3);
+  border-top:1px solid var(--filet)}
 
 /* Splits : une ligne par kilometre. La barre porte l'allure, le trait vertical
    marque la moyenne de la seance, donc les kilometres qui ont coute cher
@@ -351,51 +461,23 @@ line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
 .sp .b{position:relative;height:13px;background:var(--creux);border-radius:2px}
 .sp .b i{display:block;height:100%;background:var(--mesure);border-radius:2px}
 .sp .b u{position:absolute;top:-3px;bottom:-3px;width:1px;
-  background:var(--bitume);text-decoration:none}
+  background:var(--encre);text-decoration:none}
 .sp .a{white-space:nowrap;font-weight:500}
 .sp .f{color:var(--sourd);white-space:nowrap}
 .sp .pt{color:var(--acier)}
 .sp-l{font-size:var(--t1);color:var(--acier);margin-top:var(--s2);
-  line-height:1.45;font-family:var(--sans)}
+  line-height:1.45;font-family:var(--sans);max-width:62ch;text-wrap:pretty}
 
-/* Dynamique de course : paires libelle / valeur, pas des tuiles. Ce sont des
-   details qu'on consulte, pas des chiffres qu'on surveille. */
+/* Dynamique de course : paires libelle / valeur, pas des tuiles. */
 .dyn{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
-  gap:var(--s2) var(--s3);font-size:var(--t2)}
+  gap:0 var(--s5);font-size:var(--t2)}
 .dyn div{display:flex;justify-content:space-between;gap:var(--s2);
   padding:var(--s2) 0;border-bottom:1px solid var(--filet)}
 .dyn span{color:var(--sourd)}
 .dyn b{font-family:var(--num);font-weight:500}
-.verd{font-size:var(--t3);line-height:1.5;margin-top:var(--s3)}
+.verd{font-size:var(--t3);line-height:1.5;margin-top:var(--s3);max-width:66ch;
+  text-wrap:pretty}
 .verd b{font-weight:600}
-
-/* ---------- graphiques de seance, direction Garmin ----------
-   Garmin donne une teinte par metrique et une rampe fixe aux zones de FC.
-   C'est une convention qu'un coureur lit deja sur sa montre : la reprendre
-   vaut mieux que d'imposer la mienne. Ces teintes ne servent QUE dans les
-   courbes de seance et l'histogramme de zones, jamais ailleurs, pour ne pas
-   defaire la regle du reste du site.
-   Les trois metriques tracees passent les six controles de palette. La rampe
-   des zones est ordinale et non categorielle : ce qui est verifie sur elle,
-   c'est la clarte strictement decroissante de Z1 a Z7, pour qu'elle se lise
-   aussi dans l'ordre en niveaux de gris. Chaque barre porte de toute facon son
-   nom, ses bornes en bpm et son temps : la couleur ne porte jamais seule. */
-:root{
-  --m-allure:#1B6AC9;
-  --m-fc:#D9432F;
-  --m-puissance:#7A4FBF;
-  --m-alt:#6B7378;
-  --z1:#B4BABD; --z2:#6BA6E0; --z3:#3D9E5C; --z4:#A87410;
-  --z5:#B33220; --z6:#87200F; --z7:#571309;
-}
-.gc{margin-top:var(--s3);margin-bottom:var(--s5);position:relative}
-.gc svg{display:block;width:100%;height:auto;overflow:visible}
-text.gl{font-family:"Geist Mono",monospace;font-size:10.5px;font-weight:500}
-text.gv{font-family:"Geist Mono",monospace;font-size:10.5px;fill:var(--sourd)}
-line.gg{stroke:var(--filet);stroke-width:1}
-line.gx{stroke:var(--bitume);stroke-width:1;stroke-dasharray:3 3}
-/* Etiquette de borne de zone, posee dans la marge droite reservee. */
-text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
 
 /* Histogramme des zones : proportion du temps passe dans chacune. */
 .gz{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s2) var(--s3);
@@ -414,38 +496,20 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
    information. Elle s'efface sans disparaitre. */
 .gz .zv.vide{color:var(--acier)}
 
-/* Legende sous un graphique, hors du trace. */
-.gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
-  font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
-.gc-lg span{display:flex;align-items:center;gap:var(--s2)}
-.gc-lg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
-
-/* ---------- selecteur de seance ---------- */
-#sea-choix select{width:100%;appearance:none;font-family:inherit;
-  font-size:var(--t4);font-weight:500;color:var(--encre);
-  background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s3) var(--s5) var(--s3) var(--s4);
-  cursor:pointer;line-height:1.4;
-  background-image:linear-gradient(45deg,transparent 50%,var(--acier) 50%),
-    linear-gradient(135deg,var(--acier) 50%,transparent 50%);
-  background-position:calc(100% - 19px) 50%,calc(100% - 13px) 50%;
-  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
-#sea-choix select:focus-visible{outline:2px solid var(--focus);
-  outline-offset:-2px}
-.sc-ouvert{background:var(--surface);border:1px solid var(--filet);
-  border-radius:var(--r2);padding:var(--s4);margin-top:var(--s3)}
-
 /* ---------- resume d'analyse ---------- */
-.ia{border-left:3px solid var(--bitume);padding-left:var(--s4);
+.ia{border-left:3px solid var(--encre);padding-left:var(--s4);
   margin-bottom:var(--s5)}
 .ia-h{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
   margin-bottom:var(--s3)}
-.ia-t{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+.ia-t{font-size:var(--t5);font-weight:600;letter-spacing:-.02em;
+  text-wrap:balance}
 .ia-q{font-size:var(--t2);font-weight:600;color:var(--sourd);
   margin-top:var(--s3)}
-.ia-r{font-size:var(--t3);line-height:1.5;margin-top:2px}
+.ia-r{font-size:var(--t3);line-height:1.5;margin-top:2px;max-width:66ch;
+  text-wrap:pretty}
 .ia-s{font-size:var(--t1);color:var(--acier);line-height:1.45;
-  margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--filet)}
+  margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--filet);
+  max-width:62ch}
 
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
@@ -460,6 +524,7 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
   stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .16s}
 .tb::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;
   border-radius:0 0 3px 3px;background:transparent;transition:background .16s}
+.tb:hover{color:var(--sourd)}
 .tb[aria-selected="true"]{color:var(--encre)}
 .tb[aria-selected="true"] svg{stroke-width:2.1}
 .tb[aria-selected="true"]::before{background:var(--volt)}
@@ -470,8 +535,7 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
   border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--craie)}
 
 /* ---------- mobile ----------
-   Le mobile ne retouche plus une vingtaine de composants un par un : il
-   deplace l'echelle d'un cran vers le haut, et tout ce qui s'y appuie suit. */
+   Le mobile deplace l'echelle d'un cran, et tout ce qui s'y appuie suit. */
 @media (max-width:640px){
   :root{
     --t1:12px; --t2:13.5px; --t3:15px; --t4:16.5px; --t5:18.5px; --t6:25px;
@@ -480,14 +544,15 @@ text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
   main{padding-left:var(--s4);padding-right:var(--s4)}
   .top-in{padding:var(--s3) var(--s4)}
   .fresh{font-size:var(--t1)}
-  .grid{grid-template-columns:1fr 1fr;gap:var(--s2)}
-  .tile{padding:var(--s3)}
+  .grid{grid-template-columns:1fr 1fr;gap:0 var(--s4)}
   .dark{padding:var(--s4) var(--s4) var(--s3);border-radius:var(--r2)}
-  .li{padding:var(--s3) var(--s4);min-height:54px}
-  .wk{grid-template-columns:28px 1fr;gap:var(--s3);padding:var(--s3) 2px}
-  .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
-  .wk.now{grid-template-columns:1fr;padding:var(--s4)}
-  .chart{padding:var(--s3)}
+  .li{min-height:54px}
+  .li.on{padding-left:var(--s2);padding-right:var(--s2);
+    margin-left:calc(var(--s2) * -1);margin-right:calc(var(--s2) * -1)}
+  .wk{margin-left:28px;padding-left:var(--s3);grid-template-columns:1fr}
+  .wk .no{left:-28px;width:22px}
+  .wk .vo{text-align:left;margin-top:var(--s1)}
+  .wk.now{grid-template-columns:1fr;padding:var(--s4);margin-left:28px}
   .tb{padding:var(--s3) 2px;gap:var(--s1)}
   .tb svg{width:28px;height:28px;stroke-width:1.75}
   .tb[aria-selected="true"] svg{stroke-width:2.2}
@@ -1435,10 +1500,12 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
       const dist = w.semaine - cur;
       // L'eloignement se lit sur le rail de gauche, jamais sur le texte :
       // faire palir des mots les rend illisibles, palir un filet ne coute rien.
+      // color-mix et non une valeur rgb() calculee ici : le melange doit
+      // suivre le theme, et un blanc code en dur casserait le mode sombre.
       const t = Math.min(1, Math.max(0, dist) / 18);
-      const mix = (x, y) => Math.round(x + (y - x) * t);
       const rail = passe ? 'var(--acier)'
-        : 'rgb(' + mix(107, 223) + ',' + mix(115, 225) + ',' + mix(120, 221) + ')';
+        : 'color-mix(in srgb, var(--acier) ' + Math.round((1 - t) * 92 + 8)
+          + '%, var(--craie))';
       const r = done[w.semaine];
       const larg = r ? Math.round(r / mxv * 46) : 0;
       return `<div class="wk ${passe ? 'past' : 'futur'} ${w.course || w.type === 'TEST'
@@ -1579,7 +1646,7 @@ function lineChart(box, series, opt) {
       stroke-linejoin="round" stroke-linecap="round"/>`;
     const la = se.data[se.data.length - 1];
     s += `<circle cx="${X(ms(la.d)).toFixed(1)}" cy="${Y(la.v).toFixed(1)}"
-      r="4.2" fill="${se.color}" stroke="var(--surface)" stroke-width="2.2"/>`;
+      r="4.2" fill="${se.color}" stroke="var(--craie)" stroke-width="2.2"/>`;
   });
   s += '</svg>';
   box.innerHTML = s;
