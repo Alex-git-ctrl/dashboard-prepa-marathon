@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 import alerts
 import calibration
+import resume_ia
 import seance_detail
 import sante
 
@@ -319,6 +320,10 @@ def main():
 
     # ---- Calibration : zones et projections issues des courses reelles ----
     metrics["calibration"] = calibration.calcule(seances, PLAN["courses"])
+
+    # ---- Resume d'analyse par seance ----
+    metrics["resumes"] = resume_ia.construit(
+        seances, PLAN, metrics["calibration"], ROOT)
 
     # ---- Alertes ----
     plan = PLAN

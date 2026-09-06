@@ -1,2 +1,5 @@
 requests>=2.32
 python-dotenv>=1.0
+# Facultatif : sans cle ANTHROPIC_API_KEY, les resumes
+# de seance basculent sur l'analyse par regles.
+anthropic>=1.0

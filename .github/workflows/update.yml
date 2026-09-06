@@ -26,6 +26,9 @@ jobs:
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+          # Facultatif. Sans ce secret, les resumes de seance basculent sur
+          # l'analyse par regles, qui s'annonce comme telle sur la page.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scripts/fetch_data.py
 
       - name: Regenerer le plan et la page

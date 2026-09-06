@@ -388,16 +388,14 @@ line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
   --z1:#B4BABD; --z2:#6BA6E0; --z3:#3D9E5C; --z4:#A87410;
   --z5:#B33220; --z6:#87200F; --z7:#571309;
 }
-.gc{margin-top:var(--s3);position:relative}
+.gc{margin-top:var(--s3);margin-bottom:var(--s5);position:relative}
 .gc svg{display:block;width:100%;height:auto;overflow:visible}
 text.gl{font-family:"Geist Mono",monospace;font-size:10.5px;font-weight:500}
 text.gv{font-family:"Geist Mono",monospace;font-size:10.5px;fill:var(--sourd)}
 line.gg{stroke:var(--filet);stroke-width:1}
 line.gx{stroke:var(--bitume);stroke-width:1;stroke-dasharray:3 3}
-.gc-l{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s2);
-  font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
-.gc-l span{display:flex;align-items:center;gap:var(--s2)}
-.gc-l i{width:14px;height:3px;border-radius:2px;display:block;flex-shrink:0}
+/* Etiquette de borne de zone, posee dans la marge droite reservee. */
+text.gz2{font-family:"Geist Mono",monospace;font-size:9.5px;font-weight:500}
 
 /* Histogramme des zones : proportion du temps passe dans chacune. */
 .gz{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s2) var(--s3);
@@ -412,6 +410,36 @@ line.gx{stroke:var(--bitume);stroke-width:1;stroke-dasharray:3 3}
   line-height:1.3}
 .gz .zv em{font-style:normal;color:var(--acier);font-size:var(--t1);
   display:block}
+/* Une zone jamais atteinte reste dans la liste : son absence est une
+   information. Elle s'efface sans disparaitre. */
+.gz .zv.vide{color:var(--acier)}
+
+/* ---------- selecteur de seance ---------- */
+#sea-choix select{width:100%;appearance:none;font-family:inherit;
+  font-size:var(--t4);font-weight:500;color:var(--encre);
+  background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s3) var(--s5) var(--s3) var(--s4);
+  cursor:pointer;line-height:1.4;
+  background-image:linear-gradient(45deg,transparent 50%,var(--acier) 50%),
+    linear-gradient(135deg,var(--acier) 50%,transparent 50%);
+  background-position:calc(100% - 19px) 50%,calc(100% - 13px) 50%;
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+#sea-choix select:focus-visible{outline:2px solid var(--focus);
+  outline-offset:-2px}
+.sc-ouvert{background:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s4);margin-top:var(--s3)}
+
+/* ---------- resume d'analyse ---------- */
+.ia{border-left:3px solid var(--bitume);padding-left:var(--s4);
+  margin-bottom:var(--s5)}
+.ia-h{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  margin-bottom:var(--s3)}
+.ia-t{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+.ia-q{font-size:var(--t2);font-weight:600;color:var(--sourd);
+  margin-top:var(--s3)}
+.ia-r{font-size:var(--t3);line-height:1.5;margin-top:2px}
+.ia-s{font-size:var(--t1);color:var(--acier);line-height:1.45;
+  margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--filet)}
 
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
@@ -518,7 +546,8 @@ line.gx{stroke:var(--bitume);stroke-width:1;stroke-dasharray:3 3}
     <p class="lede">Chaque sortie dépliée : le découpage au kilomètre, la
       répartition cardiaque, la dérive, et ce que la ceinture a mesuré de ta
       foulée. C'est ici qu'on relit une séance, pas dans un chiffre unique.</p>
-    <div class="sec"><h2>Historique</h2><div id="sea-liste"></div>
+    <div class="sec"><h2>Choisir une séance</h2><div id="sea-choix"></div>
+      <div id="sea-liste"></div>
       <p class="note" id="sea-n"></p></div>
     <div class="sec"><h2>Jours sans course</h2><div id="journal"></div></div>
     <div class="sec"><h2>Comment remplir le journal</h2>
@@ -925,28 +954,32 @@ function courbesSeance(box, s) {
     // `resume` : la moyenne annoncee par l'activite. On la prefere a la
     // moyenne des points, qui pour une allure surpondere les moments lents et
     // afficherait 7:06/km la ou les chiffres cles disent 6:55/km.
-    {cle:'allure', nom:'Allure', col:'var(--m-allure)', inv:true, h:78,
+    {cle:'allure', nom:'Allure', col:'var(--m-allure)', inv:true, h:92,
      borne:true, resume:s.allure_s_km,
      fmt:v => allure(Math.round(v)) + '/km', axe:v => allure(Math.round(v))},
-    {cle:'fc', nom:'Fréquence cardiaque', col:'var(--m-fc)', h:78,
+    {cle:'fc', nom:'Fréquence cardiaque', col:'var(--m-fc)', h:92,
      zones:true, resume:s.fc_moy,
      fmt:v => Math.round(v) + ' bpm', axe:v => Math.round(v)},
-    {cle:'puissance', nom:'Puissance', col:'var(--m-puissance)', h:78,
+    {cle:'puissance', nom:'Puissance', col:'var(--m-puissance)', h:92,
      borne:true, resume:s.puissance_moy,
      fmt:v => Math.round(v) + ' W', axe:v => Math.round(v)},
-    {cle:'altitude', nom:'Altitude', col:'var(--m-alt)', h:46,
+    {cle:'altitude', nom:'Altitude', col:'var(--m-alt)', h:52,
      fmt:v => Math.round(v) + ' m', axe:v => Math.round(v)},
   ].filter(p => (C[p.cle] || []).some(v => v != null));
   if (!PAN.length) return false;
 
-  const W = 520, L = 48, R = 8, ECART = 12, AX = 20;
-  const H = PAN.reduce((t, p) => t + p.h, 0) + ECART * (PAN.length - 1) + AX;
+  // ENTETE est une bande reservee AU-DESSUS de chaque panneau. Les libelles y
+  // vivent, hors de la zone de trace : avant, ils etaient poses dans le
+  // panneau et la courbe leur passait dessus.
+  const W = 520, L = 44, R = 24, ENTETE = 18, ECART = 22, AX = 24;
+  const H = PAN.reduce((t, p) => t + p.h + ENTETE, 0)
+    + ECART * (PAN.length - 1) + AX;
   const t0 = C.t[0], t1 = C.t[C.t.length - 1], span = (t1 - t0) || 1;
   const X = t => L + (t - t0) / span * (W - L - R);
 
   let y = 0;
   PAN.forEach(p => {
-    p.y0 = y; y += p.h + ECART;
+    p.yEnt = y; p.y0 = y + ENTETE; y += ENTETE + p.h + ECART;
     const vals = C[p.cle].filter(v => v != null);
     let mn, mx;
     if (p.borne) { mn = quant(vals, .03); mx = quant(vals, .97); }
@@ -972,8 +1005,10 @@ function courbesSeance(box, s) {
 
   PAN.forEach(p => {
     const bas = p.y0 + p.h;
-    // Grille : le haut, le bas, et rien entre les deux. Les panneaux sont
-    // courts, une troisieme ligne ne ferait qu'ajouter du bruit.
+    // Entete : le nom a gauche, la moyenne a droite, tous deux hors du trace.
+    g += `<text class="gl" x="${L}" y="${p.yEnt + 11}" fill="${p.col}"
+      >${p.nom}</text><text class="gv" x="${W - R}" y="${p.yEnt + 11}"
+      text-anchor="end">moyenne ${p.fmt(p.moy)}</text>`;
     g += `<line class="gg" x1="${L}" y1="${p.y0}" x2="${W - R}" y2="${p.y0}"/>`
        + `<line class="gg" x1="${L}" y1="${bas}" x2="${W - R}" y2="${bas}"/>`;
 
@@ -985,7 +1020,7 @@ function courbesSeance(box, s) {
         g += `<line x1="${L}" y1="${p.Y(b).toFixed(1)}" x2="${W - R}"
           y2="${p.Y(b).toFixed(1)}" stroke="${ZONE_COL[i + 1]}"
           stroke-width="1" stroke-dasharray="4 3"/>
-          <text class="gv" x="${W - R + 3}" y="${(p.Y(b) + 3).toFixed(1)}"
+          <text class="gz2" x="${W - R + 4}" y="${(p.Y(b) + 3.4).toFixed(1)}"
           fill="${ZONE_COL[i + 1]}">Z${i + 2}</text>`;
       });
     }
@@ -1014,13 +1049,8 @@ function courbesSeance(box, s) {
       >${p.axe(hautV)}</text>
       <text class="gv" x="${L - 6}" y="${bas - 1}" text-anchor="end"
       >${p.axe(basV)}</text>`;
-    // Nom du panneau et moyenne, poses dans le panneau comme sur la montre.
-    g += `<text class="gl" x="${L + 6}" y="${p.y0 + 12}" fill="${p.col}"
-      >${p.nom}</text><text class="gv" x="${L + 6}" y="${p.y0 + 24}"
-      >moyenne ${p.fmt(p.moy)}</text>`;
   });
 
-  // Axe des temps, en minutes.
   // Graduations sur des multiples ronds de minutes, comme sur la montre, et
   // non sur cinq fractions egales de la duree, qui donnaient 0, 10, 19, 29, 39.
   const bas = H - AX;
@@ -1031,14 +1061,14 @@ function courbesSeance(box, s) {
     const x = X(t0 + m * 60);
     const dernier = (m + pas) * 60 > span + 1;
     const anc = m === 0 ? 'start' : dernier && x > W - R - 24 ? 'end' : 'middle';
-    g += `<text class="gv" x="${x.toFixed(1)}" y="${bas + 14}"
+    g += `<text class="gv" x="${x.toFixed(1)}" y="${bas + 15}"
       text-anchor="${anc}">${m}${dernier ? ' min' : ''}</text>`;
   }
   g += `<line class="gx" data-cur x1="0" y1="0" x2="0" y2="${bas}"
     style="opacity:0"/></svg>`;
   box.innerHTML = g;
 
-  // ---- curseur partage : un seul trait pour les quatre panneaux ----
+  // ---- curseur partage : un seul trait pour tous les panneaux ----
   const svg = box.querySelector('svg'), cur = svg.querySelector('[data-cur]');
   svg.addEventListener('pointermove', e => {
     const r = svg.getBoundingClientRect(); if (!r.width) return;
@@ -1061,10 +1091,6 @@ function courbesSeance(box, s) {
   svg.addEventListener('pointerleave', () => {
     tip.style.opacity = 0; cur.style.opacity = 0;
   });
-
-  box.insertAdjacentHTML('beforeend', '<div class="gc-l">'
-    + PAN.map(p => '<span><i style="background:' + p.col + '"></i>' + p.nom
-      + '</span>').join('') + '</div>');
   return true;
 }
 
@@ -1073,26 +1099,65 @@ function histoZones(s) {
   const Z = s.zones_fc || {}, B = s.zones_bornes || [];
   const tot = Object.values(Z).reduce((a, b) => a + b, 0);
   if (!tot || !B.length) return '';
+  // Cinq zones toujours affichees, comme sur la montre : une zone a zero est
+  // une information, elle dit que l'intensite n'y est jamais montee. Au-dela
+  // de la cinquieme, on ne montre que ce qui a ete touche.
   const lignes = [];
   let vides = 0;
   B.forEach((haut, i) => {
     const sec = Z['z' + (i + 1)] || 0;
-    if (!sec) { vides++; return; }
+    if (!sec && i >= 5) { vides++; return; }
     const bas = i ? B[i - 1] : null;
     lignes.push('<div class="zk"><div class="zn">Z' + (i + 1) + ' · '
       + nomZone(i) + '</div><div class="zr">'
       + (bas ? bas + ' à ' + haut : 'jusqu’à ' + haut) + ' bpm</div></div>'
       + '<span class="zb"><i style="width:' + (sec / tot * 100).toFixed(1)
       + '%;background:' + ZONE_COL[i] + '"></i></span>'
-      + '<span class="zv">' + Math.round(sec / tot * 100) + ' %'
-      + '<em>' + duree(sec) + '</em></span>');
+      + '<span class="zv' + (sec ? '' : ' vide') + '">'
+      + Math.round(sec / tot * 100) + ' %'
+      + '<em>' + (sec ? duree(sec) : 'jamais') + '</em></span>');
   });
   if (!lignes.length) return '';
   return '<div class="sc-h">Temps par zone de fréquence cardiaque</div>'
     + '<div class="gz">' + lignes.join('') + '</div>'
-    + (vides ? '<div class="sp-l">' + (vides > 1 ? vides + ' zones plus hautes '
-        + 'n’ont pas été touchées.' : 'La zone la plus haute n’a pas été '
+    + (vides ? '<div class="sp-l">' + (vides > 1 ? 'Les ' + vides + ' zones '
+        + 'au-dessus n’ont pas été touchées.' : 'La zone au-dessus n’a pas été '
         + 'touchée.') + '</div>' : '');
+}
+
+/* ---------- le resume d'analyse ----------
+   Trois questions, dans l'ordre ou on se les pose apres une sortie : est-ce
+   que j'ai bien couru, est-ce que ca suit le plan, a quoi servait cette
+   seance. La page dit toujours qui a repondu, Claude ou un jeu de regles :
+   presenter une analyse mecanique comme une lecture serait mentir. */
+const VERDICTS = {
+  bon:['Bien couru', 'ok'],
+  correct:['Correct', 'no'],
+  attention:['À corriger', 'al'],
+};
+
+function resumeIA(s) {
+  const r = (M.resumes || {})[s.date];
+  if (!r) return '';
+  const [mot, cls] = VERDICTS[r.verdict] || VERDICTS.correct;
+  const Q = [
+    ['As-tu bien couru ?', r.execution],
+    ['Est-ce conforme au plan ?', r.conformite],
+    ['À quoi servait cette séance ?', r.objectif],
+  ].filter(q => q[1]);
+  return '<div class="ia"><div class="ia-h"><span class="pill ' + cls + '">'
+    + mot + '</span>'
+    + (r.titre && r.titre !== 'Analyse automatique'
+       ? '<span class="ia-t">' + r.titre + '</span>' : '')
+    + '</div>'
+    + Q.map(q => '<div class="ia-q">' + q[0] + '</div><div class="ia-r">'
+      + q[1] + '</div>').join('')
+    + '<div class="ia-s">' + (r.source === 'claude'
+      ? 'Rédigé par Claude à partir de la séance, du plan de la semaine et de '
+        + 'tes allures de référence.'
+      : 'Analyse automatique, produite par un jeu de règles et non par un '
+        + 'modèle. Elle se limite à ce que des seuils peuvent dire.')
+    + '</div></div>';
 }
 
 function detailSeance(s) {
@@ -1144,7 +1209,9 @@ function detailSeance(s) {
     + chiffres(s) + zonesFC(s, true) + '</div>';
 })();
 
-/* ---------- onglet Seances : l'historique detaille ---------- */
+/* ---------- onglet Seances : on choisit, on lit ----------
+   Un selecteur plutot qu'un accordeon : on vient ici pour relire UNE seance,
+   pas pour parcourir une pile. Le choix est memorise d'une visite a l'autre. */
 (function () {
   const S = (M.seances || []).slice().reverse();
   if (!S.length) {
@@ -1158,35 +1225,43 @@ function detailSeance(s) {
     $('sea-n').textContent = '';
     return;
   }
-  $('sea-liste').innerHTML = S.map((s, i) => {
-    const resume = [
-      s.km != null ? nf(s.km) + ' km' : null,
-      allure(s.allure_s_km) ? allure(s.allure_s_km) + '/km' : null,
-      s.fc_moy ? s.fc_moy + ' bpm' : null,
-    ].filter(Boolean);
-    return '<details class="sc"' + (i === 0 ? ' open' : '') + '>'
-      + '<summary><div class="sc-k"><div class="sc-t">'
-      + attendu(s).titre + '</div>'
-      + '<div class="sc-s">' + dlong(s.date)
-      + (s.semaine ? ' · semaine ' + s.semaine : '') + '</div></div>'
-      + '<div class="sc-v">' + resume.join('<br>') + '</div>'
-      + '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M6 9.5l6 6 6-6"/></svg></summary>'
-      + '<div class="sc-d">' + detailSeance(s) + '</div></details>';
-  }).join('');
-  // Les SVG se construisent apres l'insertion : ils ont besoin d'un noeud
-  // reel pour brancher le curseur.
-  S.forEach(s => {
-    if (!s.courbes) return;
-    const b = document.querySelector('[data-courbes="' + s.date + '"]');
-    if (b) courbesSeance(b, s);
-  });
+
+  const court = d => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR',
+    {weekday:'short', day:'numeric', month:'short'});
+  $('sea-choix').innerHTML = '<select id="sea-sel" aria-label="Choisir une séance">'
+    + S.map((s, i) => '<option value="' + i + '">' + court(s.date) + ' · '
+      + attendu(s).titre + (s.km != null ? ' · ' + nf(s.km) + ' km' : '')
+      + '</option>').join('') + '</select>';
+
+  function montre(i) {
+    const s = S[i];
+    $('sea-liste').innerHTML = '<div class="sc-ouvert">' + resumeIA(s)
+      + detailSeance(s) + '</div>';
+    // Les SVG se construisent apres l'insertion : ils ont besoin d'un noeud
+    // reel pour brancher le curseur.
+    if (s.courbes) {
+      const b = document.querySelector('[data-courbes]');
+      if (b) courbesSeance(b, s);
+    }
+    try { localStorage.setItem('seance', s.date); } catch (e) {}
+  }
+
+  const sel = $('sea-sel');
+  let dep = 0;
+  try {
+    const v = localStorage.getItem('seance');
+    const k = S.findIndex(s => s.date === v);
+    if (k >= 0) dep = k;
+  } catch (e) {}
+  sel.value = String(dep);
+  sel.addEventListener('change', () => montre(+sel.value));
+  montre(dep);
+
   const avecSplits = S.filter(s => s.splits && s.splits.length).length;
   $('sea-n').textContent = S.length + ' séance' + (S.length > 1 ? 's' : '')
     + ' enregistrée' + (S.length > 1 ? 's' : '') + '. Le découpage au kilomètre '
     + 'est disponible sur ' + avecSplits + ' d’entre elles, les courbes '
-    + 'seconde par seconde sur ' + S.filter(s => s.courbes).length
-    + '. La plus récente est ouverte, les autres se déplient.';
+    + 'seconde par seconde sur ' + S.filter(s => s.courbes).length + '.';
 })();
 
 /* ---------- journal des jours sans course ---------- */
