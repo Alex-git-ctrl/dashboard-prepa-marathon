@@ -256,7 +256,9 @@ def construit(seances, plan, calibration, racine, combien=10):
         c = contexte(s, plan, calibration, seances[:len(seances) - combien + i])
         cle = _cle(c)
         vieux = cache.get(s["date"])
-        if vieux and vieux.get("cle") == cle:
+        # `fige` protege un resume ecrit a la main dans la conversation : sans
+        # ca, la prochaine collecte le remplacerait par l'analyse par regles.
+        if vieux and (vieux.get("fige") or vieux.get("cle") == cle):
             out[s["date"]] = vieux
             continue
         r = par_claude(c) or par_regles(c)

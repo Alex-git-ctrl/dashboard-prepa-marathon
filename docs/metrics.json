@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-07T00:31:38",
+  "maj": "2026-09-06T19:56:20",
   "nb_activites": 1,
   "semaines": {},
   "seances": [
@@ -983,29 +983,6 @@
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": 4.2
-    },
-    {
-      "date": "2026-09-07",
-      "hrv": null,
-      "fc_repos": null,
-      "poids": null,
-      "vo2max": null,
-      "readiness": null,
-      "sommeil_score": null,
-      "fc_sommeil": null,
-      "spo2": null,
-      "respiration": null,
-      "masse_grasse": null,
-      "ctl": 0.6057227,
-      "atl": 2.7010324,
-      "ramp_rate": null,
-      "pas": null,
-      "courbatures": null,
-      "fatigue": null,
-      "moral": null,
-      "douleur_niveau": null,
-      "commentaire": null,
-      "sommeil_h": null
     }
   ],
   "derives": [
@@ -1051,8 +1028,8 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 0.6057227,
-    "atl": 2.7010324,
+    "ctl": 0.62031776,
+    "atl": 3.1158164,
     "ramp_rate": null,
     "pas": 13478,
     "courbatures": null,
@@ -1076,8 +1053,8 @@
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 6,
-    "atl": 6,
+    "ctl": 5,
+    "atl": 5,
     "ramp_rate": 0,
     "pas": 5,
     "courbatures": 0,
@@ -1086,7 +1063,7 @@
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 6,
+  "jours_wellness": 5,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -1107,8 +1084,8 @@
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-09-07",
-    "atl": "2026-09-07",
+    "ctl": "2026-09-06",
+    "atl": "2026-09-06",
     "ramp_rate": null,
     "pas": "2026-09-06",
     "courbatures": null,
@@ -1122,7 +1099,7 @@
     "cadence": "2026-09-05",
     "volume": "2026-09-05"
   },
-  "derniere_donnee": "2026-09-07",
+  "derniere_donnee": "2026-09-06",
   "derniere_seance": "2026-09-05",
   "journal": [
     {
@@ -1248,17 +1225,6 @@
         "spo2": null,
         "date": "2026-09-06",
         "fatigue_indice": null
-      },
-      {
-        "pas": null,
-        "sommeil_h": null,
-        "sommeil_score": null,
-        "fc_repos": null,
-        "hrv": null,
-        "poids": null,
-        "spo2": null,
-        "date": "2026-09-07",
-        "fatigue_indice": null
       }
     ],
     "actuel": {
@@ -1352,12 +1318,13 @@
   "resumes": {
     "2026-09-05": {
       "verdict": "bon",
-      "titre": "Analyse automatique",
-      "execution": "98 % du temps en endurance. Dérive cardiaque de -1,1 %, sous le seuil de 5 %. Première moitié à 6:59/km, seconde à 7:04/km. Avec 179 m de dénivelé, l'allure vaut 6:04/km sur le plat.",
-      "conformite": "Cette séance est antérieure au démarrage du plan.",
-      "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-      "source": "regles",
-      "cle": "8d4f3722f63584df"
+      "titre": "Contrôle cardiaque impeccable sur parcours dur",
+      "execution": "Tu as passé 98 % du temps en endurance et ta fréquence cardiaque a fini plus bas qu'elle n'a commencé, dérive de -1,1 %. Sur 39 minutes avec 179 m de dénivelé, c'est le signe d'un effort tenu bien en dessous de ce que tu pouvais donner. Tes kilomètres vont de 6:20 à 7:32 mais c'est le relief qui parle, pas ton allure : ramenée au plat, tu as couru à 6:04/km, tout en haut de ta zone d'endurance qui va de 6:03 à 6:42. Les deux moitiés sont à 6:59 et 7:04, donc tu n'es pas parti trop vite. Le seul chiffre qui accroche est ta cadence à 156 pas par minute, avec 302 ms de contact au sol : c'est long, et les deux vont ensemble. Sur du raide c'est normal, il faudra le revoir sur du plat avant de conclure.",
+      "conformite": "Cette séance est antérieure au plan, qui démarre lundi 7 septembre. Elle ne compte donc dans aucune semaine, mais elle sert de point de départ : elle montre que 40 minutes en endurance passent sans coût cardiaque.",
+      "objectif": "Une sortie en endurance fondamentale construit la base aérobie, et celle-ci a fait un second travail que tu n'avais peut-être pas prévu : 179 m de dénivelé sur 5,6 km, c'est du renforcement des appuis et des mollets, exactement ce qui manque à la plupart des préparations marathon faites sur le plat. Le rôle est rempli deux fois.",
+      "source": "claude_conversation",
+      "date_redaction": "2026-09-07",
+      "fige": true
     }
   },
   "alertes": []

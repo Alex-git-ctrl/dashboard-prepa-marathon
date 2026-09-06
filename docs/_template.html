@@ -1136,10 +1136,24 @@ const VERDICTS = {
   attention:['À corriger', 'al'],
 };
 
+// Trois provenances possibles, et la page ne les confond jamais : une analyse
+// mécanique présentée comme une lecture d'entraîneur serait un mensonge.
+const SOURCES = {
+  claude: () => 'Rédigé par Claude à la collecte, à partir de la séance, du '
+    + 'plan de la semaine et de tes allures de référence.',
+  claude_conversation: r => 'Rédigé par Claude en conversation'
+    + (r.date_redaction ? ' le ' + dshort(r.date_redaction) : '')
+    + ', à partir de la séance complète, du plan et de tes allures de '
+    + 'référence. Écrit à la demande, pas automatiquement.',
+  regles: () => 'Analyse automatique, produite par un jeu de règles et non par '
+    + 'un modèle. Elle se limite à ce que des seuils peuvent dire.',
+};
+
 function resumeIA(s) {
   const r = (M.resumes || {})[s.date];
   if (!r) return '';
   const [mot, cls] = VERDICTS[r.verdict] || VERDICTS.correct;
+  const src = SOURCES[r.source] || SOURCES.regles;
   const Q = [
     ['As-tu bien couru ?', r.execution],
     ['Est-ce conforme au plan ?', r.conformite],
@@ -1152,12 +1166,7 @@ function resumeIA(s) {
     + '</div>'
     + Q.map(q => '<div class="ia-q">' + q[0] + '</div><div class="ia-r">'
       + q[1] + '</div>').join('')
-    + '<div class="ia-s">' + (r.source === 'claude'
-      ? 'Rédigé par Claude à partir de la séance, du plan de la semaine et de '
-        + 'tes allures de référence.'
-      : 'Analyse automatique, produite par un jeu de règles et non par un '
-        + 'modèle. Elle se limite à ce que des seuils peuvent dire.')
-    + '</div></div>';
+    + '<div class="ia-s">' + src(r) + '</div></div>';
 }
 
 function detailSeance(s) {
