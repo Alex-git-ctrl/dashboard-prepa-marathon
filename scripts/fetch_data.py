@@ -16,11 +16,13 @@ from dotenv import load_dotenv
 
 import alerts
 import calibration
+import seance_detail
 import sante
 
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLDEST = date(2026, 3, 1)
+DETAIL = 15   # seances gardees avec leurs splits au kilometre
 
 # La semaine 1 vient du plan : une seule source de verite, sinon les deux
 # fichiers derivent le jour ou la date de depart change.
@@ -29,8 +31,8 @@ with open(os.path.join(ROOT, "docs", "plan.json"), encoding="utf-8") as _fh:
 S1 = date.fromisoformat(PLAN["semaines"][0]["lundi"])
 
 # Dynamique de course : ces streams viennent de la ceinture HRM-Pro Plus.
-DYN = ["cadence", "stride_length", "ground_time", "vertical_oscillation",
-       "vertical_ratio", "gct_balance"]
+# La liste vit dans seance_detail, qui les demande et les moyenne.
+DYN = seance_detail.DYN
 
 
 def connect():
@@ -61,34 +63,20 @@ def mean(xs):
 
 
 def analyse_streams(s, activity_id):
-    """Derive cardiaque et moyennes de dynamique de course pour une seance.
+    """Telecharge les streams d'une seance et delegue l'analyse.
 
-    La derive compare la FC de la 2e moitie a celle de la 1re, a effort
-    theoriquement constant. Au-dessus de 5% la sortie etait trop rapide ou
-    trop longue pour la forme du moment : c'est l'indicateur de progression
-    le plus parlant sur une preparation marathon.
+    Le decoupage vit dans seance_detail : ici on ne fait que l'appel reseau et
+    on garantit qu'une erreur d'API ne fait pas tomber toute la collecte.
     """
-    out = {"derive_pct": None, "dyn": {}}
+    vide = {"derive_pct": None, "dyn": {}, "splits": [], "fc_max_reelle": None,
+            "premiere_moitie_s_km": None, "seconde_moitie_s_km": None}
     try:
         streams = get(s, f"/activity/{activity_id}/streams",
-                      types=",".join(["time", "heartrate"] + DYN))
+                      types=",".join(seance_detail.TYPES))
     except requests.RequestException:
-        return out
-    by_type = {x.get("type"): (x.get("data") or []) for x in streams}
-
-    hr = [v for v in by_type.get("heartrate", []) if v]
-    if len(hr) >= 600:                       # au moins 10 min de FC exploitable
-        mid = len(hr) // 2
-        h1 = sum(hr[:mid]) / mid
-        h2 = sum(hr[mid:]) / (len(hr) - mid)
-        if h1:
-            out["derive_pct"] = round((h2 - h1) / h1 * 100, 1)
-
-    for k in DYN:
-        vals = [v for v in by_type.get(k, []) if v]
-        if vals:
-            out["dyn"][k] = round(sum(vals) / len(vals), 1)
-    return out
+        return vide
+    return seance_detail.analyse(
+        {x.get("type"): (x.get("data") or []) for x in streams})
 
 
 def main():
@@ -123,16 +111,20 @@ def main():
             w["charge"] += a.get("icu_training_load") or 0
             w["deniv"] += a.get("total_elevation_gain") or 0
 
+        # Les temps par zone arrivent en tableaux, pas en champs numerotes.
         zs = {}
-        for z in range(1, 8):
-            sec_fc = a.get(f"hr_z{z}_secs") or 0
-            zfc[f"z{z}"] += sec_fc
-            zall[f"z{z}"] += a.get(f"z{z}_secs") or 0
-            if sec_fc:
-                zs[f"z{z}"] = sec_fc
+        for i, sec in enumerate(a.get("icu_hr_zone_times") or [], 1):
+            zfc[f"z{i}"] += sec or 0
+            if sec:
+                zs[f"z{i}"] = sec
+        for i, sec in enumerate(a.get("pace_zone_times")
+                                or a.get("gap_zone_times") or [], 1):
+            zall[f"z{i}"] += sec or 0
 
-        st = analyse_streams(s, a["id"]) if km >= 8 else {"derive_pct": None, "dyn": {}}
-        for k, v in st["dyn"].items():
+        # Les streams sont lus pour chaque course : les splits d'une seance de
+        # 35 min sont aussi utiles a relire que ceux d'une sortie longue.
+        st = analyse_streams(s, a["id"]) if km >= 1 else {}
+        for k, v in st.get("dyn", {}).items():
             dyn_all[k].append(v)
 
         # Indice d'efficacite aerobie : vitesse rapportee a la FC.
@@ -146,18 +138,29 @@ def main():
             "fc_moy": fc, "fc_max": a.get("max_heartrate"),
             "cadence": a.get("average_cadence"),
             "charge": a.get("icu_training_load"),
-            "deniv": a.get("total_elevation_gain"),
+            "deniv": round(a["total_elevation_gain"]) if a.get("total_elevation_gain") else None,
+            # Allure ajustee du denivele : sur un parcours a 180 m de D+ pour
+            # 5 km, l'allure brute ne dit rien de l'effort fourni.
+            "gap_s_km": round(1000 / a["gap"]) if a.get("gap") else None,
+            "calories": a.get("calories"),
+            "intensite": round(a["icu_intensity"]) if a.get("icu_intensity") else None,
+            # feel : le ressenti 1 a 5 saisi sur la montre ou dans l'app.
+            "feel": a.get("feel"),
             "efficacite": eff,
             "rpe": a.get("icu_rpe"),
             "notes": (a.get("description") or "").strip() or None,
-            "derive_pct": st["derive_pct"],
-            "dyn": st["dyn"] or None,
+            "derive_pct": st.get("derive_pct"),
+            "dyn": st.get("dyn") or None,
+            "fc_max_reelle": st.get("fc_max_reelle"),
+            "splits": st.get("splits") or None,
+            "premiere_moitie_s_km": st.get("premiere_moitie_s_km"),
+            "seconde_moitie_s_km": st.get("seconde_moitie_s_km"),
             # Repartition du temps par zone de FC sur cette seance : c'est le
             # retour le plus actionnable apres une sortie en endurance.
             "zones_fc": zs or None,
         }
         seances.append(rec)
-        if st["derive_pct"] is not None:
+        if st.get("derive_pct") is not None:
             derives.append({"date": rec["date"], "km": km,
                             "derive_pct": st["derive_pct"]})
         if eff:
@@ -211,7 +214,10 @@ def main():
                               "minutes": v["minutes"], "charge": round(v["charge"]),
                               "deniv": round(v["deniv"])}
                      for k, v in sorted(semaines.items())},
-        "seances": seances[-60:],
+        # Les splits pesent lourd : on les garde sur les seances qu'on va
+        # vraiment relire, et on n'expose que le resume au-dela.
+        "seances": ([{k: v for k, v in r.items() if k != "splits"}
+                     for r in seances[-60:-DETAIL]] + seances[-DETAIL:]),
         "wellness": serie[-180:],
         "derives": derives[-20:],
         "efficacite": efficacite[-40:],
