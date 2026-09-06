@@ -11,7 +11,13 @@ telecharges pour calculer la derive cardiaque.
 # inconnu fait repondre 422 a la requete entiere, et on perd tout le detail.
 DYN = ["cadence", "step_length", "stance_time", "vertical_oscillation",
        "vertical_ratio"]
-TYPES = ["time", "heartrate", "distance", "altitude"] + DYN
+# velocity_smooth donne l'allure instantanee, watts la puissance de course :
+# le Forerunner 265 la produit avec la ceinture HRM-Pro Plus.
+TYPES = ["time", "heartrate", "distance", "altitude", "velocity_smooth",
+         "watts"] + DYN
+
+POINTS = 150       # points gardes par courbe apres sous-echantillonnage
+V_MINI = 0.6       # m/s : au-dessous on est a l'arret, l'allure ne veut rien dire
 
 MIN_ECHANTILLONS = 60      # moins d'une minute de trace : rien a decouper
 MIN_RESTE_M = 300          # dernier troncon garde s'il depasse 300 m
@@ -84,9 +90,9 @@ def splits(temps, distance, fc, alt, pas=1000.0):
 
 def analyse(par_type):
     """Tout ce qu'on sait tirer des streams d'une seance."""
-    out = {"derive_pct": None, "dyn": {}, "splits": [],
+    out = {"derive_pct": None, "dyn": {}, "splits": [], "courbes": None,
            "fc_max_reelle": None, "seconde_moitie_s_km": None,
-           "premiere_moitie_s_km": None}
+           "premiere_moitie_s_km": None, "puissance_moy": None}
 
     temps = par_type.get("time") or []
     hr = par_type.get("heartrate") or []
@@ -112,6 +118,10 @@ def analyse(par_type):
             out["dyn"][k] = round(m, 1)
 
     out["splits"] = splits(temps, dist, hr, alt)
+    out["courbes"] = courbes(par_type)
+    w = [v for v in (par_type.get("watts") or []) if v]
+    if w:
+        out["puissance_moy"] = round(sum(w) / len(w))
 
     # Negative split : la moitie de la distance, pas la moitie du temps. C'est
     # la question que se pose un coureur qui prepare un marathon.
@@ -126,3 +136,46 @@ def analyse(par_type):
             out["seconde_moitie_s_km"] = round(
                 sum(x["allure_s_km"] for x in reste) / len(reste))
     return out
+
+
+def courbes(par_type, n=POINTS):
+    """Series sous-echantillonnees pour les graphiques de seance.
+
+    Une course d'une heure fait 3600 points par canal. On en garde 150, par
+    MOYENNE et non par decimation : prendre un point sur vingt-quatre raterait
+    les pics de FC et de puissance, qui sont precisement ce qu'on vient lire.
+    """
+    temps = par_type.get("time") or []
+    if len(temps) < 20:
+        return None
+    N = len(temps)
+    n = min(n, N)
+    bornes = [round(i * N / n) for i in range(n + 1)]
+
+    def canal(cle, transfo=None):
+        src = par_type.get(cle) or []
+        if not any(v for v in src):
+            return None
+        out = []
+        for i in range(n):
+            seg = [v for v in src[bornes[i]:bornes[i + 1]] if v is not None]
+            if not seg:
+                out.append(None)
+                continue
+            m = sum(seg) / len(seg)
+            out.append(transfo(m) if transfo else round(m))
+        return out if any(v is not None for v in out) else None
+
+    # L'allure vient de la vitesse : a l'arret elle tendrait vers l'infini,
+    # donc on la laisse vide plutot que de tracer un pic absurde.
+    allure = canal("velocity_smooth",
+                   lambda v: round(1000 / v) if v >= V_MINI else None)
+
+    out = {
+        "t": [round(temps[bornes[i]]) for i in range(n)],
+        "allure": allure,
+        "fc": canal("heartrate"),
+        "puissance": canal("watts"),
+        "altitude": canal("altitude"),
+    }
+    return out if any(out[k] for k in ("allure", "fc", "puissance")) else None

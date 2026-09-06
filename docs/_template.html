@@ -369,6 +369,50 @@ line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
 .verd{font-size:var(--t3);line-height:1.5;margin-top:var(--s3)}
 .verd b{font-weight:600}
 
+/* ---------- graphiques de seance, direction Garmin ----------
+   Garmin donne une teinte par metrique et une rampe fixe aux zones de FC.
+   C'est une convention qu'un coureur lit deja sur sa montre : la reprendre
+   vaut mieux que d'imposer la mienne. Ces teintes ne servent QUE dans les
+   courbes de seance et l'histogramme de zones, jamais ailleurs, pour ne pas
+   defaire la regle du reste du site.
+   Les trois metriques tracees passent les six controles de palette. La rampe
+   des zones est ordinale et non categorielle : ce qui est verifie sur elle,
+   c'est la clarte strictement decroissante de Z1 a Z7, pour qu'elle se lise
+   aussi dans l'ordre en niveaux de gris. Chaque barre porte de toute facon son
+   nom, ses bornes en bpm et son temps : la couleur ne porte jamais seule. */
+:root{
+  --m-allure:#1B6AC9;
+  --m-fc:#D9432F;
+  --m-puissance:#7A4FBF;
+  --m-alt:#6B7378;
+  --z1:#B4BABD; --z2:#6BA6E0; --z3:#3D9E5C; --z4:#A87410;
+  --z5:#B33220; --z6:#87200F; --z7:#571309;
+}
+.gc{margin-top:var(--s3);position:relative}
+.gc svg{display:block;width:100%;height:auto;overflow:visible}
+text.gl{font-family:"Geist Mono",monospace;font-size:10.5px;font-weight:500}
+text.gv{font-family:"Geist Mono",monospace;font-size:10.5px;fill:var(--sourd)}
+line.gg{stroke:var(--filet);stroke-width:1}
+line.gx{stroke:var(--bitume);stroke-width:1;stroke-dasharray:3 3}
+.gc-l{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s2);
+  font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
+.gc-l span{display:flex;align-items:center;gap:var(--s2)}
+.gc-l i{width:14px;height:3px;border-radius:2px;display:block;flex-shrink:0}
+
+/* Histogramme des zones : proportion du temps passe dans chacune. */
+.gz{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s2) var(--s3);
+  align-items:center;font-size:var(--t2)}
+.gz .zk{min-width:0}
+.gz .zn{font-weight:500;line-height:1.25}
+.gz .zr{font-family:var(--num);color:var(--acier);font-size:var(--t1);
+  line-height:1.3}
+.gz .zb{height:15px;background:var(--creux);border-radius:2px}
+.gz .zb i{display:block;height:100%;border-radius:2px;min-width:2px}
+.gz .zv{font-family:var(--num);white-space:nowrap;text-align:right;
+  line-height:1.3}
+.gz .zv em{font-style:normal;color:var(--acier);font-size:var(--t1);
+  display:block}
+
 /* ---------- barre d'onglets ---------- */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--craie);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
@@ -704,7 +748,18 @@ function zonesFC(s, avecBilan) {
     '<span><i style="background:' + g[2] + '"></i>' + g[0] + ' ' + pct(g)
     + ' %</span>').join('') + '</div>';
   if (!avecBilan) return h;
+  return h + bilanZones(s);
+}
+
+/** La lecture qui accompagne la repartition : elle vaut pour la barre empilee
+    de l'accueil comme pour l'histogramme detaille. */
+function bilanZones(s) {
+  const G = ZONES_G(s);
+  const tot = G.reduce((t, g) => t + g[1], 0);
+  if (!tot) return '';
+  const pct = g => Math.round(g[1] / tot * 100);
   const ef = pct(G[0]);
+  let h = '';
   h += ef >= 75
     ? '<div class="bilan ok"><b>' + ef + ' % du temps en endurance.</b> '
       + "C'est le bon dosage : la sortie construit ta base sans coûter de "
@@ -737,6 +792,7 @@ function chiffres(s) {
   // nf() et pas la valeur brute : 7.4 doit s'ecrire 7,4.
   if (s.derive_pct != null) N.push([nf(s.derive_pct), '%', 'dérive cardiaque']);
   if (s.cadence) N.push([ppm(s.cadence), 'ppm', 'cadence']);
+  if (s.puissance_moy) N.push([nf(s.puissance_moy), 'W', 'puissance moyenne']);
   if (s.calories) N.push([nf(s.calories), 'kcal', 'dépense']);
   if (s.deniv) N.push([Math.round(s.deniv), 'm', 'dénivelé positif']);
   if (s.charge) N.push([Math.round(s.charge), '', 'charge']);
@@ -825,9 +881,229 @@ function comparaison(s, idx) {
        : 'Stable, ce qui est normal d’une séance à l’autre.') + '</div>';
 }
 
+/* ---------- courbes de seance, dans l'esprit des ecrans Garmin ----------
+   Trois panneaux empiles qui partagent un axe de temps, plus une bande
+   d'altitude en bas. Aire translucide sous un trait plein, une teinte par
+   metrique, un curseur unique qui traverse les quatre panneaux. C'est la
+   lecture qu'un coureur a deja dans les yeux en sortant de sa montre. */
+
+// Intervals.icu nomme les zones en anglais. On traduit les intitules par
+// defaut, mais si Alex les a renommes sur son compte, c'est SON nom qui gagne :
+// c'est celui qu'il lit sur sa montre.
+const ZONE_EN = {'Recovery':'Récupération', 'Aerobic':'Endurance',
+  'Tempo':'Tempo', 'SubThreshold':'Seuil', 'SuperThreshold':'Au-dessus du seuil',
+  'Aerobic Capacity':'Capacité aérobie', 'Anaerobic':'Anaérobie'};
+const ZONE_FR = ['Récupération', 'Endurance', 'Tempo', 'Seuil',
+  'Au-dessus du seuil', 'Capacité aérobie', 'Anaérobie'];
+const nomZone = i => {
+  const n = (M.zones_noms || [])[i];
+  return n ? (ZONE_EN[n] || n) : (ZONE_FR[i] || 'Zone ' + (i + 1));
+};
+const ZONE_COL = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)',
+  'var(--z5)', 'var(--z6)', 'var(--z7)'];
+
+/** Duree en h:mm:ss ou mm:ss. */
+function duree(s) {
+  s = Math.round(s);
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), r = s % 60;
+  const mm = String(m).padStart(h ? 2 : 1, '0');
+  return (h ? h + ':' : '') + mm + ':' + String(r).padStart(2, '0');
+}
+
+/** Quantile d'une serie, pour borner l'axe sans le laisser dicter par une
+    seconde d'arret : une allure de 15:00/km au demarrage ecraserait tout. */
+function quant(vals, p) {
+  const s = vals.slice().sort((a, b) => a - b);
+  return s[Math.min(s.length - 1, Math.max(0, Math.round((s.length - 1) * p)))];
+}
+
+function courbesSeance(box, s) {
+  const C = s.courbes;
+  if (!C || !C.t || C.t.length < 3) return false;
+
+  const PAN = [
+    // `resume` : la moyenne annoncee par l'activite. On la prefere a la
+    // moyenne des points, qui pour une allure surpondere les moments lents et
+    // afficherait 7:06/km la ou les chiffres cles disent 6:55/km.
+    {cle:'allure', nom:'Allure', col:'var(--m-allure)', inv:true, h:78,
+     borne:true, resume:s.allure_s_km,
+     fmt:v => allure(Math.round(v)) + '/km', axe:v => allure(Math.round(v))},
+    {cle:'fc', nom:'Fréquence cardiaque', col:'var(--m-fc)', h:78,
+     zones:true, resume:s.fc_moy,
+     fmt:v => Math.round(v) + ' bpm', axe:v => Math.round(v)},
+    {cle:'puissance', nom:'Puissance', col:'var(--m-puissance)', h:78,
+     borne:true, resume:s.puissance_moy,
+     fmt:v => Math.round(v) + ' W', axe:v => Math.round(v)},
+    {cle:'altitude', nom:'Altitude', col:'var(--m-alt)', h:46,
+     fmt:v => Math.round(v) + ' m', axe:v => Math.round(v)},
+  ].filter(p => (C[p.cle] || []).some(v => v != null));
+  if (!PAN.length) return false;
+
+  const W = 520, L = 48, R = 8, ECART = 12, AX = 20;
+  const H = PAN.reduce((t, p) => t + p.h, 0) + ECART * (PAN.length - 1) + AX;
+  const t0 = C.t[0], t1 = C.t[C.t.length - 1], span = (t1 - t0) || 1;
+  const X = t => L + (t - t0) / span * (W - L - R);
+
+  let y = 0;
+  PAN.forEach(p => {
+    p.y0 = y; y += p.h + ECART;
+    const vals = C[p.cle].filter(v => v != null);
+    let mn, mx;
+    if (p.borne) { mn = quant(vals, .03); mx = quant(vals, .97); }
+    else { mn = Math.min(...vals); mx = Math.max(...vals); }
+    if (mx - mn < 1e-6) { mn -= 1; mx += 1; }
+    const pad = (mx - mn) * .12;
+    // On ecrete sur le quantile brut, mais l'axe garde sa marge autour : sans
+    // ca une valeur ecretee se pose pile sur la bordure du panneau et se lit
+    // comme un trait coupe.
+    p.lo = mn; p.hi = mx;
+    p.mn = mn - pad; p.mx = mx + pad;
+    p.moy = p.resume != null ? p.resume
+      : vals.reduce((a, b) => a + b, 0) / vals.length;
+    // L'allure se lit a l'envers : le plus rapide doit etre en haut.
+    p.Y = v => {
+      const f = (Math.min(p.hi, Math.max(p.lo, v)) - p.mn) / (p.mx - p.mn);
+      return p.y0 + (p.inv ? f : 1 - f) * p.h;
+    };
+  });
+
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Allure, `
+    + `fréquence cardiaque, puissance et altitude au fil de la séance">`;
+
+  PAN.forEach(p => {
+    const bas = p.y0 + p.h;
+    // Grille : le haut, le bas, et rien entre les deux. Les panneaux sont
+    // courts, une troisieme ligne ne ferait qu'ajouter du bruit.
+    g += `<line class="gg" x1="${L}" y1="${p.y0}" x2="${W - R}" y2="${p.y0}"/>`
+       + `<line class="gg" x1="${L}" y1="${bas}" x2="${W - R}" y2="${bas}"/>`;
+
+    // Bornes des zones de FC, a leur hauteur reelle : on voit du regard a
+    // quel moment la seance a change de zone.
+    if (p.zones && s.zones_bornes) {
+      s.zones_bornes.forEach((b, i) => {
+        if (b <= p.mn || b >= p.mx || i >= 6) return;
+        g += `<line x1="${L}" y1="${p.Y(b).toFixed(1)}" x2="${W - R}"
+          y2="${p.Y(b).toFixed(1)}" stroke="${ZONE_COL[i + 1]}"
+          stroke-width="1" stroke-dasharray="4 3"/>
+          <text class="gv" x="${W - R + 3}" y="${(p.Y(b) + 3).toFixed(1)}"
+          fill="${ZONE_COL[i + 1]}">Z${i + 2}</text>`;
+      });
+    }
+
+    // Segments : une valeur absente coupe le trait au lieu de le faire
+    // traverser le trou en ligne droite.
+    const segs = []; let cur = [];
+    C.t.forEach((t, i) => {
+      const v = C[p.cle][i];
+      if (v == null) { if (cur.length > 1) segs.push(cur); cur = []; return; }
+      cur.push([X(t), p.Y(v)]);
+    });
+    if (cur.length > 1) segs.push(cur);
+    segs.forEach(sg => {
+      const pts = sg.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
+      g += `<path d="M${sg[0][0].toFixed(1)},${bas} L${pts.replace(/ /g, ' L')}`
+         + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" fill="${p.col}"
+           fill-opacity=".13" stroke="none"/>`;
+      g += `<polyline points="${pts}" fill="none" stroke="${p.col}"
+        stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>`;
+    });
+
+    // Etiquettes d'axe : le haut et le bas du panneau, rien de plus.
+    const hautV = p.inv ? p.mn : p.mx, basV = p.inv ? p.mx : p.mn;
+    g += `<text class="gv" x="${L - 6}" y="${p.y0 + 8}" text-anchor="end"
+      >${p.axe(hautV)}</text>
+      <text class="gv" x="${L - 6}" y="${bas - 1}" text-anchor="end"
+      >${p.axe(basV)}</text>`;
+    // Nom du panneau et moyenne, poses dans le panneau comme sur la montre.
+    g += `<text class="gl" x="${L + 6}" y="${p.y0 + 12}" fill="${p.col}"
+      >${p.nom}</text><text class="gv" x="${L + 6}" y="${p.y0 + 24}"
+      >moyenne ${p.fmt(p.moy)}</text>`;
+  });
+
+  // Axe des temps, en minutes.
+  // Graduations sur des multiples ronds de minutes, comme sur la montre, et
+  // non sur cinq fractions egales de la duree, qui donnaient 0, 10, 19, 29, 39.
+  const bas = H - AX;
+  const mins = span / 60;
+  const PAS = [1, 2, 5, 10, 15, 20, 30, 60, 120];
+  const pas = PAS.find(c => mins / c <= 6) || 120;
+  for (let m = 0; m * 60 <= span + 1; m += pas) {
+    const x = X(t0 + m * 60);
+    const dernier = (m + pas) * 60 > span + 1;
+    const anc = m === 0 ? 'start' : dernier && x > W - R - 24 ? 'end' : 'middle';
+    g += `<text class="gv" x="${x.toFixed(1)}" y="${bas + 14}"
+      text-anchor="${anc}">${m}${dernier ? ' min' : ''}</text>`;
+  }
+  g += `<line class="gx" data-cur x1="0" y1="0" x2="0" y2="${bas}"
+    style="opacity:0"/></svg>`;
+  box.innerHTML = g;
+
+  // ---- curseur partage : un seul trait pour les quatre panneaux ----
+  const svg = box.querySelector('svg'), cur = svg.querySelector('[data-cur]');
+  svg.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect(); if (!r.width) return;
+    const vx = (e.clientX - r.left) / r.width * W;
+    const t = t0 + (vx - L) / (W - L - R) * span;
+    let j = 0, d = Infinity;
+    C.t.forEach((x, i) => { const y2 = Math.abs(x - t); if (y2 < d) { d = y2; j = i; } });
+    const li = PAN.filter(p => C[p.cle][j] != null)
+      .map(p => p.nom + ' ' + p.fmt(C[p.cle][j]));
+    if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0; return; }
+    const x = X(C.t[j]);
+    cur.setAttribute('x1', x.toFixed(1)); cur.setAttribute('x2', x.toFixed(1));
+    cur.style.opacity = 1;
+    tip.innerHTML = duree(C.t[j] - t0) + '<br>' + li.join('<br>');
+    tip.style.left = Math.round(Math.min(Math.max(r.left + x / W * r.width, 76),
+      document.documentElement.clientWidth - 76)) + 'px';
+    tip.style.top = Math.round(r.top + r.height * .5) + 'px';
+    tip.style.opacity = 1;
+  });
+  svg.addEventListener('pointerleave', () => {
+    tip.style.opacity = 0; cur.style.opacity = 0;
+  });
+
+  box.insertAdjacentHTML('beforeend', '<div class="gc-l">'
+    + PAN.map(p => '<span><i style="background:' + p.col + '"></i>' + p.nom
+      + '</span>').join('') + '</div>');
+  return true;
+}
+
+/** Histogramme des zones de FC : la proportion du temps passe dans chacune. */
+function histoZones(s) {
+  const Z = s.zones_fc || {}, B = s.zones_bornes || [];
+  const tot = Object.values(Z).reduce((a, b) => a + b, 0);
+  if (!tot || !B.length) return '';
+  const lignes = [];
+  let vides = 0;
+  B.forEach((haut, i) => {
+    const sec = Z['z' + (i + 1)] || 0;
+    if (!sec) { vides++; return; }
+    const bas = i ? B[i - 1] : null;
+    lignes.push('<div class="zk"><div class="zn">Z' + (i + 1) + ' · '
+      + nomZone(i) + '</div><div class="zr">'
+      + (bas ? bas + ' à ' + haut : 'jusqu’à ' + haut) + ' bpm</div></div>'
+      + '<span class="zb"><i style="width:' + (sec / tot * 100).toFixed(1)
+      + '%;background:' + ZONE_COL[i] + '"></i></span>'
+      + '<span class="zv">' + Math.round(sec / tot * 100) + ' %'
+      + '<em>' + duree(sec) + '</em></span>');
+  });
+  if (!lignes.length) return '';
+  return '<div class="sc-h">Temps par zone de fréquence cardiaque</div>'
+    + '<div class="gz">' + lignes.join('') + '</div>'
+    + (vides ? '<div class="sp-l">' + (vides > 1 ? vides + ' zones plus hautes '
+        + 'n’ont pas été touchées.' : 'La zone la plus haute n’a pas été '
+        + 'touchée.') + '</div>' : '');
+}
+
 function detailSeance(s) {
   let h = ecartPlan(s) + chiffres(s);
-  h += '<div class="sc-h">Répartition cardiaque</div>' + zonesFC(s, true);
+  // Les courbes d'abord : c'est la lecture que la montre donne, et celle qui
+  // repond a la question "qu'est-ce qui s'est passe pendant cette sortie".
+  if (s.courbes) {
+    h += '<div class="sc-h">Au fil de la séance</div>'
+      + '<div class="gc" data-courbes="' + s.date + '"></div>';
+  }
+  h += histoZones(s) + bilanZones(s);
   h += splits(s);
   const m = moities(s);
   if (m) h += '<div class="sc-h">Les deux moitiés</div>' + m;
@@ -898,11 +1174,19 @@ function detailSeance(s) {
       + '<path d="M6 9.5l6 6 6-6"/></svg></summary>'
       + '<div class="sc-d">' + detailSeance(s) + '</div></details>';
   }).join('');
+  // Les SVG se construisent apres l'insertion : ils ont besoin d'un noeud
+  // reel pour brancher le curseur.
+  S.forEach(s => {
+    if (!s.courbes) return;
+    const b = document.querySelector('[data-courbes="' + s.date + '"]');
+    if (b) courbesSeance(b, s);
+  });
   const avecSplits = S.filter(s => s.splits && s.splits.length).length;
   $('sea-n').textContent = S.length + ' séance' + (S.length > 1 ? 's' : '')
     + ' enregistrée' + (S.length > 1 ? 's' : '') + '. Le découpage au kilomètre '
-    + 'est disponible sur ' + avecSplits + ' d’entre elles. La plus récente est '
-    + 'ouverte, les autres se déplient.';
+    + 'est disponible sur ' + avecSplits + ' d’entre elles, les courbes '
+    + 'seconde par seconde sur ' + S.filter(s => s.courbes).length
+    + '. La plus récente est ouverte, les autres se déplient.';
 })();
 
 /* ---------- journal des jours sans course ---------- */

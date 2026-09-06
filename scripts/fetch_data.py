@@ -22,7 +22,8 @@ import sante
 BASE = "https://intervals.icu/api/v1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLDEST = date(2026, 3, 1)
-DETAIL = 15   # seances gardees avec leurs splits au kilometre
+DETAIL = 15    # seances gardees avec leurs splits au kilometre
+COURBES = 10   # seances gardees avec leurs courbes seconde par seconde
 
 # La semaine 1 vient du plan : une seule source de verite, sinon les deux
 # fichiers derivent le jour ou la date de depart change.
@@ -79,9 +80,34 @@ def analyse_streams(s, activity_id):
         {x.get("type"): (x.get("data") or []) for x in streams})
 
 
+def allege(seances):
+    """Retire le detail lourd des seances anciennes, en deux paliers."""
+    out = []
+    for i, r in enumerate(seances[-60:]):
+        reste = len(seances[-60:]) - i
+        jeter = set()
+        if reste > COURBES:
+            jeter.add("courbes")
+        if reste > DETAIL:
+            jeter.add("splits")
+        out.append({k: v for k, v in r.items() if k not in jeter})
+    return out
+
+
 def main():
     s, ath = connect()
     today = date.today()
+
+    # Noms des zones de FC tels que l'athlete les a regles : on les affiche
+    # plutot que d'inventer "Zone 4", que personne ne lit sur sa montre.
+    noms_zones = None
+    try:
+        for x in get(s, f"/athlete/{ath}/sport-settings"):
+            if "Run" in (x.get("types") or []):
+                noms_zones = x.get("hr_zone_names")
+                break
+    except requests.RequestException:
+        pass
 
     activities = get(s, f"/athlete/{ath}/activities",
                      oldest=OLDEST.isoformat(), newest=today.isoformat())
@@ -152,7 +178,12 @@ def main():
             "derive_pct": st.get("derive_pct"),
             "dyn": st.get("dyn") or None,
             "fc_max_reelle": st.get("fc_max_reelle"),
+            "puissance_moy": st.get("puissance_moy"),
             "splits": st.get("splits") or None,
+            "courbes": st.get("courbes"),
+            # Bornes des zones telles que la montre les applique ce jour-la :
+            # elles peuvent changer si la FC max est revisee.
+            "zones_bornes": a.get("icu_hr_zones"),
             "premiere_moitie_s_km": st.get("premiere_moitie_s_km"),
             "seconde_moitie_s_km": st.get("seconde_moitie_s_km"),
             # Repartition du temps par zone de FC sur cette seance : c'est le
@@ -214,10 +245,10 @@ def main():
                               "minutes": v["minutes"], "charge": round(v["charge"]),
                               "deniv": round(v["deniv"])}
                      for k, v in sorted(semaines.items())},
-        # Les splits pesent lourd : on les garde sur les seances qu'on va
-        # vraiment relire, et on n'expose que le resume au-dela.
-        "seances": ([{k: v for k, v in r.items() if k != "splits"}
-                     for r in seances[-60:-DETAIL]] + seances[-DETAIL:]),
+        # Splits et courbes pesent lourd. On les garde sur les seances qu'on
+        # va vraiment relire et on n'expose que le resume au-dela, sinon
+        # metrics.json enfle sans que personne n'ouvre les vieilles cartes.
+        "seances": allege(seances),
         "wellness": serie[-180:],
         "derives": derives[-20:],
         "efficacite": efficacite[-40:],
@@ -230,6 +261,7 @@ def main():
         "couverture": {dst: dispo(dst) for dst in CHAMPS.values()},
         "jours_wellness": len(serie),
     }
+    metrics["zones_noms"] = noms_zones
     metrics["dates"] = {dst: date_de(dst) for dst in CHAMPS.values()}
     metrics["dates"]["sommeil_h"] = date_de("sommeil_h")
     metrics["dates"]["derive_pct"] = derives[-1]["date"] if derives else None
