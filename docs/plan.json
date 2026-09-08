@@ -8,6 +8,7 @@
     "poids_kg": 82,
     "ref_10k_min": 48
   },
+  "ef_pace_min_km": 6.1,
   "courses": [
     {
       "cle": "dix",
@@ -17,9 +18,9 @@
       "jour": "samedi",
       "semaine": 3,
       "distance_km": 10,
-      "cible": "46 a 48 min",
-      "allure": "4:36 a 4:48 /km",
-      "role": "Premiere calibration reelle, un samedi matin. Negative split : c'est un test, pas un record."
+      "cible": "46 à 48 min",
+      "allure": "4:36 à 4:48 /km",
+      "role": "Première calibration réelle, un samedi matin. Negative split : c'est un test, pas un record."
     },
     {
       "cle": "semi",
@@ -29,9 +30,9 @@
       "jour": "dimanche",
       "semaine": 7,
       "distance_km": 21.0975,
-      "cible": "1h45 a 1h52",
-      "allure": "5:00 a 5:19 /km",
-      "role": "Jalon de decision : c'est lui qui fixe l'allure marathon."
+      "cible": "1h45 à 1h52",
+      "allure": "5:00 à 5:19 /km",
+      "role": "Jalon de décision : c'est lui qui fixe l'allure marathon."
     },
     {
       "cle": "marathon",
@@ -43,7 +44,7 @@
       "distance_km": 42.195,
       "cible": "sub-4h00",
       "allure": "5:41 /km",
-      "role": "Zurich Marato de Barcelona, depart 8h30 Placa de Catalunya. Parcours plat, parmi les plus rapides au monde."
+      "role": "Zurich Marató de Barcelona, départ 8h30 Plaça de Catalunya. Parcours plat, parmi les plus rapides au monde."
     }
   ],
   "blocs": [
@@ -51,19 +52,19 @@
       "debut": 1,
       "fin": 7,
       "nom": "Bloc 1",
-      "desc": "Base aerobie, 10 km et semi"
+      "desc": "Base aérobie, 10 km et semi"
     },
     {
       "debut": 8,
       "fin": 12,
       "nom": "Bloc 2",
-      "desc": "Recuperation et fondation marathon"
+      "desc": "Récupération et fondation marathon"
     },
     {
       "debut": 13,
       "fin": 20,
       "nom": "Bloc 3",
-      "desc": "Construction specifique"
+      "desc": "Construction spécifique"
     },
     {
       "debut": 21,
@@ -75,7 +76,7 @@
       "debut": 25,
       "fin": 27,
       "nom": "Bloc 5",
-      "desc": "Affutage"
+      "desc": "Affûtage"
     }
   ],
   "semaines": [
@@ -84,35 +85,35 @@
       "lundi": "2026-09-07",
       "dimanche": "2026-09-13",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "base",
       "sortie_longue_km": 8,
       "seance1_min": 35,
       "seance2_min": 35,
       "volume_km": 19.5,
       "course": null,
-      "note": "Passage a 3 seances. Tout en endurance fondamentale."
+      "note": "Passage à 3 séances. Tout en endurance fondamentale."
     },
     {
       "semaine": 2,
       "lundi": "2026-09-14",
       "dimanche": "2026-09-20",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "base",
       "sortie_longue_km": 10,
       "seance1_min": 40,
       "seance2_min": 40,
       "volume_km": 23.1,
       "course": null,
-      "note": "Premiere sortie a 10 km. Aucune acceleration."
+      "note": "Première sortie à 10 km. Aucune accélération."
     },
     {
       "semaine": 3,
       "lundi": "2026-09-21",
       "dimanche": "2026-09-27",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "COURSE",
       "sortie_longue_km": 10,
       "seance1_min": 30,
@@ -126,35 +127,35 @@
       "lundi": "2026-09-28",
       "dimanche": "2026-10-04",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "base",
       "sortie_longue_km": 12,
       "seance1_min": 40,
       "seance2_min": 40,
       "volume_km": 25.1,
       "course": null,
-      "note": "Reprise apres la course. Zones recalibrees sur le chrono."
+      "note": "Reprise après la course. Zones recalibrées sur le chrono."
     },
     {
       "semaine": 5,
       "lundi": "2026-10-05",
       "dimanche": "2026-10-11",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "specifique",
       "sortie_longue_km": 15,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 29.8,
       "course": null,
-      "note": "Seance 2 : 3 x 6 min a allure semi, 2 min de trot entre."
+      "note": "Séance 2 : 3 × 6 min à allure semi, 2 min de trot entre."
     },
     {
       "semaine": 6,
       "lundi": "2026-10-12",
       "dimanche": "2026-10-18",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "specifique",
       "sortie_longue_km": 18,
       "seance1_min": 45,
@@ -168,7 +169,7 @@
       "lundi": "2026-10-19",
       "dimanche": "2026-10-25",
       "bloc": "Bloc 1",
-      "bloc_desc": "Base aerobie, 10 km et semi",
+      "bloc_desc": "Base aérobie, 10 km et semi",
       "type": "COURSE",
       "sortie_longue_km": 21.1,
       "seance1_min": 30,
@@ -182,21 +183,21 @@
       "lundi": "2026-10-26",
       "dimanche": "2026-11-01",
       "bloc": "Bloc 2",
-      "bloc_desc": "Recuperation et fondation marathon",
+      "bloc_desc": "Récupération et fondation marathon",
       "type": "recup",
       "sortie_longue_km": 10,
       "seance1_min": 30,
       "seance2_min": 35,
       "volume_km": 20.7,
       "course": null,
-      "note": "Recuperation. Rien au-dessus de l'endurance fondamentale."
+      "note": "Récupération. Rien au-dessus de l'endurance fondamentale."
     },
     {
       "semaine": 9,
       "lundi": "2026-11-02",
       "dimanche": "2026-11-08",
       "bloc": "Bloc 2",
-      "bloc_desc": "Recuperation et fondation marathon",
+      "bloc_desc": "Récupération et fondation marathon",
       "type": "base",
       "sortie_longue_km": 14,
       "seance1_min": 40,
@@ -210,7 +211,7 @@
       "lundi": "2026-11-09",
       "dimanche": "2026-11-15",
       "bloc": "Bloc 2",
-      "bloc_desc": "Recuperation et fondation marathon",
+      "bloc_desc": "Récupération et fondation marathon",
       "type": "base",
       "sortie_longue_km": 16,
       "seance1_min": 45,
@@ -224,21 +225,21 @@
       "lundi": "2026-11-16",
       "dimanche": "2026-11-22",
       "bloc": "Bloc 2",
-      "bloc_desc": "Recuperation et fondation marathon",
+      "bloc_desc": "Récupération et fondation marathon",
       "type": "base",
       "sortie_longue_km": 18,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 32.8,
       "course": null,
-      "note": "Premiere sortie longue a 18 km du bloc marathon."
+      "note": "Première sortie longue à 18 km du bloc marathon."
     },
     {
       "semaine": 12,
       "lundi": "2026-11-23",
       "dimanche": "2026-11-29",
       "bloc": "Bloc 2",
-      "bloc_desc": "Recuperation et fondation marathon",
+      "bloc_desc": "Récupération et fondation marathon",
       "type": "decharge",
       "sortie_longue_km": 14,
       "seance1_min": 35,
@@ -252,35 +253,35 @@
       "lundi": "2026-11-30",
       "dimanche": "2026-12-06",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 20,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 34.8,
       "course": null,
-      "note": "Seance 2 : 2 x 15 min a allure marathon."
+      "note": "Séance 2 : 2 × 15 min à allure marathon."
     },
     {
       "semaine": 14,
       "lundi": "2026-12-07",
       "dimanche": "2026-12-13",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 22,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 36.8,
       "course": null,
-      "note": "Derniers 5 km de la sortie longue a allure marathon."
+      "note": "Derniers 5 km de la sortie longue à allure marathon."
     },
     {
       "semaine": 15,
       "lundi": "2026-12-14",
       "dimanche": "2026-12-20",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 24,
       "seance1_min": 45,
@@ -294,7 +295,7 @@
       "lundi": "2026-12-21",
       "dimanche": "2026-12-27",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "decharge",
       "sortie_longue_km": 16,
       "seance1_min": 35,
@@ -308,35 +309,35 @@
       "lundi": "2026-12-28",
       "dimanche": "2027-01-03",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 25,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 39.8,
       "course": null,
-      "note": "Seance 2 : 3 x 10 min au seuil."
+      "note": "Séance 2 : 3 × 10 min au seuil."
     },
     {
       "semaine": 18,
       "lundi": "2027-01-04",
       "dimanche": "2027-01-10",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 27,
       "seance1_min": 45,
       "seance2_min": 45,
       "volume_km": 41.8,
       "course": null,
-      "note": "Derniers 8 km a allure marathon."
+      "note": "Derniers 8 km à allure marathon."
     },
     {
       "semaine": 19,
       "lundi": "2027-01-11",
       "dimanche": "2027-01-17",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "specifique",
       "sortie_longue_km": 29,
       "seance1_min": 45,
@@ -350,7 +351,7 @@
       "lundi": "2027-01-18",
       "dimanche": "2027-01-24",
       "bloc": "Bloc 3",
-      "bloc_desc": "Construction specifique",
+      "bloc_desc": "Construction spécifique",
       "type": "decharge",
       "sortie_longue_km": 18,
       "seance1_min": 35,
@@ -371,7 +372,7 @@
       "seance2_min": 45,
       "volume_km": 40.8,
       "course": null,
-      "note": "Repetition generale : chaussures et ravitaillement de course."
+      "note": "Répétition générale : chaussures et ravitaillement de course."
     },
     {
       "semaine": 22,
@@ -385,7 +386,7 @@
       "seance2_min": 45,
       "volume_km": 44.8,
       "course": null,
-      "note": "Cap des 30 km. Pic de volume de la preparation."
+      "note": "Cap des 30 km. Pic de volume de la préparation."
     },
     {
       "semaine": 23,
@@ -399,7 +400,7 @@
       "seance2_min": 40,
       "volume_km": 43.9,
       "course": null,
-      "note": "TEST 30K a allure marathon. L'indicateur cle avant Barcelone."
+      "note": "TEST 30K à allure marathon. L'indicateur clé avant Barcelone."
     },
     {
       "semaine": 24,
@@ -420,42 +421,42 @@
       "lundi": "2027-02-22",
       "dimanche": "2027-02-28",
       "bloc": "Bloc 5",
-      "bloc_desc": "Affutage",
+      "bloc_desc": "Affûtage",
       "type": "affutage",
       "sortie_longue_km": 22,
       "seance1_min": 40,
       "seance2_min": 40,
       "volume_km": 35.1,
       "course": null,
-      "note": "Debut de l'affutage : le volume baisse, l'intensite reste."
+      "note": "Début de l'affûtage : le volume baisse, l'intensité reste."
     },
     {
       "semaine": 26,
       "lundi": "2027-03-01",
       "dimanche": "2027-03-07",
       "bloc": "Bloc 5",
-      "bloc_desc": "Affutage",
+      "bloc_desc": "Affûtage",
       "type": "affutage",
       "sortie_longue_km": 14,
       "seance1_min": 35,
       "seance2_min": 30,
       "volume_km": 24.7,
       "course": null,
-      "note": "Seance 2 : 4 x 3 min a allure marathon."
+      "note": "Séance 2 : 4 × 3 min à allure marathon."
     },
     {
       "semaine": 27,
       "lundi": "2027-03-08",
       "dimanche": "2027-03-14",
       "bloc": "Bloc 5",
-      "bloc_desc": "Affutage",
+      "bloc_desc": "Affûtage",
       "type": "COURSE",
       "sortie_longue_km": 42.195,
       "seance1_min": 25,
       "seance2_min": 20,
       "volume_km": 49.6,
       "course": "marathon",
-      "note": "MARATHON DE BARCELONE dimanche 14/03, depart 8h30."
+      "note": "MARATHON DE BARCELONE dimanche 14/03, départ 8h30."
     }
   ],
   "pic_volume_km": 44.8,

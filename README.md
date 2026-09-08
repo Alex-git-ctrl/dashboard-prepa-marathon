@@ -14,7 +14,7 @@ Forerunner 265 + HRM-Pro Plus
         ↓  partenariat officiel, moins de 5 minutes
    Intervals.icu          ← source unique de vérité
         ↓  API HTTP, une clé
-  GitHub Actions, tous les jours à 7h
+  GitHub Actions, à 7h et à 21h
         ↓
   Page statique sur GitHub Pages
 ```

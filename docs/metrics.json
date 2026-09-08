@@ -1,7 +1,18 @@
 {
-  "maj": "2026-09-08T09:11:26",
+  "maj": "2026-09-08T23:37:38",
   "nb_activites": 1,
-  "semaines": {},
+  "semaines": {
+    "1": {
+      "km": 0.0,
+      "seances": 0,
+      "minutes": 0,
+      "charge": 0,
+      "deniv": 0,
+      "renfo_seances": 1,
+      "renfo_minutes": 43
+    }
+  },
+  "nb_renfos": 1,
   "seances": [
     {
       "date": "2026-09-05",
@@ -1020,9 +1031,9 @@
       "respiration": null,
       "masse_grasse": null,
       "ctl": 0.5914711,
-      "atl": 2.3414652,
+      "atl": 3.5395641,
       "ramp_rate": null,
-      "pas": 94,
+      "pas": 10293,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -1075,9 +1086,9 @@
     "respiration": null,
     "masse_grasse": null,
     "ctl": 0.5914711,
-    "atl": 2.3414652,
+    "atl": 3.5395641,
     "ramp_rate": null,
-    "pas": 94,
+    "pas": 10293,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -1284,7 +1295,7 @@
         "fatigue_indice": null
       },
       {
-        "pas": 94,
+        "pas": 10293,
         "sommeil_h": 7.2,
         "sommeil_score": 86.0,
         "fc_repos": 45,
@@ -1296,7 +1307,7 @@
       }
     ],
     "actuel": {
-      "pas": 94,
+      "pas": 10293,
       "pas_date": "2026-09-08",
       "sommeil_h": 7.2,
       "sommeil_h_date": "2026-09-08",
@@ -1382,6 +1393,62 @@
       "temps": "3h59"
     },
     "marge_marathon_s": 27
+  },
+  "adaptation": {
+    "semaine_courante": 1,
+    "observance": {
+      "semaines": [],
+      "fenetre": [],
+      "km_prevu": 0,
+      "km_fait": 0,
+      "seances_prevues": 0,
+      "seances_faites": 0,
+      "ratio": null,
+      "base_km": null
+    },
+    "cout": {
+      "indice": 14,
+      "niveau": "faible",
+      "composantes": [
+        {
+          "nom": "Dérive cardiaque",
+          "valeur": "-1,1 %",
+          "points": 0,
+          "max": 30
+        },
+        {
+          "nom": "Effort perçu",
+          "valeur": "4,0 sur 10",
+          "points": 0,
+          "max": 30
+        },
+        {
+          "nom": "Temps en endurance",
+          "valeur": "98 %",
+          "points": 0,
+          "max": 25
+        },
+        {
+          "nom": "Dette de sommeil",
+          "valeur": "6,6 h sur la semaine",
+          "points": 14,
+          "max": 15
+        }
+      ]
+    },
+    "decision": {
+      "action": "attendre",
+      "facteur": 1.0,
+      "raison": "Le plan d'origine s'applique : moins de 2 séances mesurées sur la fenêtre. Le moteur ne décide pas sans mesures.",
+      "observance": null,
+      "cout": "faible"
+    },
+    "semaines_ajustees": [],
+    "reglages": {
+      "rampe_max_pct": 10,
+      "fenetre_semaines": 3,
+      "horizon_semaines": 3
+    }
   },
   "resumes": {
     "2026-09-05": {

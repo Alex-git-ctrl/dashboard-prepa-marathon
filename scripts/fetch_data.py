@@ -15,6 +15,7 @@ import requests
 from dotenv import load_dotenv
 
 import alerts
+import adaptation
 import calibration
 import resume_ia
 import seance_detail
@@ -112,11 +113,31 @@ def main():
 
     activities = get(s, f"/athlete/{ath}/activities",
                      oldest=OLDEST.isoformat(), newest=today.isoformat())
-    runs = [a for a in activities if "run" in str(a.get("type", "")).lower()]
+    def genre(a):
+        t = str(a.get("type", "")).lower()
+        if "run" in t:
+            return "course"
+        # Les seances de renforcement sont au plan deux fois par semaine et
+        # etaient purement et simplement jetees ici. Elles ne produisent pas de
+        # kilometres, donc elles se comptent a part, jamais dans le volume.
+        if any(k in t for k in ("weight", "strength", "workout", "gym")):
+            return "renfo"
+        return None
+
+    runs = [a for a in activities if genre(a) == "course"]
+    renfos = [a for a in activities if genre(a) == "renfo"]
     runs.sort(key=lambda x: x.get("start_date_local", ""))
 
     semaines = defaultdict(lambda: {"km": 0.0, "seances": 0, "minutes": 0,
-                                    "charge": 0, "deniv": 0})
+                                    "charge": 0, "deniv": 0,
+                                    "renfo_seances": 0, "renfo_minutes": 0})
+
+    for a in renfos:
+        d = datetime.fromisoformat(a["start_date_local"][:19]).date()
+        n = plan_week(d)
+        if n:
+            semaines[n]["renfo_seances"] += 1
+            semaines[n]["renfo_minutes"] += round((a.get("moving_time") or 0) / 60)
     seances, derives, efficacite = [], [], []
     zfc = defaultdict(int)          # secondes par zone de frequence cardiaque
     zall = defaultdict(int)         # secondes par zone d'allure
@@ -244,8 +265,11 @@ def main():
         "nb_activites": len(runs),
         "semaines": {str(k): {"km": round(v["km"], 1), "seances": v["seances"],
                               "minutes": v["minutes"], "charge": round(v["charge"]),
-                              "deniv": round(v["deniv"])}
+                              "deniv": round(v["deniv"]),
+                              "renfo_seances": v["renfo_seances"],
+                              "renfo_minutes": v["renfo_minutes"]}
                      for k, v in sorted(semaines.items())},
+        "nb_renfos": len(renfos),
         # Splits et courbes pesent lourd. On les garde sur les seances qu'on
         # va vraiment relire et on n'expose que le resume au-dela, sinon
         # metrics.json enfle sans que personne n'ouvre les vieilles cartes.
@@ -322,6 +346,13 @@ def main():
     metrics["calibration"] = calibration.calcule(seances, PLAN["courses"])
 
     # ---- Resume d'analyse par seance ----
+    # Le plan ecoute. On n'ecrit PAS plan.json ici : ce fichier reste le plan
+    # d'ambition ecrit a la main, et build_plan.py le regenere. L'adaptation
+    # voyage comme une liste d'ecarts, que la page applique a l'affichage.
+    # C'est aussi ce qui rend l'ajustement lisible : le volume d'origine reste
+    # a cote du volume adapte, avec la raison.
+    metrics["adaptation"] = adaptation.applique(PLAN, metrics, today)
+
     metrics["resumes"] = resume_ia.construit(
         seances, PLAN, metrics["calibration"], ROOT)
 

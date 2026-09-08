@@ -70,9 +70,12 @@ def charge(semaines, plan_semaines, semaine_courante):
 
 
 def derive_cardiaque(derives):
-    """Derive cardiaque sur les sorties longues.
+    """Derive cardiaque, sur toute seance portant assez de cardio.
 
-    Au-dessus de 5% la sortie etait trop rapide ou trop longue pour la forme
+    seance_detail la calcule des dix minutes de frequence cardiaque
+    exploitable, donc pas uniquement sur les sorties longues : les messages ne
+    doivent pas promettre une sortie longue quand la mesure vient d'un footing.
+    Au-dessus de 5% la seance etait trop rapide ou trop longue pour la forme
     du moment. Trois hausses consecutives signalent une fatigue de fond.
     """
     if len(derives) < 2:
@@ -83,7 +86,7 @@ def derive_cardiaque(derives):
     if dernier > 8:
         return _alerte(
             "critique", "Dérive cardiaque élevée",
-            f"Dernière sortie longue : {dernier:.1f} % d'écart entre la "
+            f"Dernière séance mesurée : {dernier:.1f} % d'écart entre la "
             f"deuxième et la première moitié.",
             "Ralentis les sorties longues d'environ 20 secondes au kilomètre. "
             "À ce niveau de dérive, la sortie coûte plus qu'elle ne construit.")
@@ -97,7 +100,7 @@ def derive_cardiaque(derives):
     if dernier > 5:
         return _alerte(
             "attention", "Dérive au-dessus du seuil",
-            f"Dernière sortie longue : {dernier:.1f} %, pour une cible sous 5 %.",
+            f"Dernière séance mesurée : {dernier:.1f} %, pour une cible sous 5 %.",
             "Pars plus lentement sur la prochaine sortie longue. "
             "La première moitié doit sembler trop facile.")
     return None

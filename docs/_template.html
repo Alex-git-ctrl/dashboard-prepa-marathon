@@ -361,6 +361,40 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
   vertical-align:2px;margin-right:var(--s2)}
 
+/* ---------- le plan s'adapte ---------- */
+.adapt{margin-top:var(--s3)}
+.adapt-h{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap;
+  padding-bottom:var(--s4);border-bottom:1px solid var(--filet)}
+.adapt-r{font-size:var(--t4);font-weight:600;letter-spacing:-.015em;
+  text-wrap:balance}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:var(--s6) var(--s6);
+  margin-top:var(--s4)}
+.cout-v{display:flex;align-items:baseline;gap:var(--s2);flex-wrap:wrap;
+  margin-bottom:var(--s3)}
+.cout-v b{font-family:var(--num);font-size:var(--t6);font-weight:600;
+  letter-spacing:-.035em;line-height:1}
+.cout-v em{font-style:normal;font-size:var(--t2);color:var(--sourd)}
+/* Chaque composante montre sa valeur, sa barre et ses points : aucun chiffre
+   de l'indice ne doit tomber du ciel. */
+.cmp{display:grid;gap:var(--s2);font-size:var(--t2)}
+.cmp div{display:grid;grid-template-columns:1fr auto 46px 24px;
+  gap:var(--s2) var(--s3);align-items:center}
+.cmp .cn{min-width:0}
+.cmp .cv{font-family:var(--num);color:var(--sourd);white-space:nowrap}
+.cmp .cb{height:6px;background:var(--creux);border-radius:2px}
+.cmp .cb i{display:block;height:100%;border-radius:2px;background:var(--effort)}
+.cmp .cp{font-family:var(--num);color:var(--acier);text-align:right}
+.chg{display:grid;gap:var(--s2);font-size:var(--t2)}
+.chg div{display:grid;grid-template-columns:34px auto auto 1fr;
+  gap:var(--s2) var(--s3);align-items:baseline}
+.chg .cs2{font-family:var(--num);color:var(--acier)}
+.chg .cq{font-family:var(--num);color:var(--acier)}
+.chg .cf{font-family:var(--num);font-weight:600}
+.chg .cl{color:var(--sourd);text-align:right;white-space:nowrap}
+/* Une semaine reecrite porte son volume d'origine a cote du nouveau : on doit
+   toujours pouvoir lire ce que le plan demandait au depart. */
+.wk .av{color:var(--acier)}
+
 /* ---------- controles ----------
    Le selecteur de periode et le selecteur de seance gardent leur boite : ce
    sont les deux seules choses de la page sur lesquelles on appuie, et elles
@@ -545,6 +579,9 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .top-in{padding:var(--s3) var(--s4)}
   .fresh{font-size:var(--t1)}
   .grid{grid-template-columns:1fr 1fr;gap:0 var(--s4)}
+  .deux{grid-template-columns:1fr;gap:var(--s5)}
+  .chg div{grid-template-columns:30px auto auto;gap:var(--s1) var(--s3)}
+  .chg .cl{grid-column:1 / -1;text-align:left}
   .dark{padding:var(--s4) var(--s4) var(--s3);border-radius:var(--r2)}
   .li{min-height:54px}
   .li.on{padding-left:var(--s2);padding-right:var(--s2);
@@ -585,6 +622,7 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
     <p class="lede">27 semaines vers Barcelone. Les semaines passées sont estompées,
       la semaine en cours est en noir, celles à venir s'éclaircissent à mesure
       qu'elles s'éloignent.</p>
+    <div class="sec"><h2>Le plan s'adapte</h2><div id="adapt"></div></div>
     <div class="sec"><h2>Les trois échéances</h2><div class="list" id="races"></div></div>
     <div class="sec"><h2>Allures de référence</h2><div class="list" id="paces"></div>
       <p class="note" id="paces-n"></p></div>
@@ -652,6 +690,14 @@ const dshort = s => new Date(s + 'T12:00:00').toLocaleDateString('fr-FR',
   {day:'2-digit', month:'short'});
 const dlong = s => new Date(s + 'T12:00:00').toLocaleDateString('fr-FR',
   {weekday:'long', day:'numeric', month:'long'});
+/** Cle ISO d'un objet Date, en heure locale. `toISOString` bascule sur UTC et
+    ferait reculer d'un jour selon le fuseau. */
+const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+  + '-' + String(d.getDate()).padStart(2, '0');
+/** Une distance du plan, a la francaise et sans decimale parasite. Le semi
+    est stocke a 21.0975 km : sans ce passage, la page affichait
+    "Semi-marathon · 21.0975 km". */
+const km1 = v => nf(Math.round(v * 10) / 10);
 const today = new Date(); today.setHours(12, 0, 0, 0);
 const jrs = s => Math.round((new Date(s + 'T12:00:00') - today) / 864e5);
 
@@ -795,14 +841,14 @@ function attendu(s) {
   if (!sem) return {titre:'Séance libre', prevu:null};
   const c = PLAN.courses.find(x => x.semaine === sem.semaine
     && JOURS_SEM.indexOf(x.jour) === jd);
-  if (c) return {titre:c.nom, prevu:c.distance_km + ' km, objectif ' + c.cible};
+  if (c) return {titre:c.nom, prevu:km1(c.distance_km) + ' km, objectif ' + c.cible};
   if (jd === 1 && sem.seance1_min)
     return {titre:'Endurance', prevu:sem.seance1_min + ' min en endurance'};
   if (jd === 3 && sem.seance2_min)
     return {titre:'Endurance', prevu:sem.seance2_min + ' min en endurance'};
   if (jd === 5)
     return {titre:'Sortie longue',
-            prevu:'sortie longue de ' + nf(sem.sortie_longue_km) + ' km'};
+            prevu:'sortie longue de ' + km1(sem.sortie_longue_km) + ' km'};
   return {titre:'Séance libre', prevu:null};
 }
 
@@ -940,7 +986,7 @@ function moities(s) {
     + (d <= 0
        ? 'Tu as accéléré : c’est exactement la façon de courir une sortie longue.'
        : d <= 10
-       ? 'Onze secondes ou moins d’écart, la séance est bien tenue.'
+       ? 'Dix secondes ou moins d’écart, la séance est bien tenue.'
        : 'Tu as perdu ' + d + ' secondes au kilomètre sur la seconde moitié. '
          + 'Le départ était trop rapide pour la distance visée.') + '</div>';
 }
@@ -967,7 +1013,7 @@ function dynamique(s) {
 
 /** Efficacite aerobie de la seance, comparee aux precedentes. Meme vitesse
     pour moins de FC, c'est la definition de la progression en endurance. */
-function comparaison(s, idx) {
+function comparaison(s) {
   if (!s.efficacite) return '';
   const avant = (M.efficacite || []).filter(x => x.date < s.date).slice(-5);
   if (avant.length < 3) return '';
@@ -1403,7 +1449,15 @@ function detailSeance(s) {
   const w = nowW, st = new Date(w.lundi + 'T12:00:00');
   const dt = i => { const d = new Date(st); d.setDate(d.getDate() + i);
     return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
-  const km = m => m ? 'environ ' + (m / 6.1).toFixed(1) + ' km · 6:00 à 6:30/km' : '';
+  // L'allure affichee vient de la calibration, plus d'une constante ecrite en
+  // dur : elle se recalcule apres chaque course, et l'onglet Plan annonçait
+  // deja 6:03 à 6:42 pendant que cette liste affirmait 6:00 à 6:30.
+  // La conversion des minutes en kilometres, elle, garde l'hypothese qui a
+  // servi a construire le plan, sinon la somme des jours ne tomberait plus sur
+  // le volume hebdomadaire annonce juste en dessous.
+  const EF = CAL.zones.find(z => z.cle === 'ef') || CAL.zones[0];
+  const EFP = PLAN.ef_pace_min_km || 6.1;
+  const km = m => m ? 'environ ' + km1(m / EFP) + ' km · ' + EF.texte + '/km' : '';
   const c = PLAN.courses.find(x => x.semaine === w.semaine);
   const jr = c ? ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche']
     .indexOf(c.jour) : -1;
@@ -1415,12 +1469,12 @@ function detailSeance(s) {
     ['Jeu', w.seance2_min ? 'Course · ' + w.seance2_min + ' min' : 'Repos',
       km(w.seance2_min), 0],
     ['Ven', 'Musculation', 'gainage et travail ATR', 0],
-    ['Sam', 'Sortie longue · ' + w.sortie_longue_km + ' km',
+    ['Sam', 'Sortie longue · ' + km1(w.sortie_longue_km) + ' km',
       'endurance fondamentale stricte', 0],
     ['Dim', 'Repos', 'marche ou récupération active', 1],
   ];
   if (jr >= 0) {
-    L[jr] = [L[jr][0], c.nom + ' · ' + c.distance_km + ' km',
+    L[jr] = [L[jr][0], c.nom + ' · ' + km1(c.distance_km) + ' km',
       'Objectif ' + c.cible + ' · ' + c.allure, 0];
     if (c.cle === 'dix') L[4] = ['Ven', 'Repos', 'veille de course', 1];
   }
@@ -1430,8 +1484,8 @@ function detailSeance(s) {
     <div class="li-k"><div>${r[1]}</div>
       ${r[2] ? `<div class="li-s">${r[2]}</div>` : ''}</div>
     <div class="li-v q">${r[0]} ${dt(i)}</div></div>`).join('');
-  $('week-n').textContent = 'Objectif de la semaine : ' + w.volume_km + ' km, dont '
-    + w.sortie_longue_km + ' km de sortie longue. ' + w.note;
+  $('week-n').textContent = 'Objectif de la semaine : ' + km1(w.volume_km)
+    + ' km, dont ' + km1(w.sortie_longue_km) + ' km de sortie longue. ' + w.note;
 })();
 
 /* ---------- tuiles ---------- */
@@ -1452,6 +1506,99 @@ $('quick').innerHTML = [
   ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, 'Mesurée chaque nuit portée'],
 ].map(tuile).join('');
 
+/* ---------- le plan s'adapte ----------
+   Deux axes affiches cote a cote, parce que la decision vient de leur
+   croisement : ce qui a ete fait, et ce que ca a coute. Chaque composante du
+   cout montre sa valeur et ses points, pour qu'aucun chiffre ne tombe du ciel.
+   Quand les mesures manquent, le bloc le dit au lieu de bluffer. */
+const ADAPT = {};
+const ACTIONS = {
+  progresser_fort:['On monte', 'ok'],
+  progresser:['On monte', 'ok'],
+  maintenir:['On maintient', 'no'],
+  alleger:['On allège', 'al'],
+  alleger_fort:['On allège nettement', 'al'],
+  attendre:['En attente de mesures', 'no'],
+};
+(((M.adaptation || {}).semaines_ajustees) || []).forEach(a => { ADAPT[a.semaine] = a; });
+
+(function () {
+  const A = M.adaptation;
+  if (!A) return;
+  const D = A.decision, O = A.observance, C = A.cout;
+  const [mot, cls] = ACTIONS[D.action] || ACTIONS.attendre;
+
+  let h = '<div class="adapt"><div class="adapt-h"><span class="pill ' + cls
+    + '">' + mot + '</span><span class="adapt-r">' + D.raison + '</span></div>';
+
+  // Axe 1 : ce qui a ete fait.
+  h += '<div class="deux"><div><div class="sc-h" style="margin-top:0">'
+    + 'Ce que tu as fait</div>';
+  if (O.ratio == null) {
+    h += '<div class="sp-l">Aucune semaine du plan n’est encore terminée. '
+      + 'La première mesure d’observance tombera dimanche soir.</div>';
+  } else {
+    h += '<div class="dyn">'
+      + [['Kilomètres', nf(O.km_fait) + ' sur ' + nf(O.km_prevu)],
+         ['Séances de course', O.seances_faites + ' sur ' + O.seances_prevues],
+         ['Observance', Math.round(O.ratio * 100) + ' %'],
+         ['Base de progression', nf(O.base_km) + ' km par semaine']]
+        .map(r => '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join('')
+      + '</div><div class="sp-l">Mesuré sur les '
+      + A.reglages.fenetre_semaines + ' dernières semaines terminées'
+      + (O.fenetre.length ? ', S' + O.fenetre.join(', S') : '')
+      + '. La semaine en cours ne compte pas.</div>';
+  }
+  h += '</div>';
+
+  // Axe 2 : ce que ca a coute.
+  h += '<div><div class="sc-h" style="margin-top:0">Ce que ça t’a coûté</div>';
+  if (C.indice == null) {
+    h += '<div class="sp-l">Aucun signal exploitable pour l’instant. L’indice '
+      + 'a besoin de dérive cardiaque, d’effort perçu, de temps par zone, ou '
+      + 'de 14 nuits pour comparer ta variabilité à sa référence.</div>';
+  } else {
+    h += '<div class="cout-v"><b>' + C.indice + '</b><em>sur 100</em>'
+      + '<span class="pill ' + (C.niveau === 'faible' ? 'ok'
+        : C.niveau === 'eleve' ? 'al' : 'no') + '">'
+      + (C.niveau === 'faible' ? 'passé facilement'
+         : C.niveau === 'eleve' ? 'coûteux' : 'coût normal') + '</span></div>'
+      + '<div class="cmp">' + C.composantes.map(c =>
+        '<div><span class="cn">' + c.nom + '</span>'
+        + '<span class="cv">' + c.valeur + '</span>'
+        + '<span class="cb"><i style="width:'
+        + (c.points / c.max * 100).toFixed(0) + '%"></i></span>'
+        + '<span class="cp">' + c.points + '</span></div>').join('') + '</div>'
+      + '<div class="sp-l">Chaque signal rend des points selon son écart à la '
+      + 'normale. Un signal absent ne compte pas pour zéro : il ne participe '
+      + 'pas au calcul.</div>';
+  }
+  h += '</div></div>';
+
+  // Ce qui a bouge.
+  if (A.semaines_ajustees.length) {
+    h += '<div class="sc-h">Semaines réécrites</div><div class="chg">'
+      + A.semaines_ajustees.map(a =>
+        '<div><span class="cs2">S' + a.semaine + '</span>'
+        + '<span class="cq">' + nf(a.volume_origine) + ' km</span>'
+        + '<span class="cf">' + nf(a.volume_adapte) + ' km</span>'
+        + '<span class="cl">sortie longue ' + nf(a.longue_origine) + ' → '
+        + nf(a.longue_adapte) + ' km</span></div>').join('') + '</div>';
+  } else if (D.action !== 'attendre') {
+    h += '<div class="sp-l" style="margin-top:var(--s4)">Aucune semaine n’a '
+      + 'besoin d’être réécrite : le plan d’origine correspond déjà à ce que '
+      + 'la décision demande.</div>';
+  }
+
+  h += '<div class="ia-s">Le plan écrit à la main reste la référence. '
+    + 'L’adaptation ne touche que les ' + A.reglages.horizon_semaines
+    + ' semaines à venir, jamais une course ni l’affûtage, et jamais plus de '
+    + A.reglages.rampe_max_pct + ' % de hausse d’une semaine à l’autre. '
+    + 'Une semaine manquée n’est pas rattrapée : la suivante repart de ce que '
+    + 'tu as réellement couru.</div></div>';
+  $('adapt').innerHTML = h;
+})();
+
 /* ================= plan ================= */
 $('races').innerHTML = PLAN.courses.map(c => `<div class="li">
   <div class="li-k"><div>${c.nom} · ${c.cible}</div>
@@ -1468,10 +1615,10 @@ $('paces').innerHTML = CAL.zones.map(z => '<div class="li"><div class="li-k">'
 $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
   + (CAL.reference.estime
     ? 'ta référence de <b>' + CAL.reference.temps + ' sur '
-      + CAL.reference.distance_km + ' km</b>, courue sans montre. Elles se '
+      + km1(CAL.reference.distance_km) + ' km</b>, courue sans montre. Elles se '
       + 'recalculeront seules après le 10 km du 26 septembre.'
     : 'ton <b>' + CAL.reference.source + '</b> du ' + dshort(CAL.reference.date)
-      + ' en <b>' + CAL.reference.temps + '</b>. VDOT ' + CAL.vdot + '.');
+      + ' en <b>' + CAL.reference.temps + '</b>. VDOT ' + nf(CAL.vdot) + '.');
 
 (function () {
   const gc = ['var(--b1)', 'var(--b2)', 'var(--b3)', 'var(--b4)', 'var(--b5)'];
@@ -1492,9 +1639,9 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
         return `<div class="wk now"><div>
           <div class="ti">Semaine ${w.semaine} · en cours</div>
           <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)} ·
-            sortie longue ${nf(w.sortie_longue_km)} km${w.note ? ' · ' + w.note : ''}</div>
-          <div class="vo">${r ? r + ' km réalisés sur ' + w.volume_km
-            : 'objectif ' + w.volume_km + ' km'}</div></div></div>`;
+            sortie longue ${km1(w.sortie_longue_km)} km${w.note ? ' · ' + w.note : ''}</div>
+          <div class="vo">${r ? km1(r) + ' km réalisés sur ' + km1(w.volume_km)
+            : 'objectif ' + km1(w.volume_km) + ' km'}</div></div></div>`;
       }
       const passe = w.semaine < cur;
       const dist = w.semaine - cur;
@@ -1513,17 +1660,24 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
         <div class="no">${w.semaine}</div>
         <div><div class="ti">${w.course ? PLAN.courses.find(c => c.cle === w.course).nom
           : w.type === 'TEST' ? 'Test 30 km'
-          : 'Sortie longue ' + nf(w.sortie_longue_km) + ' km'}</div>
+          : 'Sortie longue ' + km1(w.sortie_longue_km) + ' km'}</div>
           <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)}${
             w.note ? ' · ' + w.note : ''}</div></div>
-        <div class="vo">${r ? `<span class="done" style="width:${larg}px"></span>${r}`
-          : ''} ${w.volume_km} km</div></div>`;
+        <div class="vo">${r ? `<span class="done" style="width:${larg}px"></span>${km1(r)}`
+          : ''} ${ADAPT[w.semaine]
+            ? `${km1(ADAPT[w.semaine].volume_adapte)}<span class="av"> au lieu de ${
+                km1(ADAPT[w.semaine].volume_origine)}</span>`
+            : km1(w.volume_km)} km</div></div>`;
     }).join('');
   });
   $('spine').innerHTML = out;
-  $('spine-n').textContent = 'Pic à ' + PLAN.pic_volume_km + ' km, sortie longue '
-    + 'maximale ' + PLAN.pic_sortie_longue_km + ' km. Les barres bleues montrent '
-    + 'le volume réellement couru.';
+  const nAdapt = Object.keys(ADAPT).length;
+  $('spine-n').textContent = 'Pic à ' + km1(PLAN.pic_volume_km) + ' km, sortie '
+    + 'longue maximale ' + km1(PLAN.pic_sortie_longue_km) + ' km. Les barres '
+    + 'bleues montrent le volume réellement couru.'
+    + (nAdapt ? ' ' + nAdapt + (nAdapt > 1 ? ' semaines ont été réécrites'
+       : ' semaine a été réécrite') + ' à partir de ce que tu as fait, '
+       + 'le volume d’origine reste affiché à côté.' : '');
 })();
 
 /* ================= graphiques ================= */
@@ -1555,6 +1709,13 @@ function lineChart(box, series, opt) {
   const all = pts.flatMap(s => s.data.map(d => d.v));
   let mn = Math.min(...all), mx = Math.max(...all);
   if (opt.zero) mn = Math.min(0, mn);
+  // Le seuil de reference entre dans le domaine. Sans ca il tombe hors cadre,
+  // la ligne n'est pas tracee, et la legende continue d'annoncer un seuil que
+  // le graphique ne montre pas : c'est le cas de la derive tant qu'elle reste
+  // loin des 5 %.
+  if (opt.target != null) {
+    mn = Math.min(mn, opt.target); mx = Math.max(mx, opt.target);
+  }
   const bas = mn, pad = (mx - mn) * .15 || 1;
   mn -= pad; mx += pad;
   // Une grandeur qui ne peut pas etre negative ne doit pas avoir d'axe negatif.
@@ -1697,7 +1858,9 @@ $('kpis').innerHTML = [
   ['VO2max', A.vo2max, '', D.vo2max, 'Après 2 à 3 courses'],
   ['Forme de fond', A.ctl, '', D.ctl, 'Après environ 4 semaines'],
   ['Sommeil', A.sommeil_h, 'h', D.sommeil_h, 'Dès la prochaine nuit'],
-  ['Cadence moyenne', A.cadence, 'ppm', D.cadence, 'À la première course'],
+  // ppm() et pas la valeur brute : la ceinture renvoie 78 pas par jambe et
+  // par minute, la tuile affichait donc "78,2 ppm" pour une foulee a 156.
+  ['Cadence moyenne', ppm(A.cadence), 'ppm', D.cadence, 'À la première course'],
   ['Kilomètres cumulés', volCum || null, 'km', D.volume, 'Le plan démarre le 7/09'],
 ].map(tuile).join('');
 
@@ -1740,13 +1903,14 @@ $('kpis').innerHTML = [
      draw:b => lineChart(b, [{name:'Poids', color:'var(--mesure)', data:g('poids')}],
        {unit:' kg', dec:1, wait:'Une seule pesée. Monte sur la balance régulièrement '
         + 'pour voir la tendance.'})},
-    {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur sorties longues',
+    {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur toute séance '
+       + 'd’au moins dix minutes de cardio',
      k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']],
      draw:b => lineChart(b, [{name:'Dérive', color:'var(--mesure)',
        data:M.derives.map(x => ({d:x.date, v:x.derive_pct}))}],
        {unit:' %', dec:1, target:5, wait:'L’indicateur le plus parlant de la '
-        + 'préparation. Il se calcule dès ta première sortie longue, '
-        + 'samedi 12 septembre.'})},
+        + 'préparation. Il se calcule sur chaque séance qui porte au moins dix '
+        + 'minutes de cardio exploitable, et la courbe apparaît à la deuxième.'})},
     {t:'Efficacité aérobie', s:'Vitesse rapportée au coût cardiaque',
      draw:b => lineChart(b, [{name:'Indice', color:'var(--mesure)',
        data:M.efficacite.map(x => ({d:x.date, v:x.valeur}))}],
@@ -1786,14 +1950,32 @@ function couleurNuit(score) {
 }
 
 function nuits(box) {
-  const J = ((M.sante || {}).jours || [])
-    .filter(j => j.sommeil_h != null).slice(-NUITS_VUE);
-  if (J.length < 2) {
+  const attente = () => {
     box.innerHTML = '<div class="wait">Il faut au moins deux nuits mesurées '
       + 'pour tracer cette vue. Porte la montre la nuit et elle se remplit '
       + 'toute seule.</div>';
     return false;
+  };
+  const mesurees = ((M.sante || {}).jours || []).filter(j => j.sommeil_h != null);
+  if (mesurees.length < 2) return attente();
+
+  // Une nuit sans mesure garde sa place. L'axe porte des dates : en tassant
+  // les nuits mesurees les unes contre les autres, deux nuits separees par une
+  // semaine se touchaient et la pente etait fausse. La fenetre est donc un
+  // nombre de JOURS et non un nombre de nuits reussies, et elle ne remonte
+  // jamais avant la premiere nuit connue.
+  const par = {};
+  mesurees.forEach(j => { par[j.date] = j; });
+  const fin = new Date(mesurees[mesurees.length - 1].date + 'T12:00:00');
+  const debut = new Date(fin);
+  debut.setDate(debut.getDate() - (NUITS_VUE - 1));
+  const premiere = new Date(mesurees[0].date + 'T12:00:00');
+  const J = [];
+  for (let d = new Date(debut > premiere ? debut : premiere); d <= fin;
+       d.setDate(d.getDate() + 1)) {
+    J.push(par[iso(d)] || {date:iso(d)});
   }
+  if (J.filter(j => j.sommeil_h != null).length < 2) return attente();
 
   const PAN = [
     {cle:'sommeil_h', nom:'Durée de sommeil', barres:true, h:96,
@@ -1885,7 +2067,8 @@ function nuits(box) {
       >${p.fmt(low).replace(/ (ms|bpm)$/, '')}</text>`;
   });
 
-  // Dates : une sur deux au-dela de dix nuits, pour ne pas empiler.
+  // Dates : une sur deux au-dela de huit jours, une sur trois au-dela de
+  // quinze, plus la derniere dans tous les cas.
   const bas = H - AX;
   const saut = n > 14 ? 3 : n > 8 ? 2 : 1;
   J.forEach((j, i) => {
@@ -1906,6 +2089,9 @@ function nuits(box) {
     const li = PAN.filter(p => j[p.cle] != null)
       .map(p => p.nom.split(' ')[0] + ' ' + p.fmt(j[p.cle]));
     if (j.sommeil_score != null) li.push('Score ' + Math.round(j.sommeil_score));
+    // Un jour vide se survole comme les autres : il doit dire pourquoi il est
+    // vide plutot que d'afficher une date toute seule.
+    if (!li.length) li.push('Nuit non mesurée');
     cur.setAttribute('x1', cx(i).toFixed(1));
     cur.setAttribute('x2', cx(i).toFixed(1));
     cur.style.opacity = 1;
@@ -2059,8 +2245,11 @@ function lectureNuits() {
       + '<div class="cb" id="sc' + i + '"></div></div>').join('');
     S.champs.forEach((c, i) => {
       const data = agrege(c.cle, mode);
+      // Un champ note sur 100 n'a pas d'unite a suffixer. Le remplacement
+      // laissait une espace seule, et l'infobulle affichait "42 ".
+      const u = c.unite === '/100' ? '' : ' ' + c.unite;
       lineChart($('sc' + i), [{name:c.nom, color:'var(--mesure)', data:data}],
-        {unit:' ' + c.unite.replace('/100', ''), dec:c.dec,
+        {unit:u, dec:c.dec,
          target:c.cle === 'fatigue_indice' ? 50 : null,
          wait:ATTENTE[mode]});
     });
@@ -2094,7 +2283,7 @@ $('verdict').innerHTML = '<span class="pill ' + (marge > 0 ? 'ok' : 'al') + '">'
   + 'Le sub-4h demande <b>' + CAL.cible_marathon.allure + '</b>. Depuis '
   + (CAL.reference.estime ? 'ta référence de <b>' + CAL.reference.temps + '</b>'
      : 'ton ' + CAL.reference.source + ' en <b>' + CAL.reference.temps + '</b>')
-  + ' sur ' + CAL.reference.distance_km + ' km, le modèle projette <b>'
+  + ' sur ' + km1(CAL.reference.distance_km) + ' km, le modèle projette <b>'
   + CAL.projections.marathon.texte + '</b>, soit '
   + CAL.projections.marathon.allure + '. '
   + (marge > 0
@@ -2103,7 +2292,7 @@ $('verdict').innerHTML = '<span class="pill ' + (marge > 0 ? 'ok' : 'al') + '">'
      : 'Il manque <b>' + (-marge) + ' secondes au kilomètre</b> pour le tenir.')
   + '<br><br>Cette projection suppose une endurance spécifique qui reste à '
   + "construire. La contrainte n'est pas la vitesse, c'est le volume : passer de "
-  + '12 à ' + PLAN.pic_volume_km + ' km par semaine est le vrai chantier.<br><br>'
+  + '12 à ' + km1(PLAN.pic_volume_km) + ' km par semaine est le vrai chantier.<br><br>'
   + (CAL.reference.estime
      ? 'Deux rendez-vous tranchent la question. Le 10 km du 26 septembre vérifie '
        + 'que la référence tient toujours. Le semi du 25 octobre décide de tout : '
@@ -2113,17 +2302,18 @@ $('verdict').innerHTML = '<span class="pill ' + (marge > 0 ? 'ok' : 'al') + '">'
        + 'Prochaine recalibration à la prochaine échéance.') + '</div>';
 
 $('vrows').innerHTML = [
-  ['Référence retenue', CAL.reference.temps + ' sur ' + CAL.reference.distance_km + ' km'],
+  ['Référence retenue', CAL.reference.temps + ' sur '
+    + km1(CAL.reference.distance_km) + ' km'],
   ['Source', CAL.reference.estime ? 'estimée, sans montre'
     : CAL.reference.source + ' du ' + dshort(CAL.reference.date)],
-  ['VDOT calculé', String(CAL.vdot)],
+  ['VDOT calculé', nf(CAL.vdot)],
   ['Projection 10 km', CAL.projections.dix.texte + ' · ' + CAL.projections.dix.allure],
   ['Projection semi', CAL.projections.semi.texte + ' · ' + CAL.projections.semi.allure],
   ['Projection marathon', CAL.projections.marathon.texte + ' · '
     + CAL.projections.marathon.allure],
   ['Cible retenue', CAL.cible_marathon.temps + ' · ' + CAL.cible_marathon.allure],
-  ['Volume, départ → pic', '12 → ' + PLAN.pic_volume_km + ' km'],
-  ['Sortie longue, départ → pic', '6 → ' + PLAN.pic_sortie_longue_km + ' km'],
+  ['Volume, départ → pic', '12 → ' + km1(PLAN.pic_volume_km) + ' km'],
+  ['Sortie longue, départ → pic', '6 → ' + km1(PLAN.pic_sortie_longue_km) + ' km'],
 ].map(r => '<div class="li"><div class="li-k">' + r[0] + '</div>'
   + '<div class="li-v">' + r[1] + '</div></div>').join('');
 
@@ -2160,7 +2350,12 @@ $('vrows').innerHTML = [
 $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées vers
   Intervals.icu puis agrégées. <b>Aucune coordonnée GPS ni trace de parcours n'est
   publiée sur cette page.</b><br><br>Les projections utilisent la formule de Riegel,
-  exposant 1,06, appliquée au 10 km en 48 min. Elles supposent une endurance
-  spécifique déjà construite : à lire comme une borne optimiste tant que les courses
-  de calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
+  exposant 1,06, appliquée à ` + (CAL.reference.estime
+    ? 'la référence estimée de <b>' + CAL.reference.temps + '</b>'
+    : 'ton ' + CAL.reference.source + ' en <b>' + CAL.reference.temps + '</b>')
+  + ' sur ' + km1(CAL.reference.distance_km) + ` km. Les zones d'allure, elles,
+  viennent du modèle de Daniels appliqué à la même référence. Tout se recalcule
+  à chaque course. Ces projections supposent une endurance spécifique déjà
+  construite : à lire comme une borne optimiste tant que les courses de
+  calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
 </script>
