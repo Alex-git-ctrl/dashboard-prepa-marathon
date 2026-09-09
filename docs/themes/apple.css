@@ -1,0 +1,710 @@
+/* ============================================================
+   LA HALLE. D'apres le langage des pages produit d'Apple.
+
+   LE PRINCIPE. Un sol gris clair, et des cartes blanches posees dessus.
+   C'est l'inverse exact du releve, ou la carte avait ete supprimee : ici
+   elle redevient l'unite de lecture, sans bordure, sans ombre, avec un
+   rayon de 28 px. Le rythme vient de l'alternance blanc sur gris et des
+   grands blancs verticaux, jamais d'un trait de separation.
+
+   L'ECHELLE. Le guide Apple parle de titres a 96 px et de 120 px entre les
+   sections. C'est la mesure d'une page de vente, pas d'un outil qu'on ouvre
+   un mardi midi pour lire un chiffre. On garde donc le LANGAGE (grands
+   titres, vrais blancs, chasse negative sur les gros corps, chasse
+   legerement positive sur les corps moyens) a une echelle d'outil. Les pas
+   typographiques sont ceux d'Apple, tronques en haut.
+
+   LA COULEUR. L'interface est monochrome plus un bleu. Chez Apple, c'est la
+   photo du produit qui porte toute la couleur ; ici il n'y a pas de produit,
+   il y a les traces. Les graphiques sont donc le seul endroit ou la couleur
+   vit, et les cinq zones de frequence cardiaque gardent le gris, bleu, vert,
+   ambre et rouge de la Forerunner.
+
+   LE NOIR. Un seul objet est noir, et il dit toujours la meme chose : le
+   present. Le bloc d'accueil et la semaine en cours. Comme les bandes
+   noires d'apple.com, il retourne la page plutot que de l'assombrir.
+
+   CE QUI EST CALCULE, PAS CHOISI. Tous les contrastes ont ete verifies :
+   --sourd atteint 7,26 sur le gris et --acier 4,66, les deux au-dessus de
+   4,5 pour du petit texte. Les deux rampes ordinales gardent un ecart de
+   luminance OKLab d'au moins 0,079 entre pas voisins, donc elles se lisent
+   aussi en niveaux de gris. Les cinq teintes de metrique sont separees
+   d'au moins 15,2 en dE OKLab.
+
+   LA RAMPE DES BLOCS, ET POURQUOI ELLE EST DOUBLE. Le ruban des 27 semaines
+   vit sur la carte noire, et la meme rampe sert aussi sur fond clair. Le
+   calcul dit qu'une seule rampe ne peut pas faire les deux : rester au-dessus
+   de 3,0 de contraste contre le blanc ET contre le noir ne laisse que 0,146
+   de luminance disponible, alors que cinq pas ordinaux en demandent 0,24.
+   La rampe est donc redefinie dans .dark, ou elle s'inverse. C'est du CSS
+   ordinaire : les variables cascadent, et le JavaScript qui ecrit
+   var(--b3) en attribut recoit la valeur de son contexte.
+
+   PAS DE MODE SOMBRE. Choix assume, conforme au guide qui est explicitement
+   clair. Toutes les couleurs sont donc definies une seule fois, sur :root.
+   ============================================================ */
+:root{
+  color-scheme:light;
+
+  /* --- le sol et les surfaces --- */
+  /* --sol n'est lu que par ce fichier. --craie, lui, est lu par le
+     JavaScript : c'est la couleur de ce qui se trouve DERRIERE un trace,
+     donc la carte blanche, et c'est aussi le texte pose sur le noir. */
+  --sol:#f5f5f7;
+  --craie:#ffffff;
+  --surface:#ffffff;
+  --bitume:#1d1d1f;
+  --bord-present:transparent;
+
+  /* --- encres --- */
+  /* Trois niveaux, chacun verifie sur le blanc ET sur le gris du sol :
+     16,83 / 15,46 pour l'encre, 7,91 / 7,26 pour --sourd, 5,07 / 4,66 pour
+     --acier. Le gris Apple #86868b, plus joli, tombe a 3,33 sur le sol :
+     il ne sert donc qu'au texte pose sur le noir, ou il vaut 4,65. */
+  --encre:#1d1d1f;
+  --sourd:#515154;
+  --acier:#6e6e73;
+  --sur-bitume:#a1a1a6;
+  --sur-bitume-faible:#86868b;
+
+  /* --- filets et fonds neutres --- */
+  --filet:#d2d2d7;
+  --creux:#e8e8ed;
+
+  /* --- le bleu, et rien d'autre ---
+     Deux valeurs pour deux roles, jamais interchangeables. --mesure est un
+     aplat qui porte du blanc (4,70, donc lisible). Le bleu de TEXTE est plus
+     sombre, parce qu'a 4,70 sur blanc le premier ne passerait pas en petit
+     corps. C'est exactement la regle d'Apple. */
+  --mesure:#0071e3;
+  --lien:#0066cc;
+  --volt:#0071e3;
+  --focus:#0071e3;
+
+  /* --- etats de surveillance ---
+     Les couleurs systeme d'Apple, ramenees a des valeurs qui passent 4,5 sur
+     les deux fonds clairs. Le vert #248a3d du guide plafonne a 4,04 sur le
+     sol, il est donc assombri. */
+  --ok:#1d7a34;        --ok-fond:#e8f5ec;
+  --veille:#b25000;
+  --alerte:#d70015;    --alerte-fond:#fdecea;
+  --effort:#d70015;
+
+  /* --- rampe des blocs, sur fond clair : du pale au dense ---
+     Les gris systeme d'Apple. Le premier pas s'arrete a #aeaeb2 et non au
+     #d2d2d7 du guide : sur le sol gris ce dernier tombe a 1,13 de contraste
+     et la pastille du bloc 1 disparaissait purement et simplement. */
+  --b1:#aeaeb2; --b2:#8e8e93; --b3:#6e6e73; --b4:#545456; --b5:#3a3a3c;
+
+  /* --- teintes de metrique ---
+     Une par panneau, chacune sur sa propre carte blanche. Ecart minimum
+     15,2 en dE OKLab, contraste minimum 3,52. */
+  --m-allure:#00847a;
+  --m-fc:#ff375f;
+  --m-puissance:#af52de;
+  --m-alt:#515154;
+
+  /* --- zones de frequence cardiaque ---
+     Inchangees, et c'est voulu : ce sont les couleurs de la Forerunner, et
+     l'interet est justement de retrouver la meme lecture. Revalidees sur la
+     carte blanche : ecart de luminance de 0,079 a 0,081 entre pas voisins,
+     strictement monotone. */
+  --z1:#B9BFC2; --z2:#6FAAE4; --z3:#40A360; --z4:#976B1B;
+  --z5:#9E352A; --z6:#7C261D; --z7:#591B17;
+
+  /* --- echelle typographique ---
+     Les pas d'Apple (12, 14, 17, 21, 28, 40, 56), tronques en haut et
+     completes de deux valeurs intermediaires pour qu'un outil dense garde
+     deux niveaux de texte courant distincts. */
+  --t1:12px;    /* micro : unites, legendes, etiquettes d'axe */
+  --t2:14px;    /* secondaire : notes, sous-titres, dates */
+  --t3:15px;    /* texte courant secondaire */
+  --t4:17px;    /* texte courant, le corps canonique d'Apple */
+  --t5:24px;    /* titre de section et de bloc */
+  --t6:40px;    /* chiffre de tuile */
+
+  /* --- echelle d'espacement, base 4 --- */
+  --s1:4px; --s2:8px; --s3:12px; --s4:20px; --s5:32px; --s6:56px;
+  --pad:28px;   /* padding interieur d'une carte, valeur du guide */
+
+  /* --- rayons ---
+     Le guide est categorique : 28 px sur les cartes, des pilules sur les
+     controles, et jamais moins de 10 px sur un objet interactif. */
+  --r1:12px;   /* petits objets : pilules internes, infobulle, barres */
+  --r2:999px;  /* controles : segments, menu deroulant */
+  --r3:28px;   /* cartes */
+
+  /* La pile qu'Apple utilise vraiment sur le web, et surtout PAS "SF Pro
+     Display" nomme en premier. Sur cette machine Windows, une SF Pro partielle
+     est installee et ne contient qu'un dessin oblique : la nommer faisait
+     pencher tout le texte courant de la page, alors que font-style valait bien
+     normal. -apple-system rend la vraie San Francisco sur iPhone et sur Mac
+     sans jamais nommer un fichier, et ailleurs la chaine tombe sur Inter puis
+     sur Segoe UI. */
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,
+    "Helvetica Neue",Arial,sans-serif;
+  /* Apple n'utilise pas de police a chasse fixe pour ses chiffres : elle
+     utilise SF avec les chiffres tabulaires. C'est ce que fait --num, et
+     font-variant-numeric:tabular-nums est applique partout ou des chiffres
+     s'alignent en colonne. Le guide recommande la fonctionnalite "numr",
+     qui produit en realite des numerateurs en exposant : ce n'est pas ce
+     qu'il faut, et ce n'est pas ce qui est fait ici. */
+  --num:var(--sans);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--sol);color:var(--encre);font-family:var(--sans);
+  font-size:var(--t4);line-height:1.47;letter-spacing:-.022em;
+  -webkit-font-smoothing:antialiased}
+
+/* ---------- barre superieure ----------
+   Le traitement d'Apple : translucide et floutee, avec un filet en bas qui
+   n'apparait que parce que le contenu passe dessous. */
+.top{position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb, var(--sol) 78%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--filet)}
+.top-in{max-width:980px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;
+  align-items:center;justify-content:space-between;gap:var(--s4)}
+.top-t{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+.fresh{display:flex;align-items:center;gap:var(--s2);font-size:var(--t2);
+  color:var(--acier);font-variant-numeric:tabular-nums;text-align:right;
+  line-height:1.3;letter-spacing:-.01em}
+.fresh i{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:block}
+.fresh i.ok{background:var(--ok)}
+.fresh i.old{background:var(--veille)}
+.fresh i.stale{background:var(--effort)}
+
+main{max-width:980px;margin:0 auto;
+  padding:0 var(--s5) calc(112px + env(safe-area-inset-bottom))}
+.tab{display:none}
+.tab.on{display:block}
+
+/* Le seul element qui suit la fenetre. Chasse negative marquee : c'est ce
+   qui donne aux titres Apple leur allure d'architecture plutot que de texte. */
+h1{font-size:clamp(38px,8vw,56px);font-weight:700;letter-spacing:-.021em;
+  line-height:1.07;margin:var(--s6) 0 0;text-wrap:balance}
+.lede{color:var(--sourd);font-size:21px;line-height:1.38;letter-spacing:.011em;
+  margin:var(--s4) 0 0;max-width:34em;text-wrap:pretty}
+/* Chez Apple le titre de section est sombre et substantiel, pas une petite
+   capitale grise. La chasse s'ouvre legerement aux corps moyens. */
+h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
+  margin:0 0 var(--s4);text-wrap:balance}
+.sec{margin-top:var(--s6)}
+
+/* ---------- la carte, unite de lecture ----------
+   Sans bordure, sans ombre. Ce qui la detache, c'est uniquement le blanc
+   contre le gris du sol. */
+.list,.grid,.seance,.chart,.card,.alert,.se,.adapt,.bl,.ia{
+  background:var(--surface);border:0;border-radius:var(--r3);
+  padding:var(--pad);margin-top:var(--s3)}
+
+/* ---------- bloc noir : le present ----------
+   Il retourne la page. A l'interieur, les tokens changent de valeur : c'est
+   la seule facon d'avoir une rampe ordinale qui tienne sur les deux fonds. */
+.dark,.wk.now{
+  --craie:#ffffff;
+  --volt:#2997ff;
+  --mesure:#ffffff;
+  --effort:#ff453a;
+  --sur-bitume:#a1a1a6;
+  --sur-bitume-faible:#86868b;
+  --b1:#48484a; --b2:#636366; --b3:#8e8e93; --b4:#aeaeb2; --b5:#d2d2d7;
+  --creux:#2c2c2e;
+  --filet:#3a3b3d;
+}
+.dark{background:var(--bitume);color:#fff;border-radius:var(--r3);border:0;
+  padding:var(--s5);margin-top:var(--s4)}
+.dark .lbl{font-size:var(--t1);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--sur-bitume-faible);font-weight:600}
+.dark .hd{display:flex;justify-content:space-between;align-items:flex-end;
+  gap:var(--s4);flex-wrap:wrap}
+.dark .race{font-size:var(--t5);font-weight:600;letter-spacing:.007em;
+  margin-top:var(--s2)}
+.dark .sub{font-size:var(--t3);color:var(--sur-bitume);margin-top:var(--s1);
+  letter-spacing:-.01em}
+.jhero{text-align:right;flex-shrink:0}
+/* Hors echelle, et c'est le principe meme : un seul chiffre de la page a le
+   droit d'ecraser ce qui l'entoure. */
+.jhero .v{font-size:clamp(48px,13vw,80px);font-weight:700;
+  letter-spacing:-.015em;line-height:.95;color:var(--volt);
+  font-variant-numeric:tabular-nums}
+.jhero .u{font-size:var(--t1);letter-spacing:.06em;
+  color:var(--sur-bitume-faible);margin-top:var(--s2);font-weight:600}
+.ruban{margin-top:var(--s5);overflow-x:auto;scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch}
+.ruban svg{display:block;height:116px;width:100%;min-width:640px}
+.rlg{display:flex;flex-wrap:wrap;gap:var(--s4);margin-top:var(--s4);
+  font-size:var(--t1);color:var(--sur-bitume-faible)}
+.rlg span{display:flex;align-items:center;gap:var(--s2)}
+.rlg i{width:10px;height:10px;border-radius:3px;display:block;flex-shrink:0}
+
+/* ---------- alertes ----------
+   Pas de filet de couleur a gauche : il casserait le rayon de la carte.
+   L'etat se lit sur l'icone et sur le titre, comme dans les alertes d'Apple. */
+.alert{display:flex;gap:var(--s4);align-items:flex-start}
+.alert .ic{width:26px;height:26px;flex-shrink:0;margin-top:1px}
+.alert .ic svg{width:26px;height:26px;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.alert.critique .ic svg{stroke:var(--effort)}
+.alert.attention .ic svg{stroke:var(--veille)}
+.alert.calme .ic svg{stroke:var(--ok)}
+.alert.neutre .ic svg{stroke:var(--acier)}
+.alert .at{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+.alert.critique .at{color:var(--alerte)}
+.alert.attention .at{color:var(--veille)}
+.alert .ad{font-size:var(--t3);color:var(--sourd);margin-top:var(--s1);
+  line-height:1.45;max-width:60ch;text-wrap:pretty}
+.alert .aa{font-size:var(--t3);color:var(--sourd);margin-top:var(--s3);
+  padding-top:var(--s3);border-top:1px solid var(--filet);line-height:1.5;
+  max-width:60ch;text-wrap:pretty}
+
+/* ---------- listes ----------
+   Une carte, des lignes separees par un filet, et rien sous la derniere.
+   C'est la liste des Reglages d'iOS. */
+.list{padding:0 var(--pad)}
+.li{display:flex;align-items:center;gap:var(--s4);min-height:56px;
+  padding:var(--s3) 0;border-bottom:1px solid var(--filet)}
+.list>.li:last-child{border-bottom:0}
+.li-k{flex:1;min-width:0;font-size:var(--t4);font-weight:500;
+  letter-spacing:-.022em}
+.li-s{font-size:var(--t2);color:var(--acier);margin-top:2px;font-weight:400;
+  line-height:1.4;letter-spacing:-.01em}
+.li-v{font-size:var(--t4);font-weight:500;white-space:nowrap;text-align:right;
+  font-variant-numeric:tabular-nums;letter-spacing:-.022em}
+.li-v.q{color:var(--acier);font-weight:400}
+/* Le jour en cours : un aplat qui va d'un bord a l'autre de la carte. */
+.li.on{background:var(--creux);margin:0 calc(var(--pad) * -1);
+  padding-left:var(--pad);padding-right:var(--pad);border-bottom-color:transparent}
+.li.on .li-k{font-weight:600}
+.li.rest{color:var(--acier)}
+
+/* ---------- tuiles ----------
+   Une carte unique, reglee par des filets. Le libelle a une hauteur plancher
+   pour que les valeurs d'une meme rangee tombent sur la meme ligne de base. */
+.grid{display:grid;gap:0 var(--s5);
+  grid-template-columns:repeat(auto-fit,minmax(168px,1fr))}
+.tile{border-top:1px solid var(--filet);padding:var(--s3) 0 var(--s4)}
+.tile .l{font-size:var(--t2);color:var(--acier);font-weight:400;line-height:1.35;
+  min-height:2.7em;letter-spacing:-.01em}
+.tile .v{font-size:var(--t6);font-weight:600;letter-spacing:-.02em;
+  margin-top:var(--s1);line-height:1.05;font-variant-numeric:tabular-nums}
+.tile .v em{font-style:normal;font-size:var(--t2);color:var(--acier);
+  font-weight:400;margin-left:var(--s1)}
+.tile .d{font-size:var(--t1);color:var(--acier);margin-top:var(--s2);
+  font-variant-numeric:tabular-nums}
+.tile .w{font-size:var(--t2);color:var(--acier);margin-top:var(--s1);
+  line-height:1.4;letter-spacing:-.01em}
+
+/* ---------- derniere seance ---------- */
+.seance .hd{display:flex;justify-content:space-between;align-items:baseline;
+  gap:var(--s3);flex-wrap:wrap}
+.seance .ti{font-size:var(--t5);font-weight:600;letter-spacing:.007em}
+.seance .dt{font-size:var(--t2);color:var(--acier);
+  font-variant-numeric:tabular-nums}
+.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
+  gap:var(--s4);margin-top:var(--s4);padding-bottom:var(--s4);
+  border-bottom:1px solid var(--filet)}
+.chiffres div .n{font-size:var(--t6);font-weight:600;letter-spacing:-.02em;
+  line-height:1.05;font-variant-numeric:tabular-nums}
+.chiffres div .n em{font-style:normal;font-size:var(--t2);color:var(--acier);
+  font-weight:400;margin-left:3px}
+.chiffres div .c{font-size:var(--t2);color:var(--acier);margin-top:var(--s1);
+  letter-spacing:-.01em}
+.zbar{display:flex;height:28px;border-radius:var(--r1);overflow:hidden;
+  margin-top:var(--s4);background:var(--creux)}
+.zbar span{display:block}
+.zlg{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);margin-top:var(--s3);
+  font-size:var(--t2);color:var(--acier);letter-spacing:-.01em}
+.zlg span{display:flex;align-items:center;gap:var(--s2)}
+.zlg i{width:10px;height:10px;border-radius:3px;display:block;flex-shrink:0}
+.bilan{font-size:var(--t3);line-height:1.5;margin-top:var(--s4);
+  padding-top:var(--s4);border-top:1px solid var(--filet);max-width:60ch;
+  text-wrap:pretty}
+.bilan b{font-weight:600}
+.bilan.ok b{color:var(--ok)}
+.bilan.ko b{color:var(--alerte)}
+
+/* ---------- les 27 semaines ----------
+   Chaque semaine est une ligne blanche a coin doux, posee sur le gris. La
+   liste groupee d'iOS, sans le cadre autour. Le numero rentre dans la ligne
+   au lieu de pendre dans la marge : une carte n'a pas de marge exterieure. */
+.band{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap;
+  margin:var(--s6) 0 var(--s3)}
+.band .bar{height:6px;border-radius:3px;flex-shrink:0;align-self:center}
+.band .nm{font-size:var(--t5);font-weight:600;letter-spacing:.007em}
+.band .ds{font-size:var(--t2);color:var(--acier);letter-spacing:-.01em}
+.wk{background:var(--surface);border-radius:var(--r1);
+  display:grid;grid-template-columns:34px 1fr auto;gap:var(--s3);
+  align-items:center;padding:var(--s3) var(--s4);margin-bottom:var(--s1);
+  border-left:3px solid transparent}
+.wk.futur{border-left-style:solid}
+.wk .no{position:static;width:auto;text-align:right;
+  font-size:var(--t2);color:var(--acier);font-variant-numeric:tabular-nums}
+.wk .ti{font-size:var(--t3);font-weight:500;line-height:1.35;
+  letter-spacing:-.01em}
+.wk .su{font-size:var(--t2);color:var(--acier);margin-top:2px;line-height:1.4;
+  letter-spacing:-.01em}
+.wk .vo{font-size:var(--t2);color:var(--sourd);white-space:nowrap;
+  text-align:right;font-variant-numeric:tabular-nums}
+.wk.past{color:var(--acier)}
+.wk.past .ti{font-weight:400}
+.wk.past .no,.wk.past .su,.wk.past .vo{color:var(--acier)}
+.wk.race .ti{font-weight:600}
+.wk.race .no::after{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--effort);margin-left:var(--s1);
+  vertical-align:1px}
+.wk .av{color:var(--acier)}
+.wk.now{grid-template-columns:1fr;background:var(--bitume);color:#fff;
+  border:0;border-radius:var(--r3);padding:var(--s5);
+  margin:var(--s4) 0;gap:0}
+.wk.now .no{display:none}
+.wk.now .ti{font-size:var(--t5);font-weight:600;letter-spacing:.007em}
+.wk.now .su{color:var(--sur-bitume);font-size:var(--t3);margin-top:var(--s2)}
+.wk.now .vo{text-align:left;color:var(--volt);margin-top:var(--s3);
+  font-size:var(--t3);font-weight:500}
+.done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
+  vertical-align:2px;margin-right:var(--s2)}
+
+/* ---------- bloc depliable ----------
+   Une carte par bloc. Le resume tient sur la ligne de titre, donc on sait ce
+   qu'il y a dedans sans ouvrir. */
+.bl{padding:0 var(--pad);margin-top:var(--s2)}
+.bl>summary{list-style:none;cursor:pointer;display:grid;
+  grid-template-columns:1fr auto 16px;gap:var(--s2) var(--s4);
+  align-items:center;padding:var(--s4) 0}
+.bl>summary::-webkit-details-marker{display:none}
+.bl>summary:hover .bl-t{color:var(--lien)}
+.bl>summary:focus-visible{outline:2px solid var(--focus);outline-offset:4px;
+  border-radius:var(--r1)}
+.bl-t{font-size:var(--t4);font-weight:600;letter-spacing:-.022em;
+  transition:color .18s}
+.bl-r{font-size:var(--t2);color:var(--acier);white-space:nowrap;
+  text-align:right;font-variant-numeric:tabular-nums}
+.bl-c{width:16px;height:16px;stroke:var(--acier);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;align-self:center;
+  transition:transform .18s}
+.bl[open]>summary .bl-c{transform:rotate(180deg)}
+.bl-d{padding-bottom:var(--s5);border-top:1px solid var(--filet);
+  padding-top:var(--s4)}
+.bl-s{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin:0 0 var(--s3);max-width:60ch;text-wrap:pretty}
+.bl .wait{padding:var(--s3);margin-top:0}
+
+/* ---------- programme de la semaine ----------
+   Une carte par seance. Celle du jour passe en noir : c'est encore le
+   present, et c'est le seul geste que la page se permet. */
+.se{padding:var(--s4) var(--pad) var(--s5)}
+/* Retourner une carte en noir ne suffit pas : les encarts qu'elle contient
+   (la contrainte de jour, la regle de progression) ont leur propre aplat, et
+   un aplat clair sous du texte blanc ne se lit pas. Ils basculent avec elle. */
+.se-on{background:var(--bitume);color:#fff;--sourd:#a1a1a6;--acier:#86868b;
+  --filet:#3a3b3d;--encre:#fff;--creux:#2c2c2e;--surface:#2c2c2e}
+.se-j{font-size:var(--t1);color:var(--acier);text-transform:uppercase;
+  letter-spacing:.06em;font-weight:600}
+.se-t{font-size:var(--t5);font-weight:600;letter-spacing:.007em;
+  margin-top:var(--s2);display:flex;justify-content:space-between;
+  align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.se-d{font-size:var(--t3);font-weight:500;color:var(--sourd);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.se-p{font-size:var(--t3);color:var(--sourd);line-height:1.5;
+  margin:var(--s3) 0 0;max-width:62ch;text-wrap:pretty}
+/* La contrainte d'espacement compte plus que le jour suggere : elle prend un
+   aplat plutot qu'un filet, qui ne tiendrait pas dans une carte arrondie. */
+.se-c{font-size:var(--t2);color:var(--sourd);line-height:1.45;
+  margin:var(--s3) 0 0;padding:var(--s3) var(--s4);background:var(--creux);
+  border-radius:var(--r1);max-width:62ch;text-wrap:pretty}
+.et{margin-top:var(--s4)}
+.et>div{display:grid;grid-template-columns:1fr auto auto;gap:var(--s2) var(--s4);
+  align-items:baseline;padding:var(--s3) 0 var(--s2);
+  border-top:1px solid var(--filet)}
+.et .en{font-size:var(--t3);font-weight:500;letter-spacing:-.01em}
+.et .ed{font-size:var(--t2);color:var(--acier);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.et .ea{font-size:var(--t2);white-space:nowrap;font-weight:500;
+  font-variant-numeric:tabular-nums}
+.et .ec{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin:0 0 var(--s3);max-width:60ch;text-wrap:pretty}
+
+/* Exercices de calisthenie : meme grille, plus une ligne de progression. */
+.ex{margin-top:var(--s4)}
+.ex>div{display:grid;grid-template-columns:1fr auto;gap:var(--s2) var(--s4);
+  align-items:baseline;padding:var(--s3) 0 var(--s2);
+  border-top:1px solid var(--filet)}
+.ex .en{font-size:var(--t3);font-weight:500;letter-spacing:-.01em}
+.ex .ed{font-size:var(--t2);color:var(--acier);white-space:nowrap;
+  text-align:right;font-variant-numeric:tabular-nums}
+.ex .ec{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin:0 0 var(--s2);max-width:60ch;text-wrap:pretty}
+.ex .ep{font-size:var(--t2);line-height:1.45;margin:0 0 var(--s3);
+  padding:var(--s2) var(--s3);background:var(--creux);border-radius:var(--r1);
+  color:var(--sourd);max-width:60ch;text-wrap:pretty}
+.ex .ep b{font-weight:600;color:var(--encre)}
+
+/* ---------- le plan s'adapte ---------- */
+.adapt-h{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap;
+  padding-bottom:var(--s4);border-bottom:1px solid var(--filet)}
+.adapt-r{font-size:var(--t4);font-weight:600;letter-spacing:-.022em;
+  text-wrap:balance}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:var(--s6) var(--s6);
+  margin-top:var(--s5)}
+.cout-v{display:flex;align-items:baseline;gap:var(--s2);flex-wrap:wrap;
+  margin-bottom:var(--s4)}
+.cout-v b{font-size:var(--t6);font-weight:600;letter-spacing:-.02em;
+  line-height:1.05;font-variant-numeric:tabular-nums}
+.cout-v em{font-style:normal;font-size:var(--t2);color:var(--acier)}
+/* Chaque composante montre sa valeur, sa barre et ses points : aucun chiffre
+   de l'indice ne doit tomber du ciel. */
+.cmp{display:grid;gap:var(--s3);font-size:var(--t2)}
+.cmp div{display:grid;grid-template-columns:1fr auto 52px 28px;
+  gap:var(--s2) var(--s3);align-items:center}
+.cmp .cn{min-width:0;letter-spacing:-.01em}
+.cmp .cv{color:var(--acier);white-space:nowrap;font-variant-numeric:tabular-nums}
+.cmp .cb{height:6px;background:var(--creux);border-radius:3px}
+.cmp .cb i{display:block;height:100%;border-radius:3px;background:var(--effort)}
+.cmp .cp{color:var(--acier);text-align:right;
+  font-variant-numeric:tabular-nums}
+.chg{display:grid;gap:var(--s3);font-size:var(--t2)}
+.chg div{display:grid;grid-template-columns:38px auto auto 1fr;
+  gap:var(--s2) var(--s3);align-items:baseline}
+.chg .cs2{color:var(--acier);font-variant-numeric:tabular-nums}
+.chg .cq{color:var(--acier);font-variant-numeric:tabular-nums}
+.chg .cf{font-weight:600;font-variant-numeric:tabular-nums}
+.chg .cl{color:var(--acier);text-align:right;white-space:nowrap}
+
+/* ---------- controles ----------
+   Des pilules, toujours. C'est la regle la moins negociable du guide. */
+.seg{display:flex;background:var(--creux);border-radius:var(--r2);padding:3px;
+  gap:3px;margin-bottom:var(--s4)}
+.seg button{flex:1;appearance:none;border:0;background:none;
+  padding:var(--s2) var(--s3);border-radius:var(--r2);font-family:inherit;
+  font-size:var(--t3);font-weight:500;color:var(--sourd);cursor:pointer;
+  transition:background .18s,color .18s;letter-spacing:-.01em}
+.seg button:hover{color:var(--encre)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
+  font-weight:600}
+.seg button:active{transform:scale(.97)}
+.seg button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+#sea-choix select{width:100%;appearance:none;font-family:inherit;
+  font-size:var(--t4);font-weight:500;color:var(--encre);letter-spacing:-.022em;
+  background-color:var(--surface);border:1px solid var(--filet);
+  border-radius:var(--r2);padding:var(--s3) var(--s6) var(--s3) var(--s4);
+  cursor:pointer;line-height:1.4;transition:border-color .18s;
+  background-image:linear-gradient(45deg,transparent 50%,var(--acier) 50%),
+    linear-gradient(135deg,var(--acier) 50%,transparent 50%);
+  background-position:calc(100% - 23px) 50%,calc(100% - 17px) 50%;
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+#sea-choix select:hover{border-color:var(--acier)}
+#sea-choix select:focus-visible{outline:2px solid var(--focus);
+  outline-offset:2px}
+
+/* ---------- graphiques ----------
+   Une carte par graphique. Les traces sont le seul endroit de la page ou la
+   couleur a le droit d'exister. */
+.chart .ct{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+.chart .cs{font-size:var(--t2);color:var(--acier);margin-top:var(--s1);
+  line-height:1.45;max-width:60ch;text-wrap:pretty}
+.cb{margin-top:var(--s4);position:relative}
+.cb svg{display:block;width:100%;height:auto;overflow:visible}
+.keys{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);margin-top:var(--s3);
+  font-size:var(--t2);color:var(--acier);letter-spacing:-.01em}
+.keys span{display:flex;align-items:center;gap:var(--s2)}
+.keys i{width:16px;height:3px;border-radius:2px;display:block;flex-shrink:0}
+/* Hors echelle, et obligatoirement : ce texte vit dans le viewBox du SVG, pas
+   dans les pixels de l'ecran. Le brancher sur --t1 le ferait grossir avec
+   l'echelle mobile alors que le graphique, lui, ne grossit pas. */
+text.ax{font-family:var(--sans);font-size:10px;fill:var(--acier);
+  font-variant-numeric:tabular-nums}
+text.gl{font-family:var(--sans);font-size:10.5px;font-weight:600;
+  letter-spacing:-.01px}
+text.gv{font-family:var(--sans);font-size:10.5px;fill:var(--acier);
+  font-variant-numeric:tabular-nums}
+text.gz2{font-family:var(--sans);font-size:9.5px;font-weight:600}
+line.grille,line.grad,line.gg{stroke:var(--filet)}
+line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
+line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
+.gc{margin-top:var(--s4);margin-bottom:var(--s5);position:relative}
+.gc svg{display:block;width:100%;height:auto;overflow:visible}
+.gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);margin-top:var(--s3);
+  font-size:var(--t1);color:var(--acier)}
+.gc-lg span{display:flex;align-items:center;gap:var(--s2)}
+.gc-lg i{width:10px;height:10px;border-radius:3px;display:block;flex-shrink:0}
+.wait{color:var(--acier);font-size:var(--t2);line-height:1.55;
+  padding:var(--s5) var(--s4);margin-top:var(--s3);background:var(--creux);
+  border-radius:var(--r1);text-align:center;text-wrap:pretty}
+/* Infobulle : position fixed, donc en coordonnees d'ecran. Elle ne derive pas
+   au defilement, ni dans un conteneur qui defile. */
+.tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:var(--surface);color:var(--encre);border:1px solid var(--filet);
+  font-size:var(--t1);padding:var(--s2) var(--s3);border-radius:var(--r1);
+  white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
+  line-height:1.45;font-variant-numeric:tabular-nums}
+
+.note{font-size:var(--t2);color:var(--acier);margin-top:var(--s4);
+  line-height:1.5;max-width:62ch;text-wrap:pretty}
+.card{font-size:var(--t4);line-height:1.5;color:var(--sourd);max-width:64ch;
+  letter-spacing:-.022em}
+.card b{color:var(--encre);font-weight:600}
+.code{background:var(--creux);color:var(--encre);border-radius:var(--r1);
+  padding:var(--s3) var(--s4);margin-top:var(--s3);font-family:var(--mono);
+  font-size:var(--t2);overflow-x:auto;white-space:pre;line-height:1.55}
+/* Le badge d'Apple : du texte, une teinte, un rayon franc. Jamais de bordure. */
+.pill{display:inline-block;font-size:var(--t1);font-weight:600;
+  padding:var(--s1) var(--s3);border-radius:var(--r2);letter-spacing:.01em;
+  background:var(--creux);color:var(--sourd)}
+.pill.ok{background:var(--ok-fond);color:var(--ok)}
+.pill.no{background:var(--creux);color:var(--sourd)}
+.pill.al{background:var(--alerte-fond);color:var(--alerte)}
+
+/* ---------- detail d'une seance ---------- */
+.sc-ouvert{margin-top:var(--s4)}
+.sc-h{font-size:var(--t2);font-weight:600;color:var(--acier);
+  margin:var(--s5) 0 var(--s3);padding-top:var(--s4);
+  border-top:1px solid var(--filet);text-transform:uppercase;
+  letter-spacing:.06em}
+
+/* Splits : une ligne par kilometre. La barre porte le temps du kilometre,
+   donc un kilometre lent depasse a droite, et le trait vertical est la
+   moyenne de la seance. */
+.sp{display:grid;grid-template-columns:auto 1fr auto auto;
+  gap:var(--s2) var(--s4);align-items:center;font-size:var(--t2);
+  font-variant-numeric:tabular-nums}
+.sp .n{color:var(--acier);text-align:right}
+.sp .b{position:relative;height:14px;background:var(--creux);
+  border-radius:var(--r1)}
+.sp .b i{display:block;height:100%;background:var(--mesure);
+  border-radius:var(--r1)}
+.sp .b u{position:absolute;top:-3px;bottom:-3px;width:1.5px;
+  background:var(--encre);text-decoration:none;border-radius:1px}
+.sp .a{white-space:nowrap;font-weight:600}
+.sp .f{color:var(--acier);white-space:nowrap}
+.sp .pt{color:var(--acier)}
+.sp-l{font-size:var(--t1);color:var(--acier);margin-top:var(--s3);
+  line-height:1.5;max-width:60ch;text-wrap:pretty}
+
+/* Dynamique de course : paires libelle / valeur. */
+.dyn{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+  gap:0 var(--s5);font-size:var(--t2)}
+.dyn div{display:flex;justify-content:space-between;gap:var(--s2);
+  padding:var(--s3) 0;border-bottom:1px solid var(--filet)}
+.dyn span{color:var(--acier);letter-spacing:-.01em}
+.dyn b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Une mesure de foulee par ligne : sa valeur, son trace au fil de la seance,
+   et sa place dans la distribution publiee par Garmin. La reglette est
+   neutre ; c'est le curseur noir qui porte la valeur du jour. */
+.dm{display:flex;flex-direction:column;gap:var(--s6)}
+.dm-l{display:flex;flex-direction:column;gap:var(--s2)}
+.dm-h{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s3);border-bottom:1px solid var(--filet);padding-bottom:var(--s3)}
+.dm-n{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+.dm-v{font-size:var(--t5);font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.dm-v em{font-style:normal;font-size:var(--t2);color:var(--acier);
+  margin-left:.35em;font-weight:400}
+.dm-g{width:100%;height:44px;display:block;margin-top:var(--s2)}
+.dm-w{position:relative;padding:5px 0}
+.dm-b{display:flex;height:10px;border-radius:var(--r1);overflow:hidden}
+.dm-b span{flex:1}
+.dm-m{position:absolute;top:0;width:2px;height:20px;background:var(--encre);
+  border-radius:1px;transform:translateX(-1px)}
+.dm-q{display:flex;justify-content:space-between;gap:var(--s3);
+  font-size:var(--t1);color:var(--acier)}
+.dm-q b{color:var(--encre);font-weight:600}
+.dm-p{font-size:var(--t2);color:var(--acier);margin:0;max-width:60ch;
+  line-height:1.5;text-wrap:pretty}
+.verd{font-size:var(--t3);line-height:1.5;margin-top:var(--s4);max-width:62ch;
+  text-wrap:pretty}
+.verd b{font-weight:600}
+
+/* Histogramme des zones : proportion du temps passe dans chacune. */
+.gz{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s3) var(--s4);
+  align-items:center;font-size:var(--t2)}
+.gz .zk{min-width:0}
+.gz .zn{font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.gz .zr{color:var(--acier);font-size:var(--t1);line-height:1.3;
+  font-variant-numeric:tabular-nums}
+.gz .zb{height:16px;background:var(--creux);border-radius:var(--r1)}
+.gz .zb i{display:block;height:100%;border-radius:var(--r1);min-width:3px}
+.gz .zv{white-space:nowrap;text-align:right;line-height:1.3;font-weight:600;
+  font-variant-numeric:tabular-nums}
+.gz .zv em{font-style:normal;color:var(--acier);font-size:var(--t1);
+  display:block;font-weight:400}
+/* Une zone jamais atteinte reste dans la liste : son absence est une
+   information. Elle s'efface sans disparaitre. */
+.gz .zv.vide{color:var(--acier);font-weight:400}
+
+/* ---------- resume d'analyse ---------- */
+.ia-h{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  margin-bottom:var(--s3)}
+.ia-t{font-size:var(--t5);font-weight:600;letter-spacing:.007em;
+  text-wrap:balance}
+.ia-q{font-size:var(--t2);font-weight:600;color:var(--acier);
+  margin-top:var(--s4);text-transform:uppercase;letter-spacing:.06em}
+.ia-r{font-size:var(--t3);line-height:1.5;margin-top:var(--s2);max-width:62ch;
+  text-wrap:pretty}
+.ia-s{font-size:var(--t1);color:var(--acier);line-height:1.5;
+  margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--filet);
+  max-width:60ch}
+
+/* ---------- barre d'onglets ----------
+   La barre d'onglets d'iOS : translucide, sans indicateur au-dessus, et
+   l'onglet actif se lit au bleu. */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:color-mix(in srgb, var(--surface) 82%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
+.bar-in{max-width:620px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(6,1fr)}
+.tb{position:relative;appearance:none;border:0;background:none;
+  padding:var(--s2) 2px var(--s1);cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:2px;color:var(--acier);
+  font-family:inherit;font-size:10px;font-weight:500;transition:color .18s;
+  letter-spacing:-.01em}
+.tb svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .18s}
+.tb::before{content:none}
+.tb:hover{color:var(--sourd)}
+.tb[aria-selected="true"]{color:var(--mesure)}
+.tb[aria-selected="true"] svg{stroke-width:2.1}
+.tb[aria-selected="true"]::before{content:none}
+.tb:active{transform:scale(.93)}
+.tb:focus-visible{outline:2px solid var(--focus);outline-offset:-3px;
+  border-radius:var(--r1)}
+.dotb{position:absolute;top:5px;right:calc(50% - 17px);width:8px;height:8px;
+  border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--surface)}
+
+/* ---------- mobile ----------
+   Apple reduit ses corps sur petit ecran au lieu de les augmenter : les
+   grandes tailles sont faites pour etre vues de loin sur un ecran large, pas
+   subies a trente centimetres. Le rayon des cartes descend aussi, sinon 28 px
+   sur une carte de 340 px de large mange les coins du contenu. */
+@media (max-width:640px){
+  :root{
+    --t1:11px; --t2:13px; --t3:14px; --t4:16px; --t5:21px; --t6:34px;
+    --s4:16px; --s5:24px; --s6:40px;
+    --pad:20px; --r3:20px;
+  }
+  main{padding-left:var(--s4);padding-right:var(--s4)}
+  .top-in{padding:var(--s3) var(--s4)}
+  .lede{font-size:18px}
+  .grid{grid-template-columns:1fr 1fr;gap:0 var(--s4)}
+  .deux{grid-template-columns:1fr;gap:var(--s5)}
+  .et>div{grid-template-columns:1fr auto;gap:var(--s1) var(--s3)}
+  .et .ea{grid-column:2}
+  .chg div{grid-template-columns:34px auto auto;gap:var(--s1) var(--s3)}
+  .chg .cl{grid-column:1 / -1;text-align:left}
+  .cmp div{grid-template-columns:1fr auto 40px 26px}
+  .dark{padding:var(--s4)}
+  .wk{grid-template-columns:30px 1fr;padding:var(--s3)}
+  .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
+  .wk.now{grid-template-columns:1fr;padding:var(--s4)}
+  .li{min-height:52px}
+  .tb{padding:var(--s2) 2px var(--s1)}
+  .tb svg{width:27px;height:27px}
+}
+@media (max-width:380px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}

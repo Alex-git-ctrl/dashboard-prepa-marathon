@@ -1,0 +1,7 @@
+{
+  "nom": "Le relevé",
+  "resume": "Bitume et haute visibilité. La carte n'est pas le contenant par défaut : le contenu se pose sur la craie, organisé par des filets et des chiffres suspendus dans la marge.",
+  "theme_color_clair": "#F2F3F1",
+  "theme_color_sombre": "#1B1F22",
+  "polices": "https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..700&family=Geist+Mono:wght@400;500;600&display=swap"
+}
