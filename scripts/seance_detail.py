@@ -17,7 +17,24 @@ TYPES = ["time", "heartrate", "distance", "altitude", "velocity_smooth",
          "watts"] + DYN
 
 POINTS = 150       # points gardes par courbe apres sous-echantillonnage
+# La dynamique de foulee bouge lentement : soixante points suffisent a la lire,
+# et metrics.json est charge a chaque visite de la page.
+POINTS_DYN = 60
 V_MINI = 0.6       # m/s : au-dessous on est a l'arret, l'allure ne veut rien dire
+
+# ---- Zones de frequence cardiaque, telles que la montre les affiche ----
+# Relevees sur Garmin Connect : zone 1 de 101 a 120, zone 2 de 121 a 140,
+# zone 3 de 141 a 160, zone 4 de 161 a 180, zone 5 au-dela de 180. Ce sont
+# 50, 60, 70, 80 et 90 % d'une FC max a 200.
+#
+# Intervals.icu calcule SES zones sur le seuil (161, 170, 180, 190, 195, 201,
+# 210), donc icu_hr_zone_times ne decrit pas ce que montre la montre : une
+# sortie entierement sous 161 bpm ressort "100 % en zone 1" chez Intervals
+# alors que la Forerunner la repartit sur trois zones. On recalcule donc le
+# temps par zone depuis le stream de FC, avec les bornes ci-dessous.
+FC_BORNES = [100, 120, 140, 160, 180]
+FC_MAX_MONTRE = 200
+TROU_MAX_S = 30    # au-dela, la trace a ete coupee : l'intervalle ne compte pas
 
 MIN_ECHANTILLONS = 60      # moins d'une minute de trace : rien a decouper
 MIN_RESTE_M = 300          # dernier troncon garde s'il depasse 300 m
@@ -27,6 +44,42 @@ MAX_SPLITS = 60            # borne la taille de metrics.json
 def _moy(xs):
     xs = [x for x in xs if x is not None]
     return sum(xs) / len(xs) if xs else None
+
+
+def zones_montre(temps, hr, bornes=FC_BORNES):
+    """Secondes passees dans chacune des cinq zones de la montre.
+
+    Deux details qui changent le resultat :
+
+      - on integre sur les intervalles de temps reels et non sur le nombre
+        d'echantillons. Le Forerunner n'enregistre pas toujours a 1 Hz, et une
+        pause laisse un trou qu'il ne faut pas compter comme du temps couru.
+      - le temps sous la premiere borne est compte a part, comme le fait
+        Garmin : il n'appartient a aucune zone et n'entre pas dans les
+        pourcentages. C'est ce qui explique l'ecart entre la duree de
+        l'activite et la somme des cinq zones sur l'ecran de la montre.
+    """
+    n = min(len(temps or []), len(hr or []))
+    if n < 2:
+        return None
+    sec = [0.0] * len(bornes)
+    hors = 0.0
+    for i in range(1, n):
+        v = hr[i]
+        dt = temps[i] - temps[i - 1]
+        if v is None or not 0 < dt <= TROU_MAX_S:
+            continue
+        if v <= bornes[0]:
+            hors += dt
+            continue
+        z = 0
+        while z + 1 < len(bornes) and v > bornes[z + 1]:
+            z += 1
+        sec[z] += dt
+    if not any(sec):
+        return None
+    return {"bornes": list(bornes), "fc_max": FC_MAX_MONTRE,
+            "secondes": [round(x) for x in sec], "hors_s": round(hors)}
 
 
 def splits(temps, distance, fc, alt, pas=1000.0):
@@ -92,7 +145,8 @@ def analyse(par_type):
     """Tout ce qu'on sait tirer des streams d'une seance."""
     out = {"derive_pct": None, "dyn": {}, "splits": [], "courbes": None,
            "fc_max_reelle": None, "seconde_moitie_s_km": None,
-           "premiere_moitie_s_km": None, "puissance_moy": None}
+           "premiere_moitie_s_km": None, "puissance_moy": None,
+           "zones_montre": None}
 
     temps = par_type.get("time") or []
     hr = par_type.get("heartrate") or []
@@ -117,6 +171,7 @@ def analyse(par_type):
         if m is not None:
             out["dyn"][k] = round(m, 1)
 
+    out["zones_montre"] = zones_montre(temps, hr)
     out["splits"] = splits(temps, dist, hr, alt)
     out["courbes"] = courbes(par_type)
     w = [v for v in (par_type.get("watts") or []) if v]
@@ -178,4 +233,53 @@ def courbes(par_type, n=POINTS):
         "puissance": canal("watts"),
         "altitude": canal("altitude"),
     }
+    out["dyn"] = courbes_dyn(par_type)
     return out if any(out[k] for k in ("allure", "fc", "puissance")) else None
+
+
+# Unites relevees sur une activite reelle : la foulee et l'oscillation
+# arrivent en millimetres, le contact au sol en millisecondes, le ratio en
+# pourcent, et la cadence par jambe.
+DYN_CANAUX = ["cadence", "stance_time", "vertical_ratio",
+              "vertical_oscillation"]
+
+
+def courbes_dyn(par_type, n=POINTS_DYN):
+    """La dynamique de foulee au fil de la seance, en basse resolution.
+
+    Ces quatre mesures viennent de la ceinture HRM-Pro Plus et repondent a une
+    question differente des courbes principales : non pas "quel effort", mais
+    "comment tu cours". Elles derivent lentement, donc soixante points par
+    canal suffisent.
+
+    La cadence est ramenee en pas par minute des ici : la montre la donne par
+    jambe, et une courbe qui plafonne a 80 se lirait de travers.
+    """
+    temps = par_type.get("time") or []
+    if len(temps) < 20:
+        return None
+    N = len(temps)
+    n = min(n, N)
+    bornes = [round(i * N / n) for i in range(n + 1)]
+
+    def canal(cle, transfo=None):
+        src = par_type.get(cle) or []
+        if not any(v for v in src):
+            return None
+        out = []
+        for i in range(n):
+            seg = [v for v in src[bornes[i]:bornes[i + 1]] if v]
+            if not seg:
+                out.append(None)
+                continue
+            m = sum(seg) / len(seg)
+            out.append(transfo(m) if transfo else round(m))
+        return out if any(v is not None for v in out) else None
+
+    out = {"t": [round(temps[bornes[i]]) for i in range(n)],
+           "cadence": canal("cadence", lambda v: round(v * 2 if v < 120 else v)),
+           "stance_time": canal("stance_time"),
+           "vertical_ratio": canal("vertical_ratio", lambda v: round(v, 1)),
+           "vertical_oscillation": canal("vertical_oscillation",
+                                         lambda v: round(v / 10, 1))}
+    return out if any(out[k] for k in DYN_CANAUX) else None

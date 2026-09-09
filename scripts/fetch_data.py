@@ -73,7 +73,8 @@ def analyse_streams(s, activity_id):
     on garantit qu'une erreur d'API ne fait pas tomber toute la collecte.
     """
     vide = {"derive_pct": None, "dyn": {}, "splits": [], "fc_max_reelle": None,
-            "premiere_moitie_s_km": None, "seconde_moitie_s_km": None}
+            "premiere_moitie_s_km": None, "seconde_moitie_s_km": None,
+            "zones_montre": None}
     try:
         streams = get(s, f"/activity/{activity_id}/streams",
                       types=",".join(seance_detail.TYPES))
@@ -141,6 +142,9 @@ def main():
             semaines[n]["renfo_minutes"] += round((a.get("moving_time") or 0) / 60)
     seances, derives, efficacite = [], [], []
     zfc = defaultdict(int)          # secondes par zone de frequence cardiaque
+    # Les cinq zones de la montre, recalculees depuis le stream de FC : le
+    # decoupage d'Intervals ne coincide pas avec celui de la Forerunner.
+    zmontre = [0] * len(seance_detail.FC_BORNES)
     zall = defaultdict(int)         # secondes par zone d'allure
     dyn_all = defaultdict(list)
 
@@ -175,6 +179,10 @@ def main():
         st = analyse_streams(s, a["id"]) if km >= 1 else {}
         for k, v in st.get("dyn", {}).items():
             dyn_all[k].append(v)
+        zm = st.get("zones_montre")
+        if zm:
+            for i, sec in enumerate(zm["secondes"]):
+                zmontre[i] += sec
 
         # Indice d'efficacite aerobie : vitesse rapportee a la FC.
         # Il monte quand on court plus vite pour le meme cout cardiaque.
@@ -207,6 +215,9 @@ def main():
             # Bornes des zones telles que la montre les applique ce jour-la :
             # elles peuvent changer si la FC max est revisee.
             "zones_bornes": a.get("icu_hr_zones"),
+            # Les cinq zones de la montre : bornes fixes en pourcentage de la
+            # FC max, et secondes recalculees depuis le stream.
+            "zones_montre": st.get("zones_montre"),
             "premiere_moitie_s_km": st.get("premiere_moitie_s_km"),
             "seconde_moitie_s_km": st.get("seconde_moitie_s_km"),
             # Repartition du temps par zone de FC sur cette seance : c'est le
@@ -259,6 +270,7 @@ def main():
         return sum(1 for w in serie if w.get(champ) is not None)
 
     tot_fc = sum(zfc.values())
+    tot_montre = sum(zmontre)
     tot_all = sum(zall.values())
 
     metrics = {
@@ -282,6 +294,11 @@ def main():
                          if tot_fc else {}),
         "zones_allure_pct": ({k: round(v / tot_all * 100, 1) for k, v in sorted(zall.items())}
                              if tot_all else {}),
+        # Reference unique pour la page : c'est ce decoupage-la qui s'affiche.
+        "zones_montre": ({"bornes": seance_detail.FC_BORNES,
+                          "secondes": zmontre,
+                          "pct": [round(v / tot_montre * 100, 1) for v in zmontre]}
+                         if tot_montre else None),
         "dynamique": {k: mean(v) for k, v in dyn_all.items()},
         "actuel": {dst: dernier(dst) for dst in CHAMPS.values()},
         "couverture": {dst: dispo(dst) for dst in CHAMPS.values()},

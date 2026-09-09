@@ -26,7 +26,8 @@ ESPACEE = ("espacee", "Au moins 48 h avant ou après la sortie longue.")
 LONGUE = ("espacee", "Au moins 48 h après la séance de qualité. "
                      "C'est la seule séance qui demande vraiment un créneau.")
 RENFO_SOUPLESSE = ("libre", "N'importe quel jour, mais pas la veille de la "
-                            "sortie longue.")
+                            "sortie longue : les bras fatigués passent, les "
+                            "abdominaux courbaturés non.")
 
 ECHAUFFEMENT_S = 600     # 10 min avant une seance de qualite
 RETOUR_S = 600           # 10 min apres
@@ -61,26 +62,262 @@ FINALE = {
     23: {"km": 30, "zone": "marathon"},
 }
 
-RENFO = {
-    "mercredi": {"nom": "Haut du corps et tractions",
-                 "exos": ["Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
-                          "Dips lestés, 4 × 6 à 8",
-                          "Rowing haltère, 4 × 8",
-                          "Travail de muscle-up : tractions explosives, 5 × 3",
-                          "Gainage latéral, 3 × 45 s par côté"],
-                 "pourquoi": "Le haut du corps ne fait pas courir plus vite, "
-                             "mais un tronc solide tient la posture quand la "
-                             "fatigue arrive au 30e kilomètre."},
-    "vendredi": {"nom": "Gainage et travail ATR",
-                 "exos": ["Squats, 4 × 8",
-                          "Fentes bulgares, 3 × 10 par jambe",
-                          "Mollets debout, 4 × 15",
-                          "Travail ATR contre le mur, 5 × 30 s",
-                          "Gainage ventral, 3 × 60 s"],
-                 "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps "
-                             "à chaque appui. Le renforcement est ce qui "
-                             "protège des blessures de volume."},
-}
+# ---------------------------------------------------------------- calisthenie
+# Le renforcement n'est plus generique : l'objectif annonce est de progresser
+# en calisthenie. Trois principes tiennent la programmation.
+#
+#   1. Les jambes appartiennent a la course. Pas de squat lourd ni de fente
+#      chargee : elles voleraient la recuperation de la sortie longue. Ce qui
+#      reste pour le bas du corps est protecteur, pas constructeur.
+#   2. Une seance de calisthenie se construit sur des competences, pas sur des
+#      series. Chaque exercice porte donc sa regle de passage : ce qu'il faut
+#      atteindre pour avoir le droit de passer a la variante suivante. C'est
+#      cette regle qui fait progresser, pas le fait de refaire la seance.
+#   3. La charge suit celle du plan de course. Aux semaines de decharge, au
+#      pic de volume et pendant l'affutage, le volume baisse ici aussi. Deux
+#      entrainements qui montent en meme temps, c'est une blessure.
+#
+# Les deux competences visees sont le muscle-up et l'ATR libre, parce qu'elles
+# sont deja amorcees et qu'aucune des deux ne demande de charger les jambes.
+
+# Semaines ou le volume de calisthenie recule d'une serie par exercice : la
+# course y demande deja tout ce qu'il reste.
+TYPES_ALLEGES = {"decharge", "pic", "TEST", "COURSE", "recup", "affutage"}
+
+# Derniere ligne droite : une seule seance, et rien qui laisse des courbatures.
+SEMAINE_AFFUTAGE = 26
+
+
+def _ex(nom, series, consigne=None, progression=None):
+    return {"nom": nom, "series": series, "consigne": consigne,
+            "progression": progression}
+
+
+PHASES = [
+    {
+        "jusqu_a": 9,
+        "nom": "Fondations",
+        "quoi": "Neuf semaines pour construire du volume propre. Aucune "
+                "compétence nouvelle ne tient sans une base de tractions et "
+                "de dips stricts derrière.",
+        "seances": [
+            {
+                "nom": "Tirage et gainage",
+                "pourquoi": "Le dos et la ceinture abdominale tiennent la "
+                            "posture quand la fatigue arrive au 30e "
+                            "kilomètre. Ils portent aussi tout le reste de "
+                            "la calisthénie.",
+                "exos": [
+                    _ex("Tractions strictes", "5 séries, 2 répétitions de réserve",
+                        "Départ bras tendus, menton au-dessus de la barre, "
+                        "aucun balancement.",
+                        "Quand 5 × 8 passent proprement, ajoute 5 kg."),
+                    _ex("Tractions australiennes lentes", "3 × 10",
+                        "Trois secondes de descente. Corps aligné des talons "
+                        "à la nuque.",
+                        "Pieds surélevés quand 3 × 12 passent sans à-coup."),
+                    _ex("Suspension à la barre", "3 × 45 s",
+                        "Épaules actives, pas pendues dans le vide. C'est ce "
+                        "qui prépare les coudes au muscle-up.",
+                        "60 s, puis suspension à un bras en alternance."),
+                    _ex("Hollow body", "3 × 30 s",
+                        "Bas du dos plaqué au sol. Si il décolle, remonte les "
+                        "jambes.",
+                        "Bras tendus au-dessus de la tête quand 45 s passent."),
+                    _ex("Gainage latéral", "3 × 40 s par côté",
+                        "Bassin haut, épaule à l'aplomb du coude."),
+                ],
+            },
+            {
+                "nom": "Poussée et équilibre",
+                "pourquoi": "Les dips et l'ATR construisent la poussée "
+                            "verticale. L'équilibre sur les mains est une "
+                            "compétence de répétition : c'est la fréquence "
+                            "qui la donne, pas l'intensité.",
+                "exos": [
+                    _ex("Dips aux barres parallèles", "4 × 8",
+                        "Descente jusqu'à ce que le bras casse l'angle droit, "
+                        "buste légèrement penché.",
+                        "Lest de 5 kg quand 4 × 10 passent."),
+                    _ex("Pompes déclinées", "3 × 12",
+                        "Pieds surélevés d'environ 40 cm, corps en planche.",
+                        "Passe aux pompes pseudo-planche, mains à hauteur de "
+                        "hanches."),
+                    _ex("ATR face au mur", "5 × 30 s",
+                        "Ventre au mur, mains à 15 cm du mur. C'est la "
+                        "position qui apprend l'alignement, pas la banane.",
+                        "Décolle un pied, puis alterne les deux."),
+                    _ex("Pike push-ups", "3 × 8",
+                        "Bassin haut, tête entre les bras, front vers le sol.",
+                        "Pieds surélevés, puis pompes ATR au mur."),
+                    _ex("L-sit", "4 × 20 s",
+                        "Aux barres ou au sol. Genoux groupés si les jambes "
+                        "tendues font arrondir le dos.",
+                        "30 s groupé, puis jambes tendues."),
+                    _ex("Mollets debout", "3 × 15",
+                        "Le seul travail de jambes du programme. Il protège "
+                        "le tendon d'Achille du volume qui arrive."),
+                ],
+            },
+        ],
+    },
+    {
+        "jusqu_a": 19,
+        "nom": "Force et compétences",
+        "quoi": "Le volume de base est là. Dix semaines pour attaquer "
+                "vraiment le muscle-up et l'ATR libre, pendant que la course "
+                "monte de son côté.",
+        "seances": [
+            {
+                "nom": "Vers le muscle-up",
+                "pourquoi": "Le muscle-up ne s'obtient pas en faisant plus de "
+                            "tractions. Il demande de la hauteur, une "
+                            "transition apprise à part, et un dos capable de "
+                            "tenir le corps horizontal.",
+                "exos": [
+                    _ex("Tractions lestées", "5 × 5, 1 répétition de réserve",
+                        "Le lest est là pour rendre la traction à vide facile, "
+                        "pas pour battre un record.",
+                        "Ajoute 2,5 kg quand les 5 séries passent sans "
+                        "ralentir."),
+                    _ex("Tractions explosives", "5 × 3",
+                        "Tirer le plus haut possible, poitrine vers la barre. "
+                        "Repos complet entre les séries.",
+                        "Quand la barre touche le bas du sternum, tu as la "
+                        "hauteur du muscle-up."),
+                    _ex("Négatifs de muscle-up", "4 × 3",
+                        "Départ en appui bras tendus sur la barre, descente en "
+                        "5 secondes en repassant la transition.",
+                        "Quand la descente est contrôlée sur les 3, tente le "
+                        "mouvement complet avec une légère impulsion."),
+                    _ex("Front lever groupé", "5 × 15 s",
+                        "Bras tendus, dos rond, bassin à hauteur des épaules.",
+                        "Une jambe tendue, puis demi-écart, puis jambes "
+                        "tendues."),
+                    _ex("Rowing inversé pieds surélevés", "3 × 10",
+                        "Il construit le dos horizontal, ce que la traction "
+                        "verticale ne fait pas."),
+                ],
+            },
+            {
+                "nom": "Vers l'ATR libre",
+                "pourquoi": "L'équilibre sur les mains se joue aux poignets et "
+                            "aux doigts, pas dans les épaules. Le mur sert à "
+                            "installer l'alignement, puis il faut le quitter.",
+                "exos": [
+                    _ex("Dips lestés", "4 × 6",
+                        "Même règle que la traction : le lest doit rendre le "
+                        "poids de corps facile.",
+                        "Ajoute 2,5 kg quand 4 × 8 passent."),
+                    _ex("ATR dos au mur", "5 × 40 s",
+                        "Talons au mur, mains éloignées, corps aligné. Cherche "
+                        "à décoller les talons.",
+                        "Éloigne les mains de 10 cm à chaque fois que 40 s "
+                        "passent, puis lâche un appui."),
+                    _ex("Pompes ATR au mur", "4 × 5",
+                        "Face au mur, descente jusqu'à ce que la tête frôle le "
+                        "sol.",
+                        "Mains surélevées sur des cales pour gagner "
+                        "l'amplitude."),
+                    _ex("Pompes pseudo-planche", "3 × 8",
+                        "Mains à hauteur de hanches, coudes le long du corps, "
+                        "épaules devant les mains."),
+                    _ex("L-sit", "4 × 30 s",
+                        "Jambes tendues, pointes de pieds tirées.",
+                        "Passe au V-sit quand 40 s tiennent."),
+                    _ex("Ischios nordiques", "3 × 6",
+                        "Descente freinée. Protège l'ischio, qui est le muscle "
+                        "qui lâche sur les sorties longues."),
+                ],
+            },
+        ],
+    },
+    {
+        "jusqu_a": 99,
+        "nom": "Entretien",
+        "quoi": "La course prend toute la priorité : sortie longue à 30 km, "
+                "test 30K, puis affûtage. Ici on ne construit plus rien, on "
+                "garde ce qui a été acquis avec le minimum de fatigue.",
+        "seances": [
+            {
+                "nom": "Entretien tirage",
+                "pourquoi": "Deux séances légères par semaine suffisent à "
+                            "conserver la force. Chercher à progresser "
+                            "maintenant coûterait des jambes lourdes le "
+                            "dimanche.",
+                "exos": [
+                    _ex("Tractions strictes", "4 × 5",
+                        "Sans lest, sans aller à l'échec. Tu dois sortir de la "
+                        "série en pouvant en faire trois de plus."),
+                    _ex("Front lever groupé", "4 × 15 s",
+                        "Entretien de la compétence, pas de progression."),
+                    _ex("Hollow body", "3 × 30 s",
+                        "Le gainage reste utile jusqu'au dernier jour : c'est "
+                        "lui qui tient la posture au 35e kilomètre."),
+                ],
+            },
+            {
+                "nom": "Entretien poussée",
+                "pourquoi": "Même logique : maintenir l'ATR par la fréquence, "
+                            "sans jamais chercher la fatigue.",
+                "exos": [
+                    _ex("Dips", "4 × 6",
+                        "Poids de corps uniquement."),
+                    _ex("ATR dos au mur", "4 × 30 s",
+                        "C'est la répétition qui garde l'équilibre, pas la "
+                        "durée."),
+                    _ex("L-sit", "3 × 20 s"),
+                    _ex("Gainage latéral", "3 × 45 s par côté"),
+                ],
+            },
+        ],
+    },
+]
+
+
+def _phase(semaine):
+    for ph in PHASES:
+        if semaine <= ph["jusqu_a"]:
+            return ph
+    return PHASES[-1]
+
+
+def calisthenie(w):
+    """Les seances de calisthenie de la semaine, adaptees a sa charge."""
+    ph = _phase(w["semaine"])
+    seances = ph["seances"]
+    allege = w.get("type") in TYPES_ALLEGES
+    affutage = w["semaine"] >= SEMAINE_AFFUTAGE
+    if affutage:
+        # Semaine de course : une seule seance, et elle s'arrete tot.
+        seances = seances[:1]
+
+    # La consigne de la semaine, dans l'ordre ou elle prime : une course
+    # passe avant l'affutage, qui passe avant une simple decharge.
+    if w.get("type") == "COURSE":
+        consigne = ("Une course est prévue cette semaine. Rien ici dans les "
+                    "deux jours qui la précèdent, et rien qui laisse des "
+                    "courbatures.")
+    elif affutage:
+        consigne = ("Dernière ligne droite avant Barcelone : une seule séance, "
+                    "à volume réduit. On ne construit plus, on entretient.")
+    elif allege:
+        consigne = ("Semaine allégée côté course : retire une série à chaque "
+                    "exercice ici aussi. Deux charges qui montent ensemble, "
+                    "c'est une blessure.")
+    else:
+        consigne = None
+
+    out = []
+    for s in seances:
+        note = "Phase « %s ». %s" % (ph["nom"], ph["quoi"])
+        if consigne:
+            note += " " + consigne
+        out.append({"type": "renfo", "nom": s["nom"], "discipline": "calisthénie",
+                    "phase": ph["nom"], "pourquoi": s["pourquoi"],
+                    "exos": s["exos"], "note": note,
+                    "allege": bool(consigne)})
+    return out
 
 
 def _allure(s):
@@ -226,8 +463,8 @@ def programme(w, calibration, courses):
         out.append(pose(_longue(w["sortie_longue_km"], zones,
                                 FINALE.get(w["semaine"])), JOUR_LONGUE, LONGUE))
 
-    for j in JOUR_RENFO:
-        out.append(pose(dict(RENFO[j], type="renfo"), j, RENFO_SOUPLESSE))
+    for j, s in zip(JOUR_RENFO, calisthenie(w)):
+        out.append(pose(s, j, RENFO_SOUPLESSE))
 
     # L'ordre est celui de la lecture : les courses d'abord, du plus facile au
     # plus exigeant, puis le renforcement. Ce n'est pas un ordre d'execution.
@@ -264,6 +501,7 @@ def construit(plan, calibration, ajustees, semaine_courante, combien=3):
         out.append({
             "semaine": w["semaine"], "lundi": w["lundi"], "dimanche": w["dimanche"],
             "bloc": w["bloc"], "note": w.get("note"),
+            "phase_calisthenie": _phase(w["semaine"])["nom"],
             "volume_km": eff["volume_km"], "adapte": bool(a),
             "seances": programme(eff, calibration, plan["courses"]),
         })

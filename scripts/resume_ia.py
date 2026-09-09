@@ -90,11 +90,16 @@ def contexte(seance, plan, calibration, precedentes):
         elif jd == "samedi":
             prevu = "sortie longue de %s km" % sem["sortie_longue_km"]
 
+    # Les zones de la montre, pas celles d'Intervals : le resume doit citer
+    # les memes chiffres que ceux affiches sur la page et sur la Forerunner.
+    noms = ["Z1 échauffement", "Z2 facile", "Z3 aérobie", "Z4 seuil",
+            "Z5 maximum"]
+    zm = seance.get("zones_montre") or {}
     zones = {}
-    tot = sum((seance.get("zones_fc") or {}).values())
+    tot = sum(zm.get("secondes") or [])
     if tot:
-        for k, v in seance["zones_fc"].items():
-            zones[k] = round(v / tot * 100)
+        for i, v in enumerate(zm["secondes"]):
+            zones[noms[i]] = round(v / tot * 100)
 
     return {
         "date": seance["date"],
@@ -115,6 +120,13 @@ def contexte(seance, plan, calibration, precedentes):
         "cadence_pas_min": (round(seance["cadence"] * 2)
                             if seance.get("cadence") and seance["cadence"] < 120
                             else seance.get("cadence")),
+        "dynamique_de_foulee": {
+            "contact_au_sol_ms": (seance.get("dyn") or {}).get("stance_time"),
+            "ratio_vertical_pct": (seance.get("dyn") or {}).get("vertical_ratio"),
+            "oscillation_verticale_mm": (seance.get("dyn") or {})
+            .get("vertical_oscillation"),
+            "longueur_de_foulee_mm": (seance.get("dyn") or {}).get("step_length"),
+        } if seance.get("dyn") else None,
         "repartition_zones_fc_pct": zones or None,
         "premiere_moitie_min_km": _allure(seance.get("premiere_moitie_s_km")),
         "seconde_moitie_min_km": _allure(seance.get("seconde_moitie_s_km")),
@@ -137,7 +149,10 @@ def par_regles(c):
     s'appuie sur un seuil explicite, jamais sur une impression.
     """
     z = c.get("repartition_zones_fc_pct") or {}
-    endurance = (z.get("z1", 0) + z.get("z2", 0))
+    # L'endurance sur la montre, c'est Z1 plus Z2 plus Z3 : jusqu'a 160 bpm,
+    # soit 80 % de la FC max, l'effort reste aerobie.
+    endurance = (z.get("Z1 échauffement", 0) + z.get("Z2 facile", 0)
+                 + z.get("Z3 aérobie", 0))
     derive = c.get("derive_cardiaque_pct")
 
     ex = []

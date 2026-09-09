@@ -418,10 +418,21 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   font-weight:500}
 .et .ec{font-size:var(--t1);color:var(--acier);line-height:1.45;
   margin:0 0 var(--s2);max-width:62ch;text-wrap:pretty}
-.ex{margin:var(--s3) 0 0;padding-left:var(--s4);font-size:var(--t3);
-  line-height:1.6;color:var(--encre)}
-.ex li{padding-left:var(--s1)}
-.ex li::marker{color:var(--acier)}
+/* Exercices de calisthenie : meme grille que les etapes de course, plus une
+   ligne de progression. C'est elle qui fait avancer, pas la repetition de la
+   seance : elle dit a quelle condition on passe a la variante suivante. */
+.ex{margin-top:var(--s3)}
+.ex>div{display:grid;grid-template-columns:1fr auto;gap:var(--s2) var(--s3);
+  align-items:baseline;padding:var(--s2) 0;border-top:1px solid var(--filet)}
+.ex .en{font-size:var(--t3);font-weight:500}
+.ex .ed{font-family:var(--num);font-size:var(--t2);color:var(--sourd);
+  white-space:nowrap;text-align:right}
+.ex .ec{font-size:var(--t1);color:var(--acier);line-height:1.45;
+  margin:0 0 var(--s2);max-width:62ch;text-wrap:pretty}
+.ex .ep{font-size:var(--t1);line-height:1.45;margin:0 0 var(--s3);
+  padding-left:var(--s3);border-left:2px solid var(--filet);
+  color:var(--sourd);max-width:62ch;text-wrap:pretty}
+.ex .ep b{font-weight:500;color:var(--encre)}
 
 /* ---------- le plan s'adapte ---------- */
 .adapt{margin-top:var(--s3)}
@@ -571,6 +582,31 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   padding:var(--s2) 0;border-bottom:1px solid var(--filet)}
 .dyn span{color:var(--sourd)}
 .dyn b{font-family:var(--num);font-weight:500}
+
+/* Une mesure de foulee par ligne : sa valeur, son trace au fil de la seance,
+   et sa place dans la distribution publiee par Garmin. La reglette est
+   neutre, cinq gris ordonnes du moins bon au meilleur ; c'est le curseur
+   bitume qui porte la valeur du jour, comme partout ailleurs sur la page. */
+.dm{display:flex;flex-direction:column;gap:var(--s5)}
+.dm-l{display:flex;flex-direction:column;gap:var(--s2)}
+.dm-h{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s3);border-bottom:1px solid var(--filet);padding-bottom:var(--s2)}
+.dm-n{font-size:var(--t3);font-weight:500}
+.dm-v{font-family:var(--num);font-size:var(--t5);font-weight:500;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.dm-v em{font-style:normal;font-size:var(--t2);color:var(--acier);
+  margin-left:.35em;font-family:var(--sans)}
+.dm-g{width:100%;height:38px;display:block;margin-top:var(--s1)}
+.dm-w{position:relative;padding:4px 0}
+.dm-b{display:flex;height:9px;border-radius:2px;overflow:hidden}
+.dm-b span{flex:1}
+.dm-m{position:absolute;top:0;width:2px;height:17px;background:var(--bitume);
+  border-radius:1px;transform:translateX(-1px)}
+.dm-q{display:flex;justify-content:space-between;gap:var(--s3);
+  font-size:var(--t1);color:var(--acier)}
+.dm-q b{color:var(--encre);font-weight:500}
+.dm-p{font-size:var(--t2);color:var(--sourd);margin:0;max-width:62ch;
+  line-height:1.5;text-wrap:pretty}
 .verd{font-size:var(--t3);line-height:1.5;margin-top:var(--s3);max-width:66ch;
   text-wrap:pretty}
 .verd b{font-weight:600}
@@ -950,41 +986,47 @@ function ecartPlan(s) {
     cas, et on la ramene en pas par minute pour rester comparable. */
 const ppm = v => v == null ? null : Math.round(v < 120 ? v * 2 : v);
 
-/* ---------- les zones de FC, comme la montre les montre ----------
-   Intervals.icu decoupe en sept zones avec ses propres noms anglais. La
-   Forerunner en montre cinq. Les quatre premieres bornes d'Intervals
-   coincident avec le modele Garmin en pourcentage du seuil : 161, 170, 180 et
-   190 pour un seuil a 191. On regroupe donc les zones 5, 6 et 7 d'Intervals
-   en une seule zone 5, et on reprend les noms francais de Garmin.
-   Les donnees brutes gardent leurs sept zones : le regroupement est un choix
-   d'affichage, pas une perte. */
-const Z5_NOMS = ['Échauffement', 'Facile', 'Aérobie', 'Seuil', 'Maximum'];
-const Z5_COL = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z5)', 'var(--z7)'];
-const Z5_ROLE = ['Récupération active', 'Endurance fondamentale',
-  'Tempo', 'Seuil et allure semi', 'VO2max'];
+/* ---------- les zones de FC, celles de la montre ----------
+   Relevees sur Garmin Connect : Z1 de 101 a 120, Z2 de 121 a 140, Z3 de 141 a
+   160, Z4 de 161 a 180, Z5 au-dela de 180. Ce sont 50, 60, 70, 80 et 90 %
+   d'une FC max a 200.
 
-/** Les cinq zones Garmin, avec leurs secondes, leurs bornes et leur part. */
+   Intervals.icu decoupe autrement : sept zones calees sur le seuil, a 161,
+   170, 180, 190, 195, 201 et 210. Ses temps par zone ne sont donc PAS ceux de
+   la montre, et une sortie entierement sous 161 bpm en ressortait "100 % en
+   zone 1" alors que la Forerunner la repartissait sur trois zones. Le temps
+   par zone est recalcule a la collecte depuis le stream de FC.
+
+   Le temps passe sous 101 bpm n'appartient a aucune zone et n'entre pas dans
+   les pourcentages, exactement comme sur la montre : c'est ce qui explique
+   l'ecart entre la duree de la seance et la somme des cinq zones. */
+const Z5_NOMS = ['Échauffement', 'Facile', 'Aérobie', 'Seuil', 'Maximum'];
+const Z5_COL = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)', 'var(--z5)'];
+const Z5_ROLE = ['Récupération', 'Endurance fondamentale', 'Endurance active',
+  'Seuil et allure semi', 'VO2max'];
+// Jusqu'a 160 bpm, soit 80 % de la FC max, l'effort reste aerobie : c'est la
+// frontiere qui compte pour juger une sortie d'endurance.
+const Z_AERO = 3;
+
+/** Les cinq zones de la montre, avec leurs secondes, leurs bornes et leur part. */
 function zones5(s) {
-  const Z = s.zones_fc || {}, B = s.zones_bornes || [];
-  if (!B.length) return null;
-  const sec = [
-    Z.z1 || 0,
-    Z.z2 || 0,
-    Z.z3 || 0,
-    Z.z4 || 0,
-    (Z.z5 || 0) + (Z.z6 || 0) + (Z.z7 || 0),
-  ];
+  const Z = s.zones_montre;
+  if (!Z || !Z.secondes) return null;
+  const sec = Z.secondes, B = Z.bornes;
   const tot = sec.reduce((a, b) => a + b, 0);
   if (!tot) return null;
   return sec.map((v, i) => ({
     n: i + 1, nom: Z5_NOMS[i], role: Z5_ROLE[i], col: Z5_COL[i],
     secondes: v, part: v / tot,
-    bas: i ? B[i - 1] : null,
-    haut: i < 4 ? B[i] : null,
-    bornes: i === 0 ? 'jusqu’à ' + B[0] + ' bpm'
-      : i < 4 ? B[i - 1] + ' à ' + B[i] + ' bpm'
-      : 'au-dessus de ' + B[3] + ' bpm',
+    bas: B[i] + 1, haut: i < 4 ? B[i + 1] : null,
+    bornes: i < 4 ? (B[i] + 1) + ' à ' + B[i + 1] + ' bpm'
+      : 'plus de ' + B[4] + ' bpm',
   }));
+}
+
+/** La part du temps restee sous le seuil aerobie, en pourcent. */
+function partAerobie(Z) {
+  return Math.round(Z.slice(0, Z_AERO).reduce((a, z) => a + z.part, 0) * 100);
 }
 
 /** Repartition du temps par zone de FC, plus la lecture qui va avec. C'est le
@@ -1008,21 +1050,22 @@ function zonesFC(s, avecBilan) {
 function bilanZones(s) {
   const Z = zones5(s);
   if (!Z) return '';
-  // L'endurance, c'est Z1 plus Z2 sur la montre : echauffement et facile.
-  const ef = Math.round((Z[0].part + Z[1].part) * 100);
-  let h = '';
-  h += ef >= 75
-    ? '<div class="bilan ok"><b>' + ef + ' % du temps en endurance.</b> '
-      + "C'est le bon dosage : la sortie construit ta base sans coûter de "
-      + 'récupération.</div>'
-    : ef >= 55
-    ? '<div class="bilan"><b>' + ef + ' % du temps en endurance.</b> Correct, '
-      + 'mais tu dérives vers le tempo. Pars 15 secondes au kilomètre plus '
-      + 'lentement.</div>'
-    : '<div class="bilan ko"><b>' + ef + ' % du temps seulement en endurance.</b> '
-      + "Cette sortie était trop rapide pour ce qu'elle devait apporter. "
-      + 'La première moitié doit sembler trop facile.</div>';
-  return h;
+  // Sur la montre, l'aerobie couvre Z1, Z2 et Z3 : jusqu'a 160 bpm, soit 80 %
+  // de la FC max. Au-dessus commence le seuil, qui coute de la recuperation.
+  const ef = partAerobie(Z);
+  const dur = 100 - ef;
+  return dur <= 10
+    ? '<div class="bilan ok"><b>' + ef + ' % du temps en aérobie</b>, '
+      + 'sous 160 bpm. C’est le bon dosage : la sortie construit ta base sans '
+      + 'coûter de récupération.</div>'
+    : dur <= 30
+    ? '<div class="bilan"><b>' + dur + ' % du temps au-dessus de 160 bpm.</b> '
+      + 'Acceptable sur une séance de qualité, trop sur une sortie facile. '
+      + 'Si celle-ci devait rester lente, pars 15 secondes au kilomètre plus '
+      + 'doucement.</div>'
+    : '<div class="bilan ko"><b>' + dur + ' % du temps au-dessus de 160 bpm.</b> '
+      + 'C’est une séance dure, pas une sortie d’endurance. Elle ne vaut que '
+      + 'si elle était prévue comme telle.</div>';
 }
 
 /** Grille de chiffres cles. */
@@ -1093,23 +1136,147 @@ function moities(s) {
          + 'Le départ était trop rapide pour la distance visée.') + '</div>';
 }
 
-// Unites relevees sur une activite reelle, plus devinees : la foulee et
-// l'oscillation arrivent en millimetres, le contact au sol en millisecondes,
-// et la cadence par jambe.
-const DYN_NOMS = {
-  step_length:['Longueur de foulée', v => fx(v / 1000, 2) + ' m'],
-  stance_time:['Contact au sol', v => Math.round(v) + ' ms'],
-  vertical_oscillation:['Oscillation verticale', v => fx(v / 10, 1) + ' cm'],
-  vertical_ratio:['Ratio vertical', v => fx(v, 1) + ' %'],
-};
+/* ---------- dynamique de course ----------
+   Quatre mesures que la ceinture HRM-Pro Plus produit a chaque appui. Un
+   chiffre seul ne dit rien : 286 ms de contact au sol, est-ce bien ou mal ?
+   Garmin publie la distribution de ces mesures sur l'ensemble de ses
+   coureurs, decoupee en cinq bandes de percentiles. C'est cette distribution
+   qui sert de reglette. Elle est generique et non personnelle : elle situe,
+   elle ne prescrit pas.
+
+   Unites relevees sur une activite reelle : la foulee et l'oscillation
+   arrivent en millimetres, le contact au sol en millisecondes, la cadence par
+   jambe. */
+
+const DYN_BANDES = [
+  ['Faible', 'derniers 5 %'],
+  ['Sous la moyenne', 'entre 5 et 30 %'],
+  ['Moyen', 'entre 30 et 70 %'],
+  ['Bon', 'entre 70 et 95 %'],
+  ['Très bon', '5 % de tête'],
+];
+// Cinq gris ordonnes, du moins bon au meilleur. La reglette reste neutre :
+// c'est le curseur bitume qui porte la valeur du jour.
+const DYN_GRIS = [12, 26, 40, 54, 68].map(x =>
+  'color-mix(in srgb, var(--acier) ' + x + '%, var(--creux))');
+
+const DYN_MESURES = [
+  {cle:'cadence', nom:'Cadence', unite:'ppm', dec:0, col:'var(--m-allure)',
+   val:d => ppm(d.cadence), seuils:[153, 164, 174, 184], haut:true,
+   quoi:'Le nombre de pas par minute. Monter la cadence raccourcit la foulée '
+     + 'et réduit le freinage à chaque appui, sans courir plus vite pour '
+     + 'autant. C’est le seul des quatre sur lequel tu peux agir directement, '
+     + 'en pleine séance.'},
+  {cle:'stance_time', nom:'Contact au sol', unite:'ms', dec:0, col:'var(--m-fc)',
+   val:d => d.stance_time, seuils:[218, 249, 278, 309], haut:false,
+   quoi:'Le temps passé au sol à chaque appui. Plus il est court, moins '
+     + 'l’appui coûte, et il se raccourcit surtout quand la cadence monte : '
+     + 'les deux mesures bougent ensemble.'},
+  {cle:'vertical_oscillation', nom:'Oscillation verticale', unite:'cm', dec:1,
+   col:'var(--m-puissance)', val:d => d.vertical_oscillation / 10,
+   seuils:[6.4, 8.2, 9.8, 11.6], haut:false,
+   quoi:'De combien le bassin monte et descend à chaque foulée. Ce mouvement '
+     + 'vertical ne fait pas avancer : c’est de l’énergie dépensée en pure '
+     + 'perte.'},
+  {cle:'vertical_ratio', nom:'Ratio vertical', unite:'%', dec:1,
+   col:'var(--m-alt)', val:d => d.vertical_ratio, seuils:[6.1, 7.5, 8.7, 10.2],
+   haut:false,
+   quoi:'L’oscillation rapportée à la longueur de la foulée. C’est la plus '
+     + 'honnête des quatre : elle dit combien de mouvement vertical tu paies '
+     + 'pour chaque mètre gagné, et elle ne dépend pas de ta taille.'},
+];
+
+/** Ou tombe une valeur dans les cinq bandes, et ou poser le curseur. */
+function dynBande(m, v) {
+  let i = 0;
+  while (i < m.seuils.length && v >= m.seuils[i]) i++;
+  // i est le rang dans l'ordre croissant de la mesure. La qualite le suit
+  // pour la cadence, et l'inverse pour les trois autres, ou moins vaut mieux.
+  const q = m.haut ? i : m.seuils.length - i;
+  // Le curseur est interpole dans la bande quand elle est bornee des deux
+  // cotes, et pose au milieu dans les deux bandes ouvertes.
+  const bas = m.seuils[i - 1], haut = m.seuils[i];
+  let f = .5;
+  if (bas != null && haut != null) f = (v - bas) / (haut - bas);
+  const pos = (m.haut ? q + f : q + 1 - f) / 5;
+  return {q:q, pos:Math.min(.99, Math.max(.01, pos))};
+}
+
+/** Trace d'une mesure de foulee au fil de la seance, en pleine largeur. */
+function dynSpark(C, cle, col) {
+  const v = C && C[cle];
+  if (!v) return '';
+  const ok = v.filter(x => x != null);
+  if (ok.length < 5) return '';
+  // Deux unites de marge de chaque cote : sans elles, le trait commence pile
+  // sur le bord du viewBox et la moitie de son epaisseur est rognee.
+  const W = 520, H = 38, PAD = 4, MX = 2;
+  let mn = Math.min.apply(null, ok), mx = Math.max.apply(null, ok);
+  if (mx - mn < 1e-6) { mn -= 1; mx += 1; }
+  const t0 = C.t[0], span = (C.t[C.t.length - 1] - t0) || 1;
+  const X = i => MX + (C.t[i] - t0) / span * (W - 2 * MX);
+  const Y = x => PAD + (1 - (x - mn) / (mx - mn)) * (H - 2 * PAD);
+  // Une mesure absente coupe le trait plutot que de le faire traverser le
+  // trou en ligne droite : la ceinture decroche parfois quelques secondes.
+  const segs = []; let cur = [];
+  v.forEach((x, i) => {
+    if (x == null) { if (cur.length > 1) segs.push(cur); cur = []; return; }
+    cur.push(X(i).toFixed(1) + ',' + Y(x).toFixed(1));
+  });
+  if (cur.length > 1) segs.push(cur);
+  if (!segs.length) return '';
+  return '<svg class="dm-g" viewBox="0 0 ' + W + ' ' + H + '" '
+    + 'preserveAspectRatio="none" aria-hidden="true">'
+    + segs.map(sg => '<polyline points="' + sg.join(' ') + '" fill="none" '
+      + 'stroke="' + col + '" stroke-width="1.5" stroke-linejoin="round" '
+      + 'vector-effect="non-scaling-stroke"/>').join('') + '</svg>';
+}
 
 function dynamique(s) {
   const D = s.dyn || {};
-  const lignes = Object.keys(DYN_NOMS).filter(k => D[k] != null);
-  if (!lignes.length) return '';
-  return '<div class="dyn">' + lignes.map(k =>
-      '<div><span>' + DYN_NOMS[k][0] + '</span><b>'
-      + DYN_NOMS[k][1](D[k]) + '</b></div>').join('') + '</div>';
+  const CD = (s.courbes || {}).dyn;
+  const dispo = DYN_MESURES.filter(m => {
+    const v = m.val(D);
+    return v != null && isFinite(v);
+  });
+  // Longueur de foulee et puissance : Garmin ne publie pas de bande de
+  // reference pour elles, donc elles restent des chiffres bruts.
+  const brut = [];
+  if (D.step_length)
+    brut.push(['Longueur de foulée', fx(D.step_length / 1000, 2) + ' m']);
+  if (s.puissance_moy)
+    brut.push(['Puissance moyenne', nf(s.puissance_moy) + ' W']);
+  if (!dispo.length && !brut.length) return '';
+
+  let h = '';
+  if (dispo.length) {
+    h += '<div class="dm">' + dispo.map(m => {
+      const v = m.val(D), B = dynBande(m, v);
+      return '<div class="dm-l">'
+        + '<div class="dm-h"><span class="dm-n">' + m.nom + '</span>'
+        + '<span class="dm-v">' + fx(v, m.dec) + '<em>' + m.unite
+        + '</em></span></div>'
+        + dynSpark(CD, m.cle, m.col)
+        + '<div class="dm-w"><div class="dm-b">'
+        + DYN_GRIS.map(g => '<span style="background:' + g + '"></span>').join('')
+        + '</div><i class="dm-m" style="left:' + (B.pos * 100).toFixed(1)
+        + '%"></i></div>'
+        + '<div class="dm-q"><b>' + DYN_BANDES[B.q][0] + '</b><span>'
+        + DYN_BANDES[B.q][1] + ' des coureurs Garmin</span></div>'
+        + '<p class="dm-p">' + m.quoi + '</p></div>';
+    }).join('') + '</div>';
+  }
+  if (brut.length)
+    h += '<div class="dyn" style="margin-top:var(--s5)">' + brut.map(x =>
+      '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('')
+      + '</div>';
+  if (dispo.length)
+    h += '<div class="sp-l">Les cinq bandes sont la distribution que Garmin '
+      + 'publie sur l’ensemble de ses coureurs, pas une cible personnelle. Un '
+      + 'coureur grand et lourd n’a pas les mêmes valeurs qu’un coureur léger. '
+      + 'Ce qui compte ici est le sens dans lequel elles bougent chez toi, '
+      + 'séance après séance.</div>';
+  return h;
 }
 
 /** Efficacite aerobie de la seance, comparee aux precedentes. Meme vitesse
@@ -1221,9 +1388,11 @@ function courbesSeance(box, s) {
 
     // Bornes des zones de FC, a leur hauteur reelle : on voit du regard a
     // quel moment la seance a change de zone.
-    if (p.zones && s.zones_bornes) {
-      // Quatre bornes seulement : au-dela, la montre ne distingue plus rien.
-      s.zones_bornes.slice(0, 4).forEach((b, i) => {
+    if (p.zones && s.zones_montre) {
+      // Les quatre bornes qui separent les cinq zones de la montre : 120,
+      // 140, 160 et 180. La premiere, a 100, n'est pas une separation entre
+      // zones mais le plancher sous lequel la montre ne compte plus rien.
+      s.zones_montre.bornes.slice(1).forEach((b, i) => {
         if (b <= p.mn || b >= p.mx) return;
         g += `<line x1="${L}" y1="${p.Y(b).toFixed(1)}" x2="${W - R}"
           y2="${p.Y(b).toFixed(1)}" stroke="${Z5_COL[i + 1]}"
@@ -1302,23 +1471,34 @@ function courbesSeance(box, s) {
   return true;
 }
 
-/** Histogramme des zones de FC : la proportion du temps passe dans chacune. */
+/** Histogramme des zones de FC, dans l'ordre de l'ecran de la montre : la
+    zone la plus dure en haut, la plus facile en bas. */
 function histoZones(s) {
   const Z = zones5(s);
   if (!Z) return '';
+  const hors = (s.zones_montre || {}).hors_s || 0;
   // Les cinq zones sont toujours listees : une zone a zero est une
   // information, elle dit que l'intensite n'y est jamais montee.
-  return '<div class="gz">' + Z.map(z =>
-    '<div class="zk"><div class="zn">Z' + z.n + ' · ' + z.nom + '</div>'
+  let h = '<div class="gz">' + Z.slice().reverse().map(z =>
+    '<div class="zk"><div class="zn">Zone ' + z.n + ' · ' + z.nom + '</div>'
     + '<div class="zr">' + z.bornes + '</div></div>'
-    + '<span class="zb"><i style="width:' + (z.part * 100).toFixed(1)
-    + '%;background:' + z.col + '"></i></span>'
+    + '<span class="zb"><i style="width:' + (z.part * 100).toFixed(1) + '%'
+    + (z.secondes ? '' : ';min-width:0') + ';background:' + z.col
+    + '"></i></span>'
     + '<span class="zv' + (z.secondes ? '' : ' vide') + '">'
     + Math.round(z.part * 100) + ' %<em>'
-    + (z.secondes ? duree(z.secondes) : 'jamais') + '</em></span>').join('')
-    + '</div><div class="sp-l">Le découpage est celui de ta montre : cinq '
-    + 'zones, calées sur les mêmes bornes que ce que tu lis sur la Forerunner.'
+    + (z.secondes ? duree(z.secondes) : '0:00') + '</em></span>').join('')
     + '</div>';
+  h += '<div class="sp-l">Les bornes sont celles de ta Forerunner : 50, 60, '
+    + '70, 80 et 90 % d’une fréquence maximale de 200. Les temps sont '
+    + 'recalculés seconde par seconde et tombent sur ceux de la montre.'
+    + (hors >= 15 ? ' ' + duree(hors) + ' passées sous 101 bpm n’entrent dans '
+       + 'aucune zone, comme sur la montre.' : '')
+    + ' Les pourcentages, eux, peuvent différer d’un ou deux points : ils sont '
+    + 'calculés sur le temps réellement passé en zone, donc ils totalisent '
+    + '100, alors que la montre divise par la durée entière de l’activité.'
+    + '</div>';
+  return h;
 }
 
 /* ---------- le resume d'analyse ----------
@@ -1376,9 +1556,8 @@ function detailSeance(s) {
   }
   const hz = histoZones(s);
   if (hz) {
-    const Z = zones5(s);
-    const ef = Math.round((Z[0].part + Z[1].part) * 100);
-    h += bloc('Zones de fréquence cardiaque', ef + ' % en endurance',
+    h += bloc('Zones de fréquence cardiaque',
+              partAerobie(zones5(s)) + ' % en aérobie',
               hz + bilanZones(s), false);
   }
   const sp = splits(s);
@@ -1392,7 +1571,9 @@ function detailSeance(s) {
   const c = comparaison(s);
   if (c) h += bloc('Par rapport aux précédentes', '', c, false);
   const dy = dynamique(s);
-  if (dy) h += bloc('Dynamique de course', 'ceinture HRM-Pro Plus', dy, false);
+  if (dy) h += bloc('Dynamique de course',
+                    s.cadence ? ppm(s.cadence) + ' ppm' : 'ceinture HRM-Pro Plus',
+                    dy, false);
   // Le relief change la lecture de l'allure : le dire une fois, en clair.
   if (s.gap_s_km && s.deniv >= 60 && Math.abs(s.gap_s_km - s.allure_s_km) >= 5)
     h += '<div class="verd">Avec <b>' + nf(s.deniv) + ' m de dénivelé</b>, '
@@ -1568,6 +1749,16 @@ function detailSeance(s) {
       + (e.consigne ? '<p class="ec">' + e.consigne + '</p>' : '');
   }
 
+  /** Un exercice de calisthenie : son volume, sa consigne, et la condition
+      a remplir pour passer a la variante suivante. */
+  function exo(e) {
+    return '<div><span class="en">' + e.nom + '</span>'
+      + '<span class="ed">' + e.series + '</span></div>'
+      + (e.consigne ? '<p class="ec">' + e.consigne + '</p>' : '')
+      + (e.progression ? '<p class="ep"><b>Progression.</b> '
+         + e.progression + '</p>' : '');
+  }
+
   function dessine(i) {
     const w = P[i];
     const lundi = new Date(w.lundi + 'T12:00:00');
@@ -1577,7 +1768,9 @@ function detailSeance(s) {
 
     $('prog').innerHTML = w.seances.map(s => {
       const ici = i === 0 && s.jour_suggere === auj;
-      const rang = s.type === 'renfo' ? 'Renforcement' : 'Séance ' + s.ordre;
+      const rang = s.type === 'renfo'
+        ? 'Calisthénie' + (s.phase ? ' · ' + s.phase : '')
+        : 'Séance ' + s.ordre;
       return '<article class="se' + (ici ? ' se-on' : '') + '">'
         + '<div class="se-j">' + rang + ' · '
         + (s.souplesse === 'ancree' ? s.jour_suggere + ' ' + dt(s.jour_suggere)
@@ -1589,8 +1782,9 @@ function detailSeance(s) {
         + (s.contrainte ? '<p class="se-c">' + s.contrainte + '</p>' : '')
         + (s.etapes && s.etapes.length
            ? '<div class="et">' + s.etapes.map(etape).join('') + '</div>' : '')
-        + (s.exos ? '<ul class="ex">' + s.exos.map(x => '<li>' + x + '</li>').join('')
-           + '</ul>' : '')
+        + (s.exos && s.exos.length
+           ? '<div class="ex">' + s.exos.map(exo).join('') + '</div>' : '')
+        + (s.note ? '<p class="se-c">' + s.note + '</p>' : '')
         + '</article>';
     }).join('');
 
@@ -2460,10 +2654,12 @@ $('vrows').innerHTML = [
   $('cover').innerHTML = [
     ['Distance, allure, durée', 'Chaque séance', !!M.nb_activites],
     ['FC seconde par seconde', 'Alimente la dérive cardiaque', !!M.nb_activites],
-    ['Temps par zone de FC', 'Discipline en endurance',
-      !!Object.keys(M.zones_fc_pct).length],
+    ['Temps par zone de FC', 'Recalculé sur les cinq zones de la montre',
+      !!(M.zones_montre && M.zones_montre.secondes)],
     ['Cadence', 'Indicateur de foulée', !!A.cadence],
-    ['Dynamique de course', 'Ceinture HRM-Pro Plus',
+    ['Puissance de course', 'Watts, via la ceinture HRM-Pro Plus',
+      (M.seances || []).some(x => x.puissance_moy)],
+    ['Dynamique de course', 'Contact au sol, oscillation, ratio vertical',
       !!Object.keys(M.dynamique || {}).length],
     ['Charge d’entraînement', 'Forme et fatigue', !!cv.ctl],
     ['Variabilité cardiaque', 'Récupération', !!cv.hrv],
