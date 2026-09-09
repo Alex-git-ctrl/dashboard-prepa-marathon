@@ -295,9 +295,17 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   gap:var(--s3);flex-wrap:wrap}
 .seance .ti{font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
 .seance .dt{font-size:var(--t2);color:var(--acier);font-family:var(--num)}
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));
-  gap:var(--s4);margin-top:var(--s4);padding-bottom:var(--s4);
+/* Chiffres cles, ranges par question posee : le gabarit les groupe, chaque
+   theme decide de la forme. Ici un libelle suspendu au-dessus d'un filet,
+   comme partout ailleurs dans le releve. */
+.chiffres{display:flex;flex-direction:column;gap:var(--s5);
+  margin-top:var(--s4);padding-bottom:var(--s4);
   border-bottom:1px solid var(--filet)}
+.cg-t{font-family:var(--num);font-size:var(--t1);font-weight:500;
+  color:var(--sourd);text-transform:uppercase;letter-spacing:.14em;
+  padding-bottom:var(--s2);border-bottom:1px solid var(--filet)}
+.cg-n{display:grid;gap:var(--s4);margin-top:var(--s3);
+  grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
 .chiffres div .n{font-family:var(--num);font-size:var(--t6);font-weight:600;
   letter-spacing:-.035em;line-height:1}
 .chiffres div .n em{font-style:normal;font-size:var(--t2);color:var(--sourd);
@@ -375,6 +383,12 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   stroke-linecap:round;stroke-linejoin:round;align-self:center}
 .bl[open]>summary .bl-c{transform:rotate(180deg)}
 .bl-d{padding-bottom:var(--s5)}
+/* Un bloc ouvert porte deja son filet sous le titre. Le premier element de
+   son contenu ne doit ni en remettre un, ni pousser une marge par-dessus :
+   "Les deux moities" s'ouvrait sur soixante pixels de vide surmontes de deux
+   traits paralleles. */
+.bl-d>:first-child{margin-top:0}
+.bl-d>.bilan:first-child,.bl-d>.verd:first-child{padding-top:0;border-top:0}
 .bl-s{font-size:var(--t2);color:var(--sourd);line-height:1.4;
   margin:0 0 var(--s3);max-width:62ch;text-wrap:pretty}
 /* Dans un bloc replie, un message d'attente n'a pas besoin d'un grand cadre

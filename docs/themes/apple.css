@@ -99,9 +99,13 @@
   /* --- teintes de metrique ---
      Une par panneau, chacune sur sa propre carte blanche. Ecart minimum
      15,2 en dE OKLab, contraste minimum 3,52. */
+  /* Les valeurs precedentes, #ff375f et #af52de, etaient celles du mode
+     SOMBRE d'Apple : sur du blanc elles claquaient et sonnaient faux. Ce sont
+     maintenant les variantes a contraste augmente de la palette systeme, plus
+     profondes et plus sobres. */
   --m-allure:#00847a;
-  --m-fc:#ff375f;
-  --m-puissance:#af52de;
+  --m-fc:#d30f45;
+  --m-puissance:#8944ab;
   --m-alt:#515154;
 
   /* --- zones de frequence cardiaque ---
@@ -304,9 +308,21 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .seance .ti{font-size:var(--t5);font-weight:600;letter-spacing:.007em}
 .seance .dt{font-size:var(--t2);color:var(--acier);
   font-variant-numeric:tabular-nums}
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
-  gap:var(--s4);margin-top:var(--s4);padding-bottom:var(--s4);
+/* Douze nombres a la suite ne donnaient a l'oeil aucune raison de s'arreter
+   quelque part. Ils sont maintenant ranges par question posee, chaque groupe
+   annonce par son intitule et pose sur son propre filet. C'est la mise en
+   page des fiches techniques d'Apple : un libelle en petites capitales, un
+   trait, puis les valeurs au large. */
+.chiffres{display:flex;flex-direction:column;gap:var(--s5);
+  margin-top:var(--s4)}
+.cg-t{font-size:var(--t1);font-weight:600;color:var(--acier);
+  text-transform:uppercase;letter-spacing:.06em;padding-bottom:var(--s2);
   border-bottom:1px solid var(--filet)}
+/* auto-fill et non auto-fit : auto-fit supprime les colonnes vides, si
+   bien qu'un groupe de trois valeurs les etalait sur toute la largeur et ne
+   tombait plus sous les colonnes du groupe precedent. */
+.cg-n{display:grid;gap:var(--s4) var(--s5);margin-top:var(--s4);
+  grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}
 .chiffres div .n{font-size:var(--t6);font-weight:600;letter-spacing:-.02em;
   line-height:1.05;font-variant-numeric:tabular-nums}
 .chiffres div .n em{font-style:normal;font-size:var(--t2);color:var(--acier);
@@ -389,6 +405,12 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .bl[open]>summary .bl-c{transform:rotate(180deg)}
 .bl-d{padding-bottom:var(--s5);border-top:1px solid var(--filet);
   padding-top:var(--s4)}
+/* Un bloc ouvert porte deja son filet sous le titre. Le premier element de
+   son contenu ne doit ni en remettre un, ni pousser une marge par-dessus :
+   "Les deux moities" s'ouvrait sur soixante pixels de vide surmontes de deux
+   traits paralleles. */
+.bl-d>:first-child{margin-top:0}
+.bl-d>.bilan:first-child,.bl-d>.verd:first-child{padding-top:0;border-top:0}
 .bl-s{font-size:var(--t2);color:var(--acier);line-height:1.45;
   margin:0 0 var(--s3);max-width:60ch;text-wrap:pretty}
 .bl .wait{padding:var(--s3);margin-top:0}
@@ -525,6 +547,12 @@ text.gz2{font-family:var(--sans);font-size:9.5px;font-weight:600}
 line.grille,line.grad,line.gg{stroke:var(--filet)}
 line.curseur{stroke:var(--acier);stroke-width:1;stroke-dasharray:3 3}
 line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
+/* Un graphique d'Apple pose un trait NET sur un remplissage a peine present.
+   Le trait de 1,9 et l'aplat a 13 % faisaient lourd sur une carte blanche. */
+.trait{stroke-width:1.5px}
+.cb .trait{stroke-width:2px}
+.aire{fill-opacity:.09}
+.bout{stroke-width:2px}
 .gc{margin-top:var(--s4);margin-bottom:var(--s5);position:relative}
 .gc svg{display:block;width:100%;height:auto;overflow:visible}
 .gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);margin-top:var(--s3);
@@ -559,7 +587,14 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .pill.al{background:var(--alerte-fond);color:var(--alerte)}
 
 /* ---------- detail d'une seance ---------- */
+/* Dans le detail d'une seance, les chiffres et les notes n'ont pas de carte
+   parente : ils flottaient sur le gris pendant que tout le reste etait pose.
+   Ils recoivent donc la leur. Sous "Derniere seance", au contraire, ils sont
+   deja dans une carte et n'en veulent pas une seconde. */
 .sc-ouvert{margin-top:var(--s4)}
+.sc-ouvert>.chiffres,.sc-ouvert>.verd{background:var(--surface);
+  border-radius:var(--r3);padding:var(--pad);margin-top:var(--s2)}
+.sc-ouvert>.sc-h{border-top:0;padding-top:0;margin:var(--s5) 0 var(--s3)}
 .sc-h{font-size:var(--t2);font-weight:600;color:var(--acier);
   margin:var(--s5) 0 var(--s3);padding-top:var(--s4);
   border-top:1px solid var(--filet);text-transform:uppercase;
@@ -572,10 +607,13 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   gap:var(--s2) var(--s4);align-items:center;font-size:var(--t2);
   font-variant-numeric:tabular-nums}
 .sp .n{color:var(--acier);text-align:right}
-.sp .b{position:relative;height:14px;background:var(--creux);
-  border-radius:var(--r1)}
-.sp .b i{display:block;height:100%;background:var(--mesure);
-  border-radius:var(--r1)}
+/* Le rayon des cartes ne s'applique pas a une barre de donnees : a 12 px sur
+   une barre haute de 14, un kilometre rapide devenait une pastille ronde et
+   sa longueur, qui est justement la donnee, disparaissait. Rayon reduit, et
+   une largeur plancher pour qu'une valeur minuscule reste une barre. */
+.sp .b{position:relative;height:14px;background:var(--creux);border-radius:7px}
+.sp .b i{display:block;height:100%;background:var(--mesure);border-radius:5px;
+  min-width:6px}
 .sp .b u{position:absolute;top:-3px;bottom:-3px;width:1.5px;
   background:var(--encre);text-decoration:none;border-radius:1px}
 .sp .a{white-space:nowrap;font-weight:600}
@@ -626,8 +664,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .gz .zn{font-weight:600;line-height:1.3;letter-spacing:-.01em}
 .gz .zr{color:var(--acier);font-size:var(--t1);line-height:1.3;
   font-variant-numeric:tabular-nums}
-.gz .zb{height:16px;background:var(--creux);border-radius:var(--r1)}
-.gz .zb i{display:block;height:100%;border-radius:var(--r1);min-width:3px}
+.gz .zb{height:16px;background:var(--creux);border-radius:8px}
+.gz .zb i{display:block;height:100%;border-radius:5px;min-width:6px}
 .gz .zv{white-space:nowrap;text-align:right;line-height:1.3;font-weight:600;
   font-variant-numeric:tabular-nums}
 .gz .zv em{font-style:normal;color:var(--acier);font-size:var(--t1);

@@ -140,23 +140,32 @@ const allure = sec => sec == null ? null
 })();
 
 /* ---------- onglets ---------- */
+/* Icones d'onglet, dessinees dans l'esprit des SF Symbols : une seule
+   epaisseur, des extremites et des angles arrondis, une geometrie reduite au
+   strict necessaire. Tout ce qui etait un detail decoratif a saute, parce
+   qu'a 26 px un detail devient une bavure. */
 const ICONS = {
-  today:'<g transform="rotate(-90 12 12)"><circle cx="12" cy="12" r="8.6"'
-       +' stroke-dasharray="43 11"/><circle cx="12" cy="12" r="4.6"'
-       +' stroke-dasharray="21 8"/></g>',
-  plan:'<rect x="3.3" y="5" width="17.4" height="15.7" rx="3.6"/>'
-      +'<path d="M3.3 9.9h17.4"/><path d="M8.2 3.3v3.4M15.8 3.3v3.4"/>'
-      +'<path d="M7.6 14h3.2M7.6 17.4h6.6"/>',
-  prog:'<path d="M3.4 16.8l4.4-5.1 3.3 2.7 3.2-4.1 3.1 2.4"/>'
-      +'<circle cx="17.4" cy="12.7" r="1.9" fill="currentColor" stroke="none"/>'
-      +'<path d="M3.4 20.6h17.2"/>',
-  sea:'<circle cx="12" cy="13.6" r="7.7"/><path d="M12 9.8v3.8l2.5 1.5"/>'
-     +'<path d="M9.5 2.7h5"/><path d="M12 2.7v3.2"/><path d="M18.6 6.4l1.5-1.5"/>',
-  sante:'<path d="M3.2 12.4h4.1l2-4.6 3.1 8.6 2.3-5.5 1.6 1.5h4.5"/>'
-      +'<path d="M20.5 9.4a4.6 4.6 0 0 0-8.5-2.5A4.6 4.6 0 0 0 3.5 9.4"/>',
-  data:'<ellipse cx="12" cy="6.2" rx="7.3" ry="2.9"/>'
-      +'<path d="M4.7 6.2v11.6c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9V6.2"/>'
-      +'<path d="M4.7 12c0 1.6 3.3 2.9 7.3 2.9s7.3-1.3 7.3-2.9"/>',
+  // Les anneaux d'activite : deux arcs presque fermes, terminaisons rondes.
+  today:'<path d="M12 3.4a8.6 8.6 0 1 1-6.08 2.52" stroke-linecap="round"/>'
+       +'<path d="M12 7.6a4.4 4.4 0 1 1-3.11 1.29" stroke-linecap="round"/>',
+  plan:'<rect x="3.2" y="5.2" width="17.6" height="15.6" rx="4.2"/>'
+      +'<path d="M3.2 10.4h17.6"/>'
+      +'<path d="M8.4 3.2v3.8M15.6 3.2v3.8" stroke-linecap="round"/>',
+  prog:'<path d="M3.6 3.8v14.6a2 2 0 0 0 2 2h14.8" stroke-linecap="round"/>'
+      +'<path d="M7.4 15.4l3.6-4.4 2.8 2.2 4.4-5.6" stroke-linecap="round"'
+      +' stroke-linejoin="round"/>',
+  sea:'<circle cx="12" cy="13.9" r="7.5"/>'
+     +'<path d="M12 10.2v3.7h2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+     +'<path d="M9.6 2.9h4.8" stroke-linecap="round"/>'
+     +'<path d="M12 2.9v3.5" stroke-linecap="round"/>'
+     +'<path d="M18.9 7.1l1.4-1.4" stroke-linecap="round"/>',
+  sante:'<path d="M12 20.4C6.2 16.2 3 13.1 3 9.6A5 5 0 0 1 12 6.6'
+       +' 5 5 0 0 1 21 9.6c0 3.5-3.2 6.6-9 10.8z" stroke-linejoin="round"/>',
+  data:'<ellipse cx="12" cy="6.4" rx="7.2" ry="3"/>'
+      +'<path d="M4.8 6.4v11.2c0 1.66 3.22 3 7.2 3s7.2-1.34 7.2-3V6.4"'
+      +' stroke-linecap="round"/>'
+      +'<path d="M4.8 12c0 1.66 3.22 3 7.2 3s7.2-1.34 7.2-3"'
+      +' stroke-linecap="round"/>',
 };
 const SYM = {
   bang:'<path d="M12 5.6v7.2"/><circle cx="12" cy="17.6" r=".9" fill="currentColor"'
@@ -374,29 +383,45 @@ function bilanZones(s) {
 
 /** Grille de chiffres cles. */
 function chiffres(s) {
-  const N = [
-    [s.km != null ? nf(s.km) : '·', 'km', 'distance'],
-    [s.minutes != null ? s.minutes : '·', 'min', 'durée'],
-    [allure(s.allure_s_km) || '·', '/km', 'allure moyenne'],
+  // Douze nombres a la suite ne se lisent pas : l'oeil n'a aucune raison de
+  // s'arreter quelque part. On les range donc par question posee, et chaque
+  // groupe porte son intitule. Un groupe sans mesure disparait entierement.
+  const F = [];
+  const G = [
+    ['La course', F.concat(
+      [[s.km != null ? nf(s.km) : null, 'km', 'distance'],
+       [s.minutes != null ? s.minutes : null, 'min', 'durée'],
+       [allure(s.allure_s_km), '/km', 'allure moyenne'],
+       // L'allure ajustee ne s'affiche que si le relief l'a vraiment ecartee
+       // de l'allure brute : au-dessous de cinq secondes, c'est du bruit.
+       [s.gap_s_km && Math.abs(s.gap_s_km - s.allure_s_km) >= 5
+        ? allure(s.gap_s_km) : null, '/km', 'ajustée du dénivelé'],
+       [s.deniv ? Math.round(s.deniv) : null, 'm', 'dénivelé positif']])],
+    // Sans ceinture, une tuile "· bpm" n'apprend rien : le message sous la
+    // repartition cardiaque dit deja que la mesure manque.
+    ['Le cœur', [
+      [s.fc_moy || null, 'bpm', 'FC moyenne'],
+      [s.fc_max_reelle || s.fc_max || null, 'bpm', 'FC max'],
+      // nf() et pas la valeur brute : 7.4 doit s'ecrire 7,4.
+      [s.derive_pct != null ? nf(s.derive_pct) : null, '%', 'dérive cardiaque']]],
+    ['La foulée', [
+      [s.cadence ? ppm(s.cadence) : null, 'ppm', 'cadence'],
+      [s.puissance_moy ? nf(s.puissance_moy) : null, 'W', 'puissance moyenne']]],
+    ['Ce que ça a coûté', [
+      [s.calories ? nf(s.calories) : null, 'kcal', 'dépense'],
+      [s.charge ? Math.round(s.charge) : null, '', 'charge']]],
   ];
-  // Sans ceinture, une tuile "· bpm" n'apprend rien : le message sous la
-  // repartition cardiaque dit deja que la mesure manque.
-  if (s.fc_moy) N.push([s.fc_moy, 'bpm', 'FC moyenne']);
-  if (s.fc_max_reelle || s.fc_max) N.push([s.fc_max_reelle || s.fc_max, 'bpm', 'FC max']);
-  // L'allure ajustee ne s'affiche que si le relief l'a vraiment ecartee de
-  // l'allure brute : au-dessous de cinq secondes, c'est du bruit.
-  if (s.gap_s_km && Math.abs(s.gap_s_km - s.allure_s_km) >= 5)
-    N.push([allure(s.gap_s_km), '/km', 'allure ajustée du dénivelé']);
-  // nf() et pas la valeur brute : 7.4 doit s'ecrire 7,4.
-  if (s.derive_pct != null) N.push([nf(s.derive_pct), '%', 'dérive cardiaque']);
-  if (s.cadence) N.push([ppm(s.cadence), 'ppm', 'cadence']);
-  if (s.puissance_moy) N.push([nf(s.puissance_moy), 'W', 'puissance moyenne']);
-  if (s.calories) N.push([nf(s.calories), 'kcal', 'dépense']);
-  if (s.deniv) N.push([Math.round(s.deniv), 'm', 'dénivelé positif']);
-  if (s.charge) N.push([Math.round(s.charge), '', 'charge']);
-  return '<div class="chiffres">' + N.map(n =>
-    '<div><div class="n">' + n[0] + '<em>' + n[1] + '</em></div>'
-    + '<div class="c">' + n[2] + '</div></div>').join('') + '</div>';
+  const bloc = ([titre, N]) => {
+    const vus = N.filter(n => n[0] != null && n[0] !== '');
+    if (!vus.length) return '';
+    return '<div class="cg"><div class="cg-t">' + titre + '</div>'
+      + '<div class="cg-n">' + vus.map(n =>
+        '<div><div class="n">' + n[0]
+        + (n[1] ? '<em>' + n[1] + '</em>' : '') + '</div>'
+        + '<div class="c">' + n[2] + '</div></div>').join('')
+      + '</div></div>';
+  };
+  return '<div class="chiffres">' + G.map(bloc).join('') + '</div>';
 }
 
 /** Splits au kilometre. La barre encode le temps du kilometre, donc un
@@ -533,6 +558,7 @@ function dynSpark(C, cle, col) {
     + 'preserveAspectRatio="none" aria-hidden="true">'
     + segs.map(sg => '<polyline points="' + sg.join(' ') + '" fill="none" '
       + 'stroke="' + col + '" stroke-width="1.5" stroke-linejoin="round" '
+      + 'class="trait" '
       + 'vector-effect="non-scaling-stroke"/>').join('') + '</svg>';
 }
 
@@ -718,9 +744,9 @@ function courbesSeance(box, s) {
     segs.forEach(sg => {
       const pts = sg.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
       g += `<path d="M${sg[0][0].toFixed(1)},${bas} L${pts.replace(/ /g, ' L')}`
-         + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" fill="${p.col}"
-           fill-opacity=".13" stroke="none"/>`;
-      g += `<polyline points="${pts}" fill="none" stroke="${p.col}"
+         + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" class="aire"
+           fill="${p.col}" fill-opacity=".13" stroke="none"/>`;
+      g += `<polyline class="trait" points="${pts}" fill="none" stroke="${p.col}"
         stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>`;
     });
 
@@ -1432,11 +1458,12 @@ function lineChart(box, series, opt) {
 
   pts.forEach(se => {
     const d = se.data.map(p => `${X(ms(p.d)).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
-    s += `<polyline points="${d}" fill="none" stroke="${se.color}" stroke-width="2.4"
-      stroke-linejoin="round" stroke-linecap="round"/>`;
+    s += `<polyline class="trait" points="${d}" fill="none" stroke="${se.color}"
+      stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
     const la = se.data[se.data.length - 1];
-    s += `<circle cx="${X(ms(la.d)).toFixed(1)}" cy="${Y(la.v).toFixed(1)}"
-      r="4.2" fill="${se.color}" stroke="var(--craie)" stroke-width="2.2"/>`;
+    s += `<circle class="bout" cx="${X(ms(la.d)).toFixed(1)}"
+      cy="${Y(la.v).toFixed(1)}" r="4.2" fill="${se.color}"
+      stroke="var(--craie)" stroke-width="2.2"/>`;
   });
   s += '</svg>';
   box.innerHTML = s;
@@ -1685,11 +1712,11 @@ function nuits(box) {
       segs.forEach(sg => {
         const pts = sg.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
         g += `<path d="M${sg[0][0].toFixed(1)},${bas} L${pts.replace(/ /g, ' L')}`
-          + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" fill="${p.col}"
-            fill-opacity=".13" stroke="none"/>`
-          + `<polyline points="${pts}" fill="none" stroke="${p.col}"
+          + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" class="aire"
+            fill="${p.col}" fill-opacity=".13" stroke="none"/>`
+          + `<polyline class="trait" points="${pts}" fill="none" stroke="${p.col}"
             stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>`;
-        sg.forEach(q => { g += `<circle cx="${q[0].toFixed(1)}"
+        sg.forEach(q => { g += `<circle class="pt" cx="${q[0].toFixed(1)}"
           cy="${q[1].toFixed(1)}" r="2.6" fill="${p.col}"/>`; });
       });
     }
