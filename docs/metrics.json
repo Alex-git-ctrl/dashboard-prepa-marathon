@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-09T22:13:47",
+  "maj": "2026-09-09T22:41:37",
   "nb_activites": 2,
   "semaines": {
     "1": {
@@ -2400,20 +2400,10 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "mardi"
-        },
-        {
-          "nom": "Haut du corps et tractions",
-          "exos": [
-            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
-            "Dips lestés, 4 × 6 à 8",
-            "Rowing haltère, 4 × 8",
-            "Travail de muscle-up : tractions explosives, 5 × 3",
-            "Gainage latéral, 3 × 45 s par côté"
-          ],
-          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
-          "type": "renfo",
-          "jour": "mercredi"
+          "jour_suggere": "mardi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 1
         },
         {
           "type": "course",
@@ -2432,20 +2422,10 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "jeudi"
-        },
-        {
-          "nom": "Gainage et travail ATR",
-          "exos": [
-            "Squats, 4 × 8",
-            "Fentes bulgares, 3 × 10 par jambe",
-            "Mollets debout, 4 × 15",
-            "Travail ATR contre le mur, 5 × 30 s",
-            "Gainage ventral, 3 × 60 s"
-          ],
-          "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps à chaque appui. Le renforcement est ce qui protège des blessures de volume.",
-          "type": "renfo",
-          "jour": "vendredi"
+          "jour_suggere": "jeudi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 2
         },
         {
           "type": "course",
@@ -2464,7 +2444,42 @@
               "consigne": "Allure constante, aucune accélération. Bois toutes les 20 minutes au-delà de 90 min."
             }
           ],
-          "jour": "samedi"
+          "jour_suggere": "samedi",
+          "souplesse": "espacee",
+          "contrainte": "Au moins 48 h après la séance de qualité. C'est la seule séance qui demande vraiment un créneau.",
+          "ordre": 3
+        },
+        {
+          "nom": "Haut du corps et tractions",
+          "exos": [
+            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
+            "Dips lestés, 4 × 6 à 8",
+            "Rowing haltère, 4 × 8",
+            "Travail de muscle-up : tractions explosives, 5 × 3",
+            "Gainage latéral, 3 × 45 s par côté"
+          ],
+          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
+          "type": "renfo",
+          "jour_suggere": "mercredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 4
+        },
+        {
+          "nom": "Gainage et travail ATR",
+          "exos": [
+            "Squats, 4 × 8",
+            "Fentes bulgares, 3 × 10 par jambe",
+            "Mollets debout, 4 × 15",
+            "Travail ATR contre le mur, 5 × 30 s",
+            "Gainage ventral, 3 × 60 s"
+          ],
+          "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps à chaque appui. Le renforcement est ce qui protège des blessures de volume.",
+          "type": "renfo",
+          "jour_suggere": "vendredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 5
         }
       ]
     },
@@ -2494,20 +2509,10 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "mardi"
-        },
-        {
-          "nom": "Haut du corps et tractions",
-          "exos": [
-            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
-            "Dips lestés, 4 × 6 à 8",
-            "Rowing haltère, 4 × 8",
-            "Travail de muscle-up : tractions explosives, 5 × 3",
-            "Gainage latéral, 3 × 45 s par côté"
-          ],
-          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
-          "type": "renfo",
-          "jour": "mercredi"
+          "jour_suggere": "mardi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 1
         },
         {
           "type": "course",
@@ -2526,20 +2531,10 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "jeudi"
-        },
-        {
-          "nom": "Gainage et travail ATR",
-          "exos": [
-            "Squats, 4 × 8",
-            "Fentes bulgares, 3 × 10 par jambe",
-            "Mollets debout, 4 × 15",
-            "Travail ATR contre le mur, 5 × 30 s",
-            "Gainage ventral, 3 × 60 s"
-          ],
-          "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps à chaque appui. Le renforcement est ce qui protège des blessures de volume.",
-          "type": "renfo",
-          "jour": "vendredi"
+          "jour_suggere": "jeudi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 2
         },
         {
           "type": "course",
@@ -2558,7 +2553,42 @@
               "consigne": "Allure constante, aucune accélération. Bois toutes les 20 minutes au-delà de 90 min."
             }
           ],
-          "jour": "samedi"
+          "jour_suggere": "samedi",
+          "souplesse": "espacee",
+          "contrainte": "Au moins 48 h après la séance de qualité. C'est la seule séance qui demande vraiment un créneau.",
+          "ordre": 3
+        },
+        {
+          "nom": "Haut du corps et tractions",
+          "exos": [
+            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
+            "Dips lestés, 4 × 6 à 8",
+            "Rowing haltère, 4 × 8",
+            "Travail de muscle-up : tractions explosives, 5 × 3",
+            "Gainage latéral, 3 × 45 s par côté"
+          ],
+          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
+          "type": "renfo",
+          "jour_suggere": "mercredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 4
+        },
+        {
+          "nom": "Gainage et travail ATR",
+          "exos": [
+            "Squats, 4 × 8",
+            "Fentes bulgares, 3 × 10 par jambe",
+            "Mollets debout, 4 × 15",
+            "Travail ATR contre le mur, 5 × 30 s",
+            "Gainage ventral, 3 × 60 s"
+          ],
+          "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps à chaque appui. Le renforcement est ce qui protège des blessures de volume.",
+          "type": "renfo",
+          "jour_suggere": "vendredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 5
         }
       ]
     },
@@ -2588,20 +2618,10 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "mardi"
-        },
-        {
-          "nom": "Haut du corps et tractions",
-          "exos": [
-            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
-            "Dips lestés, 4 × 6 à 8",
-            "Rowing haltère, 4 × 8",
-            "Travail de muscle-up : tractions explosives, 5 × 3",
-            "Gainage latéral, 3 × 45 s par côté"
-          ],
-          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
-          "type": "renfo",
-          "jour": "mercredi"
+          "jour_suggere": "mardi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 1
         },
         {
           "type": "course",
@@ -2620,7 +2640,38 @@
               "consigne": "Tu dois pouvoir tenir une conversation entière. Si ce n'est pas le cas, ralentis."
             }
           ],
-          "jour": "jeudi"
+          "jour_suggere": "jeudi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, c'est une séance facile.",
+          "ordre": 2
+        },
+        {
+          "type": "course",
+          "course": true,
+          "nom": "10 km · 46 à 48 min",
+          "distance_km": 10,
+          "pourquoi": "Première calibration réelle, un samedi matin. Negative split : c'est un test, pas un record.",
+          "etapes": [],
+          "jour_suggere": "samedi",
+          "souplesse": "ancree",
+          "contrainte": "Date imposée par la course.",
+          "ordre": 3
+        },
+        {
+          "nom": "Haut du corps et tractions",
+          "exos": [
+            "Tractions, 5 séries jusqu'à 2 répétitions de la réserve",
+            "Dips lestés, 4 × 6 à 8",
+            "Rowing haltère, 4 × 8",
+            "Travail de muscle-up : tractions explosives, 5 × 3",
+            "Gainage latéral, 3 × 45 s par côté"
+          ],
+          "pourquoi": "Le haut du corps ne fait pas courir plus vite, mais un tronc solide tient la posture quand la fatigue arrive au 30e kilomètre.",
+          "type": "renfo",
+          "jour_suggere": "mercredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 4
         },
         {
           "nom": "Gainage et travail ATR",
@@ -2633,16 +2684,10 @@
           ],
           "pourquoi": "Les jambes encaissent 2,5 fois le poids du corps à chaque appui. Le renforcement est ce qui protège des blessures de volume.",
           "type": "renfo",
-          "jour": "vendredi"
-        },
-        {
-          "type": "course",
-          "jour": "samedi",
-          "course": true,
-          "nom": "10 km · 46 à 48 min",
-          "distance_km": 10,
-          "pourquoi": "Première calibration réelle, un samedi matin. Negative split : c'est un test, pas un record.",
-          "etapes": []
+          "jour_suggere": "vendredi",
+          "souplesse": "libre",
+          "contrainte": "N'importe quel jour, mais pas la veille de la sortie longue.",
+          "ordre": 5
         }
       ]
     }

@@ -11,9 +11,22 @@ exportables vers la montre : c'est la meme description qui nourrit la page et
 le fichier envoye a Garmin.
 """
 
-# Jours fixes, imposes par la contrainte du creneau du midi et du samedi matin.
+# Les jours ne sont que des SUGGESTIONS. Ce qui compte dans une semaine
+# d'entrainement, ce n'est pas le jour mais l'espacement : la sortie longue et
+# la seance de qualite ne doivent pas se toucher, le reste se pose ou il veut.
+# Chaque seance porte donc sa souplesse :
+#   libre    : n'importe quel jour de la semaine
+#   espacee  : au moins 48 h d'une autre seance exigeante
+#   ancree   : une date imposee, c'est le cas d'une course
 JOUR_S1, JOUR_S2, JOUR_LONGUE = "mardi", "jeudi", "samedi"
 JOUR_RENFO = ("mercredi", "vendredi")
+
+LIBRE = ("libre", "N'importe quel jour, c'est une séance facile.")
+ESPACEE = ("espacee", "Au moins 48 h avant ou après la sortie longue.")
+LONGUE = ("espacee", "Au moins 48 h après la séance de qualité. "
+                     "C'est la seule séance qui demande vraiment un créneau.")
+RENFO_SOUPLESSE = ("libre", "N'importe quel jour, mais pas la veille de la "
+                            "sortie longue.")
 
 ECHAUFFEMENT_S = 600     # 10 min avant une seance de qualite
 RETOUR_S = 600           # 10 min apres
@@ -184,32 +197,46 @@ def programme(w, calibration, courses):
     course = next((c for c in courses if c["semaine"] == w["semaine"]), None)
     out = []
 
+    def pose(seance, jour, souplesse):
+        seance = dict(seance)
+        seance["jour_suggere"] = jour
+        seance["souplesse"], seance["contrainte"] = souplesse
+        return seance
+
     s1 = w.get("seance1_min")
     if s1:
-        out.append(dict(_endurance(s1, zones), jour=JOUR_S1))
-
-    out.append(dict(RENFO["mercredi"], type="renfo", jour="mercredi"))
+        out.append(pose(_endurance(s1, zones), JOUR_S1, LIBRE))
 
     s2 = w.get("seance2_min")
     q = QUALITE.get(w["semaine"])
     if q and s2:
-        out.append(dict(_qualite(q, zones), jour=JOUR_S2))
+        out.append(pose(_qualite(q, zones), JOUR_S2, ESPACEE))
     elif s2:
-        out.append(dict(_endurance(s2, zones), jour=JOUR_S2))
-
-    out.append(dict(RENFO["vendredi"], type="renfo", jour="vendredi"))
+        out.append(pose(_endurance(s2, zones), JOUR_S2, LIBRE))
 
     if course:
-        out.append({"type": "course", "jour": course["jour"], "course": True,
-                    "nom": "%s · %s" % (course["nom"], course["cible"]),
-                    "distance_km": course["distance_km"],
-                    "pourquoi": course["role"], "etapes": []})
+        # Une course a une date, elle. C'est la seule seance vraiment ancree.
+        out.append(pose({"type": "course", "course": True,
+                         "nom": "%s · %s" % (course["nom"], course["cible"]),
+                         "distance_km": course["distance_km"],
+                         "pourquoi": course["role"], "etapes": []},
+                        course["jour"],
+                        ("ancree", "Date imposée par la course.")))
     else:
-        out.append(dict(_longue(w["sortie_longue_km"], zones,
-                                FINALE.get(w["semaine"])), jour=JOUR_LONGUE))
+        out.append(pose(_longue(w["sortie_longue_km"], zones,
+                                FINALE.get(w["semaine"])), JOUR_LONGUE, LONGUE))
 
-    ordre = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-    out.sort(key=lambda s: ordre.index(s["jour"]))
+    for j in JOUR_RENFO:
+        out.append(pose(dict(RENFO[j], type="renfo"), j, RENFO_SOUPLESSE))
+
+    # L'ordre est celui de la lecture : les courses d'abord, du plus facile au
+    # plus exigeant, puis le renforcement. Ce n'est pas un ordre d'execution.
+    rang = {"course": 0, "renfo": 1}
+    for i, x in enumerate(out):
+        x["ordre"] = i + 1
+    out.sort(key=lambda x: (rang[x["type"]], x["ordre"]))
+    for i, x in enumerate(out):
+        x["ordre"] = i + 1
     return out
 
 

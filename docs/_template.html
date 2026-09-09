@@ -361,6 +361,32 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
   vertical-align:2px;margin-right:var(--s2)}
 
+/* ---------- bloc depliable ----------
+   Une page dense se lit mal. Chaque graphique et chaque section de detail
+   devient un bloc qu'on ouvre : le premier de chaque liste reste ouvert, le
+   reste attend d'etre demande. Le resume tient sur la ligne de titre, donc on
+   sait ce qu'il y a dedans sans avoir a ouvrir. */
+.bl{border-top:1px solid var(--filet)}
+.bl>summary{list-style:none;cursor:pointer;display:grid;
+  grid-template-columns:1fr auto 14px;gap:var(--s2) var(--s3);
+  align-items:baseline;padding:var(--s4) 0}
+.bl>summary::-webkit-details-marker{display:none}
+.bl>summary:hover .bl-t{color:var(--sourd)}
+.bl>summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.bl-t{font-size:var(--t4);font-weight:600;letter-spacing:-.015em;
+  transition:color .15s}
+.bl-r{font-family:var(--num);font-size:var(--t2);color:var(--sourd);
+  white-space:nowrap;text-align:right}
+.bl-c{width:14px;height:14px;stroke:var(--acier);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;align-self:center}
+.bl[open]>summary .bl-c{transform:rotate(180deg)}
+.bl-d{padding-bottom:var(--s5)}
+.bl-s{font-size:var(--t2);color:var(--sourd);line-height:1.4;
+  margin:0 0 var(--s3);max-width:62ch;text-wrap:pretty}
+/* Dans un bloc replie, un message d'attente n'a pas besoin d'un grand cadre
+   gris : il tient sur la ligne de titre. */
+.bl .wait{padding:var(--s3);margin-top:0}
+
 /* ---------- programme detaille de la semaine ----------
    Une seance est un objet de lecture, pas une ligne de tableau : elle a un
    titre, une raison d'exister et des etapes. Le jour du jour porte le seul
@@ -378,6 +404,10 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   color:var(--sourd);white-space:nowrap}
 .se-p{font-size:var(--t2);color:var(--sourd);line-height:1.5;
   margin:var(--s2) 0 0;max-width:66ch;text-wrap:pretty}
+/* La contrainte d'espacement compte plus que le jour : elle porte un filet. */
+.se-c{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin:var(--s2) 0 0;padding-left:var(--s3);
+  border-left:2px solid var(--filet);max-width:62ch;text-wrap:pretty}
 .et{margin-top:var(--s3)}
 .et>div{display:grid;grid-template-columns:1fr auto auto;gap:var(--s2) var(--s3);
   align-items:baseline;padding:var(--s2) 0;border-top:1px solid var(--filet)}
@@ -733,6 +763,19 @@ const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0
     est stocke a 21.0975 km : sans ce passage, la page affichait
     "Semi-marathon · 21.0975 km". */
 const km1 = v => nf(Math.round(v * 10) / 10);
+
+/* ---------- bloc depliable ----------
+   `resume` est ce qui reste visible quand le bloc est ferme : la valeur du
+   jour, ou la raison pour laquelle il n'y a rien a montrer. */
+const CHEVRON = '<svg class="bl-c" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path d="M6 9.5l6 6 6-6"/></svg>';
+
+function bloc(titre, resume, contenu, ouvert) {
+  return '<details class="bl"' + (ouvert ? ' open' : '') + '>'
+    + '<summary><span class="bl-t">' + titre + '</span>'
+    + '<span class="bl-r">' + (resume || '') + '</span>' + CHEVRON
+    + '</summary><div class="bl-d">' + contenu + '</div></details>';
+}
 const today = new Date(); today.setHours(12, 0, 0, 0);
 const jrs = s => Math.round((new Date(s + 'T12:00:00') - today) / 864e5);
 
@@ -907,42 +950,66 @@ function ecartPlan(s) {
     cas, et on la ramene en pas par minute pour rester comparable. */
 const ppm = v => v == null ? null : Math.round(v < 120 ? v * 2 : v);
 
-const ZONES_G = s => {
-  const Z = s.zones_fc || {};
-  return [
-    ['Endurance', (Z.z1 || 0) + (Z.z2 || 0), 'var(--mesure)'],
-    ['Tempo', Z.z3 || 0, 'var(--acier)'],
-    ['Seuil', Z.z4 || 0, 'var(--veille)'],
-    ['VO2max', (Z.z5 || 0) + (Z.z6 || 0) + (Z.z7 || 0), 'var(--effort)'],
+/* ---------- les zones de FC, comme la montre les montre ----------
+   Intervals.icu decoupe en sept zones avec ses propres noms anglais. La
+   Forerunner en montre cinq. Les quatre premieres bornes d'Intervals
+   coincident avec le modele Garmin en pourcentage du seuil : 161, 170, 180 et
+   190 pour un seuil a 191. On regroupe donc les zones 5, 6 et 7 d'Intervals
+   en une seule zone 5, et on reprend les noms francais de Garmin.
+   Les donnees brutes gardent leurs sept zones : le regroupement est un choix
+   d'affichage, pas une perte. */
+const Z5_NOMS = ['Échauffement', 'Facile', 'Aérobie', 'Seuil', 'Maximum'];
+const Z5_COL = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z5)', 'var(--z7)'];
+const Z5_ROLE = ['Récupération active', 'Endurance fondamentale',
+  'Tempo', 'Seuil et allure semi', 'VO2max'];
+
+/** Les cinq zones Garmin, avec leurs secondes, leurs bornes et leur part. */
+function zones5(s) {
+  const Z = s.zones_fc || {}, B = s.zones_bornes || [];
+  if (!B.length) return null;
+  const sec = [
+    Z.z1 || 0,
+    Z.z2 || 0,
+    Z.z3 || 0,
+    Z.z4 || 0,
+    (Z.z5 || 0) + (Z.z6 || 0) + (Z.z7 || 0),
   ];
-};
+  const tot = sec.reduce((a, b) => a + b, 0);
+  if (!tot) return null;
+  return sec.map((v, i) => ({
+    n: i + 1, nom: Z5_NOMS[i], role: Z5_ROLE[i], col: Z5_COL[i],
+    secondes: v, part: v / tot,
+    bas: i ? B[i - 1] : null,
+    haut: i < 4 ? B[i] : null,
+    bornes: i === 0 ? 'jusqu’à ' + B[0] + ' bpm'
+      : i < 4 ? B[i - 1] + ' à ' + B[i] + ' bpm'
+      : 'au-dessus de ' + B[3] + ' bpm',
+  }));
+}
 
 /** Repartition du temps par zone de FC, plus la lecture qui va avec. C'est le
     retour le plus actionnable apres une sortie en endurance. */
 function zonesFC(s, avecBilan) {
-  const G = ZONES_G(s);
-  const tot = G.reduce((t, g) => t + g[1], 0);
-  if (!tot) return '<div class="bilan">Pas de données de zone cardiaque sur '
+  const Z = zones5(s);
+  if (!Z) return '<div class="bilan">Pas de données de zone cardiaque sur '
     + 'cette séance. Vérifie que la ceinture était appairée.</div>';
-  const pct = g => Math.round(g[1] / tot * 100);
-  let h = '<div class="zbar">' + G.filter(g => g[1]).map(g =>
-    '<span style="width:' + (g[1] / tot * 100).toFixed(1) + '%;background:'
-    + g[2] + '" title="' + g[0] + '"></span>').join('')
-    + '</div><div class="zlg">' + G.filter(g => g[1]).map(g =>
-    '<span><i style="background:' + g[2] + '"></i>' + g[0] + ' ' + pct(g)
-    + ' %</span>').join('') + '</div>';
-  if (!avecBilan) return h;
-  return h + bilanZones(s);
+  const vus = Z.filter(z => z.secondes);
+  const h = '<div class="zbar">' + vus.map(z =>
+    '<span style="width:' + (z.part * 100).toFixed(1) + '%;background:'
+    + z.col + '" title="' + z.nom + '"></span>').join('')
+    + '</div><div class="zlg">' + vus.map(z =>
+    '<span><i style="background:' + z.col + '"></i>Z' + z.n + ' ' + z.nom
+    + ' ' + Math.round(z.part * 100) + ' %</span>').join('') + '</div>';
+  return avecBilan ? h + bilanZones(s) : h;
 }
 
 /** La lecture qui accompagne la repartition : elle vaut pour la barre empilee
     de l'accueil comme pour l'histogramme detaille. */
 function bilanZones(s) {
-  const G = ZONES_G(s);
-  const tot = G.reduce((t, g) => t + g[1], 0);
-  if (!tot) return '';
-  const pct = g => Math.round(g[1] / tot * 100);
-  const ef = pct(G[0]);
+  const Z = zones5(s);
+  if (!Z) return '';
+  // L'endurance, c'est Z1 plus Z2 sur la montre : echauffement et facile.
+  const ef = Math.round((Z[0].part + Z[1].part) * 100);
   let h = '';
   h += ef >= 75
     ? '<div class="bilan ok"><b>' + ef + ' % du temps en endurance.</b> '
@@ -996,7 +1063,7 @@ function splits(s) {
   // rapide aurait une barre de longueur nulle et se lirait comme une absence.
   const lo = Math.min(...P) - 8, hi = Math.max(...P) + 8;
   const w = v => ((v - lo) / (hi - lo) * 100).toFixed(1);
-  return '<div class="sc-h">Kilomètre par kilomètre</div><div class="sp">'
+  return '<div class="sp">'
     + S.map(x => '<span class="n' + (x.partiel ? ' pt' : '') + '">'
       + (x.partiel ? nf(Math.round(x.distance_m / 100) / 10) : x.km) + '</span>'
       + '<span class="b"><i style="width:' + w(x.allure_s_km) + '%"></i>'
@@ -1040,8 +1107,7 @@ function dynamique(s) {
   const D = s.dyn || {};
   const lignes = Object.keys(DYN_NOMS).filter(k => D[k] != null);
   if (!lignes.length) return '';
-  return '<div class="sc-h">Dynamique de course, ceinture HRM-Pro Plus</div>'
-    + '<div class="dyn">' + lignes.map(k =>
+  return '<div class="dyn">' + lignes.map(k =>
       '<div><span>' + DYN_NOMS[k][0] + '</span><b>'
       + DYN_NOMS[k][1](D[k]) + '</b></div>').join('') + '</div>';
 }
@@ -1071,20 +1137,6 @@ function comparaison(s) {
    metrique, un curseur unique qui traverse les quatre panneaux. C'est la
    lecture qu'un coureur a deja dans les yeux en sortant de sa montre. */
 
-// Intervals.icu nomme les zones en anglais. On traduit les intitules par
-// defaut, mais si Alex les a renommes sur son compte, c'est SON nom qui gagne :
-// c'est celui qu'il lit sur sa montre.
-const ZONE_EN = {'Recovery':'Récupération', 'Aerobic':'Endurance',
-  'Tempo':'Tempo', 'SubThreshold':'Seuil', 'SuperThreshold':'Au-dessus du seuil',
-  'Aerobic Capacity':'Capacité aérobie', 'Anaerobic':'Anaérobie'};
-const ZONE_FR = ['Récupération', 'Endurance', 'Tempo', 'Seuil',
-  'Au-dessus du seuil', 'Capacité aérobie', 'Anaérobie'];
-const nomZone = i => {
-  const n = (M.zones_noms || [])[i];
-  return n ? (ZONE_EN[n] || n) : (ZONE_FR[i] || 'Zone ' + (i + 1));
-};
-const ZONE_COL = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)',
-  'var(--z5)', 'var(--z6)', 'var(--z7)'];
 
 /** Duree en h:mm:ss ou mm:ss. */
 function duree(s) {
@@ -1170,13 +1222,14 @@ function courbesSeance(box, s) {
     // Bornes des zones de FC, a leur hauteur reelle : on voit du regard a
     // quel moment la seance a change de zone.
     if (p.zones && s.zones_bornes) {
-      s.zones_bornes.forEach((b, i) => {
-        if (b <= p.mn || b >= p.mx || i >= 6) return;
+      // Quatre bornes seulement : au-dela, la montre ne distingue plus rien.
+      s.zones_bornes.slice(0, 4).forEach((b, i) => {
+        if (b <= p.mn || b >= p.mx) return;
         g += `<line x1="${L}" y1="${p.Y(b).toFixed(1)}" x2="${W - R}"
-          y2="${p.Y(b).toFixed(1)}" stroke="${ZONE_COL[i + 1]}"
+          y2="${p.Y(b).toFixed(1)}" stroke="${Z5_COL[i + 1]}"
           stroke-width="1" stroke-dasharray="4 3"/>
           <text class="gz2" x="${W - R + 4}" y="${(p.Y(b) + 3.4).toFixed(1)}"
-          fill="${ZONE_COL[i + 1]}">Z${i + 2}</text>`;
+          fill="${Z5_COL[i + 1]}">Z${i + 2}</text>`;
       });
     }
 
@@ -1251,33 +1304,21 @@ function courbesSeance(box, s) {
 
 /** Histogramme des zones de FC : la proportion du temps passe dans chacune. */
 function histoZones(s) {
-  const Z = s.zones_fc || {}, B = s.zones_bornes || [];
-  const tot = Object.values(Z).reduce((a, b) => a + b, 0);
-  if (!tot || !B.length) return '';
-  // Cinq zones toujours affichees, comme sur la montre : une zone a zero est
-  // une information, elle dit que l'intensite n'y est jamais montee. Au-dela
-  // de la cinquieme, on ne montre que ce qui a ete touche.
-  const lignes = [];
-  let vides = 0;
-  B.forEach((haut, i) => {
-    const sec = Z['z' + (i + 1)] || 0;
-    if (!sec && i >= 5) { vides++; return; }
-    const bas = i ? B[i - 1] : null;
-    lignes.push('<div class="zk"><div class="zn">Z' + (i + 1) + ' · '
-      + nomZone(i) + '</div><div class="zr">'
-      + (bas ? bas + ' à ' + haut : 'jusqu’à ' + haut) + ' bpm</div></div>'
-      + '<span class="zb"><i style="width:' + (sec / tot * 100).toFixed(1)
-      + '%;background:' + ZONE_COL[i] + '"></i></span>'
-      + '<span class="zv' + (sec ? '' : ' vide') + '">'
-      + Math.round(sec / tot * 100) + ' %'
-      + '<em>' + (sec ? duree(sec) : 'jamais') + '</em></span>');
-  });
-  if (!lignes.length) return '';
-  return '<div class="sc-h">Temps par zone de fréquence cardiaque</div>'
-    + '<div class="gz">' + lignes.join('') + '</div>'
-    + (vides ? '<div class="sp-l">' + (vides > 1 ? 'Les ' + vides + ' zones '
-        + 'au-dessus n’ont pas été touchées.' : 'La zone au-dessus n’a pas été '
-        + 'touchée.') + '</div>' : '');
+  const Z = zones5(s);
+  if (!Z) return '';
+  // Les cinq zones sont toujours listees : une zone a zero est une
+  // information, elle dit que l'intensite n'y est jamais montee.
+  return '<div class="gz">' + Z.map(z =>
+    '<div class="zk"><div class="zn">Z' + z.n + ' · ' + z.nom + '</div>'
+    + '<div class="zr">' + z.bornes + '</div></div>'
+    + '<span class="zb"><i style="width:' + (z.part * 100).toFixed(1)
+    + '%;background:' + z.col + '"></i></span>'
+    + '<span class="zv' + (z.secondes ? '' : ' vide') + '">'
+    + Math.round(z.part * 100) + ' %<em>'
+    + (z.secondes ? duree(z.secondes) : 'jamais') + '</em></span>').join('')
+    + '</div><div class="sp-l">Le découpage est celui de ta montre : cinq '
+    + 'zones, calées sur les mêmes bornes que ce que tu lis sur la Forerunner.'
+    + '</div>';
 }
 
 /* ---------- le resume d'analyse ----------
@@ -1328,17 +1369,30 @@ function detailSeance(s) {
   let h = ecartPlan(s) + chiffres(s);
   // Les courbes d'abord : c'est la lecture que la montre donne, et celle qui
   // repond a la question "qu'est-ce qui s'est passe pendant cette sortie".
+  // Elles restent ouvertes, tout le reste se deplie a la demande.
   if (s.courbes) {
-    h += '<div class="sc-h">Au fil de la séance</div>'
-      + '<div class="gc" data-courbes="' + s.date + '"></div>';
+    h += bloc('Au fil de la séance', '',
+      '<div class="gc" data-courbes="' + s.date + '"></div>', true);
   }
-  h += histoZones(s) + bilanZones(s);
-  h += splits(s);
+  const hz = histoZones(s);
+  if (hz) {
+    const Z = zones5(s);
+    const ef = Math.round((Z[0].part + Z[1].part) * 100);
+    h += bloc('Zones de fréquence cardiaque', ef + ' % en endurance',
+              hz + bilanZones(s), false);
+  }
+  const sp = splits(s);
+  if (sp) h += bloc('Kilomètre par kilomètre',
+                    (s.splits || []).length + ' km', sp, false);
   const m = moities(s);
-  if (m) h += '<div class="sc-h">Les deux moitiés</div>' + m;
+  if (m) h += bloc('Les deux moitiés',
+                   s.premiere_moitie_s_km && s.seconde_moitie_s_km
+                     ? allure(s.premiere_moitie_s_km) + ' puis '
+                       + allure(s.seconde_moitie_s_km) : '', m, false);
   const c = comparaison(s);
-  if (c) h += '<div class="sc-h">Par rapport aux précédentes</div>' + c;
-  h += dynamique(s);
+  if (c) h += bloc('Par rapport aux précédentes', '', c, false);
+  const dy = dynamique(s);
+  if (dy) h += bloc('Dynamique de course', 'ceinture HRM-Pro Plus', dy, false);
   // Le relief change la lecture de l'allure : le dire une fois, en clair.
   if (s.gap_s_km && s.deniv >= 60 && Math.abs(s.gap_s_km - s.allure_s_km) >= 5)
     h += '<div class="verd">Avec <b>' + nf(s.deniv) + ' m de dénivelé</b>, '
@@ -1522,13 +1576,17 @@ function detailSeance(s) {
       return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
 
     $('prog').innerHTML = w.seances.map(s => {
-      const ici = i === 0 && s.jour === auj;
+      const ici = i === 0 && s.jour_suggere === auj;
+      const rang = s.type === 'renfo' ? 'Renforcement' : 'Séance ' + s.ordre;
       return '<article class="se' + (ici ? ' se-on' : '') + '">'
-        + '<div class="se-j">' + s.jour + ' ' + dt(s.jour)
+        + '<div class="se-j">' + rang + ' · '
+        + (s.souplesse === 'ancree' ? s.jour_suggere + ' ' + dt(s.jour_suggere)
+           : 'plutôt ' + s.jour_suggere)
         + (ici ? ' · aujourd’hui' : '') + '</div>'
         + '<div class="se-t">' + s.nom
         + (duree(s) ? '<span class="se-d">' + duree(s) + '</span>' : '') + '</div>'
         + (s.pourquoi ? '<p class="se-p">' + s.pourquoi + '</p>' : '')
+        + (s.contrainte ? '<p class="se-c">' + s.contrainte + '</p>' : '')
         + (s.etapes && s.etapes.length
            ? '<div class="et">' + s.etapes.map(etape).join('') + '</div>' : '')
         + (s.exos ? '<ul class="ex">' + s.exos.map(x => '<li>' + x + '</li>').join('')
@@ -1542,7 +1600,10 @@ function detailSeance(s) {
          + 'voir l’onglet Plan.' : '')
       + (w.note ? ' ' + w.note : '')
       + ' Les allures viennent de ta calibration et se recalculent après chaque '
-      + 'course.';
+      + 'course.'
+      + ' <b>Les jours sont des suggestions.</b> Ce qui compte est l’espacement, '
+      + 'pas le calendrier : fais les séances dans l’ordre que tu veux tant que '
+      + 'la sortie longue garde 48 h de marge avec la séance exigeante.';
   }
 
   $('prog-sem').addEventListener('click', e => {
@@ -1989,13 +2050,18 @@ $('kpis').innerHTML = [
        {wait:'Garmin a besoin de 2 à 3 courses avec cardio et GPS avant de produire '
         + 'une première estimation.'})},
   ];
-  $('charts').innerHTML = CH.map((c, i) => `<div class="chart">
-    <div class="ct">${c.t}</div><div class="cs">${c.s}</div>
-    <div class="cb" id="ch${i}"></div><div class="keys" id="k${i}"></div></div>`).join('');
+  // Le premier graphique reste ouvert, les autres attendent d'etre demandes.
+  $('charts').innerHTML = CH.map((c, i) => bloc(c.t, '',
+    '<p class="bl-s">' + c.s + '</p><div class="cb" id="ch' + i + '"></div>'
+    + '<div class="keys" id="k' + i + '"></div>', i === 0)).join('');
   CH.forEach((c, i) => {
     const ok = c.draw($('ch' + i));
     if (ok && c.k) $('k' + i).innerHTML = c.k.map(([n, col]) =>
       `<span><i style="background:${col}"></i>${n}</span>`).join('');
+    // Le resume dit sur la ligne de titre s'il y a quelque chose a ouvrir.
+    const r = document.querySelector('#ch' + i).closest('.bl')
+      .querySelector('.bl-r');
+    if (r) r.textContent = ok ? '' : 'en attente';
   });
 })();
 
@@ -2307,10 +2373,14 @@ function lectureNuits() {
   };
 
   function dessine() {
-    $('sante-charts').innerHTML = S.champs.map((c, i) =>
-      '<div class="chart"><div class="ct">' + c.nom + '</div>'
-      + (NOTES[c.cle] ? '<div class="cs">' + NOTES[c.cle] + '</div>' : '')
-      + '<div class="cb" id="sc' + i + '"></div></div>').join('');
+    $('sante-charts').innerHTML = S.champs.map((c, i) => bloc(
+      c.nom,
+      S.actuel[c.cle] != null
+        ? nf(c.dec ? Number(S.actuel[c.cle].toFixed(c.dec))
+             : Math.round(S.actuel[c.cle])) + ' ' + c.unite.replace('/100', '')
+        : '',
+      (NOTES[c.cle] ? '<p class="bl-s">' + NOTES[c.cle] + '</p>' : '')
+      + '<div class="cb" id="sc' + i + '"></div>', i === 0)).join('');
     S.champs.forEach((c, i) => {
       const data = agrege(c.cle, mode);
       // Un champ note sur 100 n'a pas d'unite a suffixer. Le remplacement

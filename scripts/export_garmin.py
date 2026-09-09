@@ -103,13 +103,13 @@ def evenements(programme, semaines):
         for s in w["seances"]:
             if s["type"] != "course" or s.get("course") or not s.get("etapes"):
                 continue
-            jour = lundi + timedelta(days=JOURS.index(s["jour"]))
+            jour = lundi + timedelta(days=JOURS.index(s["jour_suggere"]))
             doc = workout_doc(s)
             # Pas de `description` : elle ferait recompiler la seance depuis le
             # texte et effacerait toutes les etapes.
             out.append({
                 "start_date_local": "%sT%s:00" % (jour.isoformat(),
-                                                  HEURES[s["jour"]]),
+                                                  HEURES[s["jour_suggere"]]),
                 "category": "WORKOUT",
                 "type": "Run",
                 "name": "S%d · %s" % (w["semaine"], s["nom"]),
