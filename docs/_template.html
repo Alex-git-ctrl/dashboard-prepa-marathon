@@ -361,6 +361,38 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .done{display:inline-block;height:4px;border-radius:2px;background:var(--mesure);
   vertical-align:2px;margin-right:var(--s2)}
 
+/* ---------- programme detaille de la semaine ----------
+   Une seance est un objet de lecture, pas une ligne de tableau : elle a un
+   titre, une raison d'exister et des etapes. Le jour du jour porte le seul
+   filet bitume de la liste. */
+.se{border-top:1px solid var(--filet);padding:var(--s4) 0;
+  border-left:3px solid transparent}
+.se-on{border-left-color:var(--bitume);padding-left:var(--s3);
+  margin-left:calc(var(--s3) * -1);background:var(--creux)}
+.se-j{font-family:var(--num);font-size:var(--t1);color:var(--acier);
+  text-transform:uppercase;letter-spacing:.08em}
+.se-t{font-size:var(--t5);font-weight:600;letter-spacing:-.02em;
+  margin-top:var(--s1);display:flex;justify-content:space-between;
+  align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.se-d{font-family:var(--num);font-size:var(--t3);font-weight:500;
+  color:var(--sourd);white-space:nowrap}
+.se-p{font-size:var(--t2);color:var(--sourd);line-height:1.5;
+  margin:var(--s2) 0 0;max-width:66ch;text-wrap:pretty}
+.et{margin-top:var(--s3)}
+.et>div{display:grid;grid-template-columns:1fr auto auto;gap:var(--s2) var(--s3);
+  align-items:baseline;padding:var(--s2) 0;border-top:1px solid var(--filet)}
+.et .en{font-size:var(--t3);font-weight:500}
+.et .ed{font-family:var(--num);font-size:var(--t2);color:var(--sourd);
+  white-space:nowrap}
+.et .ea{font-family:var(--num);font-size:var(--t2);white-space:nowrap;
+  font-weight:500}
+.et .ec{font-size:var(--t1);color:var(--acier);line-height:1.45;
+  margin:0 0 var(--s2);max-width:62ch;text-wrap:pretty}
+.ex{margin:var(--s3) 0 0;padding-left:var(--s4);font-size:var(--t3);
+  line-height:1.6;color:var(--encre)}
+.ex li{padding-left:var(--s1)}
+.ex li::marker{color:var(--acier)}
+
 /* ---------- le plan s'adapte ---------- */
 .adapt{margin-top:var(--s3)}
 .adapt-h{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap;
@@ -580,6 +612,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .fresh{font-size:var(--t1)}
   .grid{grid-template-columns:1fr 1fr;gap:0 var(--s4)}
   .deux{grid-template-columns:1fr;gap:var(--s5)}
+  .et>div{grid-template-columns:1fr auto;gap:var(--s1) var(--s3)}
+  .et .ea{grid-column:2}
   .chg div{grid-template-columns:30px auto auto;gap:var(--s1) var(--s3)}
   .chg .cl{grid-column:1 / -1;text-align:left}
   .dark{padding:var(--s4) var(--s4) var(--s3);border-radius:var(--r2)}
@@ -612,8 +646,9 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
     <div id="hero"></div>
     <div class="sec"><h2>Dernière séance</h2><div id="seance"></div></div>
     <div class="sec"><h2>Surveillance</h2><div id="alerts"></div></div>
-    <div class="sec"><h2>Cette semaine</h2><div class="list" id="week"></div>
-      <p class="note" id="week-n"></p></div>
+    <div class="sec"><h2>Le programme</h2>
+      <div id="prog-sem"></div><div id="prog"></div>
+      <p class="note" id="prog-n"></p></div>
     <div class="sec"><h2>En un coup d'œil</h2><div class="grid" id="quick"></div></div>
   </section>
 
@@ -1444,48 +1479,81 @@ function detailSeance(s) {
     + '3 semaines, la variabilité après 14 nuits.');
 })();
 
-/* ---------- semaine en cours ---------- */
+/* ---------- le programme detaille de la semaine ----------
+   Le plan disait "45 min". Ici on dit quoi faire, etape par etape, avec une
+   allure cible prise dans la calibration, donc recalculee apres chaque course.
+   Le jour du jour est marque : c'est la seule chose qu'on vient chercher en
+   ouvrant la page un mardi midi. */
 (function () {
-  const w = nowW, st = new Date(w.lundi + 'T12:00:00');
-  const dt = i => { const d = new Date(st); d.setDate(d.getDate() + i);
-    return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
-  // L'allure affichee vient de la calibration, plus d'une constante ecrite en
-  // dur : elle se recalcule apres chaque course, et l'onglet Plan annonçait
-  // deja 6:03 à 6:42 pendant que cette liste affirmait 6:00 à 6:30.
-  // La conversion des minutes en kilometres, elle, garde l'hypothese qui a
-  // servi a construire le plan, sinon la somme des jours ne tomberait plus sur
-  // le volume hebdomadaire annonce juste en dessous.
-  const EF = CAL.zones.find(z => z.cle === 'ef') || CAL.zones[0];
-  const EFP = PLAN.ef_pace_min_km || 6.1;
-  const km = m => m ? 'environ ' + km1(m / EFP) + ' km · ' + EF.texte + '/km' : '';
-  const c = PLAN.courses.find(x => x.semaine === w.semaine);
-  const jr = c ? ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche']
-    .indexOf(c.jour) : -1;
-  const L = [
-    ['Lun', 'Repos', 'ou 15 min de mobilité', 1],
-    ['Mar', w.seance1_min ? 'Course · ' + w.seance1_min + ' min' : 'Repos',
-      km(w.seance1_min), 0],
-    ['Mer', 'Musculation', 'haut du corps, tractions, muscle-up', 0],
-    ['Jeu', w.seance2_min ? 'Course · ' + w.seance2_min + ' min' : 'Repos',
-      km(w.seance2_min), 0],
-    ['Ven', 'Musculation', 'gainage et travail ATR', 0],
-    ['Sam', 'Sortie longue · ' + km1(w.sortie_longue_km) + ' km',
-      'endurance fondamentale stricte', 0],
-    ['Dim', 'Repos', 'marche ou récupération active', 1],
-  ];
-  if (jr >= 0) {
-    L[jr] = [L[jr][0], c.nom + ' · ' + km1(c.distance_km) + ' km',
-      'Objectif ' + c.cible + ' · ' + c.allure, 0];
-    if (c.cle === 'dix') L[4] = ['Ven', 'Repos', 'veille de course', 1];
+  const P = M.programme || [];
+  if (!P.length) { $('prog-sem').innerHTML = ''; return; }
+
+  const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi',
+    'dimanche'];
+  const auj = JOURS[(today.getDay() + 6) % 7];
+  let k = 0;
+
+  $('prog-sem').innerHTML = '<div class="seg" role="group" '
+    + 'aria-label="Semaine du programme">' + P.map((w, i) =>
+      '<button type="button" data-i="' + i + '" aria-pressed="' + (i === 0)
+      + '">S' + w.semaine + (i === 0 ? ' · en cours' : '') + '</button>').join('')
+    + '</div>';
+
+  function duree(s) {
+    if (s.duree_min) return s.duree_min + ' min';
+    if (s.distance_km) return km1(s.distance_km) + ' km';
+    return '';
   }
-  const jToday = Math.floor((today - st) / 864e5);
-  $('week').innerHTML = L.map((r, i) => `<div class="li${i === jToday ? ' on' : ''}${
-    r[3] && i !== jToday ? ' rest' : ''}">
-    <div class="li-k"><div>${r[1]}</div>
-      ${r[2] ? `<div class="li-s">${r[2]}</div>` : ''}</div>
-    <div class="li-v q">${r[0]} ${dt(i)}</div></div>`).join('');
-  $('week-n').textContent = 'Objectif de la semaine : ' + km1(w.volume_km)
-    + ' km, dont ' + km1(w.sortie_longue_km) + ' km de sortie longue. ' + w.note;
+
+  function etape(e) {
+    const combien = e.duree_s ? Math.round(e.duree_s / 60) + ' min'
+      : km1(e.distance_m / 1000) + ' km';
+    return '<div><span class="en">' + e.nom + '</span>'
+      + '<span class="ed">' + combien + '</span>'
+      + '<span class="ea">' + e.allure_texte + '</span></div>'
+      + (e.consigne ? '<p class="ec">' + e.consigne + '</p>' : '');
+  }
+
+  function dessine(i) {
+    const w = P[i];
+    const lundi = new Date(w.lundi + 'T12:00:00');
+    const dt = j => { const d = new Date(lundi);
+      d.setDate(d.getDate() + JOURS.indexOf(j));
+      return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
+
+    $('prog').innerHTML = w.seances.map(s => {
+      const ici = i === 0 && s.jour === auj;
+      return '<article class="se' + (ici ? ' se-on' : '') + '">'
+        + '<div class="se-j">' + s.jour + ' ' + dt(s.jour)
+        + (ici ? ' · aujourd’hui' : '') + '</div>'
+        + '<div class="se-t">' + s.nom
+        + (duree(s) ? '<span class="se-d">' + duree(s) + '</span>' : '') + '</div>'
+        + (s.pourquoi ? '<p class="se-p">' + s.pourquoi + '</p>' : '')
+        + (s.etapes && s.etapes.length
+           ? '<div class="et">' + s.etapes.map(etape).join('') + '</div>' : '')
+        + (s.exos ? '<ul class="ex">' + s.exos.map(x => '<li>' + x + '</li>').join('')
+           + '</ul>' : '')
+        + '</article>';
+    }).join('');
+
+    $('prog-n').innerHTML = 'Semaine ' + w.semaine + ' du ' + dshort(w.lundi)
+      + ' au ' + dshort(w.dimanche) + ', objectif ' + km1(w.volume_km) + ' km.'
+      + (w.adapte ? ' <b>Volume réécrit</b> à partir de ce que tu as fait, '
+         + 'voir l’onglet Plan.' : '')
+      + (w.note ? ' ' + w.note : '')
+      + ' Les allures viennent de ta calibration et se recalculent après chaque '
+      + 'course.';
+  }
+
+  $('prog-sem').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    k = +b.dataset.i;
+    [...$('prog-sem').children].forEach(x =>
+      x.setAttribute('aria-pressed', +x.dataset.i === k ? 'true' : 'false'));
+    dessine(k);
+  });
+  dessine(0);
 })();
 
 /* ---------- tuiles ---------- */

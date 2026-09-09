@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 import alerts
 import adaptation
 import calibration
+import seances_type
 import resume_ia
 import seance_detail
 import sante
@@ -352,6 +353,13 @@ def main():
     # C'est aussi ce qui rend l'ajustement lisible : le volume d'origine reste
     # a cote du volume adapte, avec la raison.
     metrics["adaptation"] = adaptation.applique(PLAN, metrics, today)
+
+    # Le programme detaille suit l'adaptation : il doit dire ce qu'il faut
+    # faire vraiment, pas ce que le plan demandait avant de t'ecouter.
+    metrics["programme"] = seances_type.construit(
+        PLAN, metrics["calibration"],
+        metrics["adaptation"]["semaines_ajustees"],
+        metrics["adaptation"]["semaine_courante"])
 
     metrics["resumes"] = resume_ia.construit(
         seances, PLAN, metrics["calibration"], ROOT)

@@ -46,3 +46,21 @@ Ce dépôt est public. Deux garde-fous :
   fichiers bruts ne partent sur GitHub.
 - `docs/metrics.json` ne contient que des agrégats. **Aucune coordonnée GPS,
   aucune trace, aucun nom de lieu** n'est publié.
+
+## Envoyer les séances sur la montre
+
+Le dashboard sait pousser le programme vers la Forerunner, en passant par le
+calendrier Intervals.icu, qui le synchronise vers Garmin Connect.
+
+```
+python scripts/export_garmin.py              # simulation, n'écrit rien
+python scripts/export_garmin.py --envoyer    # pose les 3 semaines à venir
+```
+
+Une seule condition côté compte : dans Intervals.icu, section Garmin, cocher
+**Upload planned workouts to Garmin Connect**. Le script vérifie ce réglage et
+le signale s'il est éteint, plutôt que de créer des séances qui resteraient
+bloquées dans le calendrier.
+
+Le script ne supprime que les séances qu'il a lui-même posées, dont il garde
+les identifiants dans `docs/export_garmin.json`.
