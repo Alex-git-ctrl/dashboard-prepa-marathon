@@ -44,20 +44,29 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # La comparaison se fait en bash, sur la chaine brute, et surtout pas
+      # dans une expression GitHub. Selon que l'entree arrive en booleen ou
+      # en chaine, `inputs.simulation == false` peut valoir faux dans les
+      # DEUX cas : --envoyer ne serait jamais ajoute, le script afficherait
+      # ce qu'il compte faire, le job passerait au vert, et rien ne partirait
+      # sur la montre. Une panne muette est le pire resultat possible ici.
       - name: Envoyer les seances
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+          SIMULATION: ${{ github.event.inputs.simulation }}
+          SEMAINES: ${{ github.event.inputs.semaines }}
         run: |
-          python scripts/export_garmin.py \
-            --semaines ${{ inputs.semaines }} \
-            ${{ inputs.simulation == false && '--envoyer' || '' }}
+          FLAG="--envoyer"
+          if [ "$SIMULATION" = "true" ]; then FLAG=""; fi
+          echo "simulation=[$SIMULATION] semaines=[$SEMAINES] flag=[$FLAG]"
+          python scripts/export_garmin.py --semaines "${SEMAINES:-3}" $FLAG
 
       # Le suivi des evenements poses doit revenir dans le depot, sinon le
       # prochain envoi ne saurait pas quoi remplacer et empilerait les
       # doublons sur le calendrier.
       - name: Memoriser ce qui a ete pose
-        if: ${{ inputs.simulation == false }}
+        if: github.event.inputs.simulation != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
