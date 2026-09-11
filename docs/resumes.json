@@ -18,5 +18,15 @@
     "source": "claude_conversation",
     "fige": true,
     "date_redaction": "2026-09-11"
+  },
+  "2026-09-11": {
+    "verdict": "correct",
+    "titre": "Ta sortie longue est déjà faite",
+    "execution": "10,02 km en 62 min à 6:09/km, et cette fois tu es dans ta fourchette d'endurance fondamentale, sans que le relief y change quoi que ce soit. Seconde moitié à 6:00 contre 6:18 pour la première, tu accélères encore. La dérive cardiaque monte à 8,0 %, ta plus haute des trois séances, et la durée y est pour beaucoup : la FC max a touché 164, soit un bref passage en zone 4. 85 % du temps en zone 3, comme les deux fois précédentes.",
+    "conformite": "Rien n'était prévu ce vendredi, le plan demandait de la calisthénie. Mais le vrai point est ailleurs : tu en es à 16,1 km sur une semaine visée à 19,5. Ajouter la sortie longue de 8 km te porterait à 24,1 km, soit 24 % au-dessus de l'objectif, sur ta toute première semaine à trois séances.",
+    "objectif": "Ce 10 km n'était pas au programme, mais il en tient lieu : c'est exactement la sortie longue prévue en semaine 2, faite avec une semaine d'avance. Le week-end, remplace la sortie longue par 35 à 40 minutes faciles, ou ne cours pas du tout. Monter de 24 % la semaine où tu passes de deux à trois séances est le profil de blessure le plus banal qui soit.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-11"
   }
 }
