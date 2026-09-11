@@ -80,31 +80,65 @@ def courses(metrics):
 
 
 def binaire_claude():
-    """Le chemin du binaire Claude Code, ou None s'il n'est pas installe."""
-    import shutil
-    for nom in ("claude", "claude.cmd", "claude.exe"):
+    """Le chemin du VRAI binaire Claude Code, pas du lanceur .cmd.
+
+    Sous Windows, npm installe un shim claude.CMD a cote du binaire. Ce shim
+    passe par cmd.exe, qui redecoupe les arguments sur les espaces : un long
+    JSON arrivait vide, et --system-prompt "Reponds uniquement par OK"
+    arrivait comme le seul mot "uniquement". On cherche donc l'executable
+    reel d'abord, et le shim seulement en dernier recours.
+    """
+    import shutil, subprocess
+    # Le chemin pose par npm, le plus direct.
+    try:
+        racine = subprocess.run(["npm", "root", "-g"], capture_output=True,
+                                text=True, timeout=30, shell=(os.name == "nt"))
+        if racine.returncode == 0:
+            exe = os.path.join(racine.stdout.strip(), "@anthropic-ai",
+                               "claude-code", "bin",
+                               "claude.exe" if os.name == "nt" else "claude")
+            if os.path.exists(exe):
+                return exe
+    except (OSError, subprocess.SubprocessError):
+        pass
+    for nom in ("claude.exe", "claude"):
         chemin = shutil.which(nom)
-        if chemin:
+        # Un .cmd ou .bat est un shim : il casserait les arguments.
+        if chemin and not chemin.lower().endswith((".cmd", ".bat")):
             return chemin
-    return None
+    return shutil.which("claude")
 
 
 def redige(cible, contexte_json):
     """Fait ecrire l'analyse par Claude Code, donc sur l'abonnement.
 
-    On n'utilise que -p, le drapeau le plus stable du CLI, et surtout pas
-    --output-format dont le nom pourrait changer. Le JSON est ensuite extrait
-    de la sortie, quelle que soit la prose qui l'entoure.
+    Trois precautions, toutes apprises du premier essai rate.
+
+    --system-prompt REMPLACE le prompt par defaut. Sans lui, Claude Code
+    reste un assistant de code : il a repondu en Markdown, avec des titres,
+    apres etre alle lire le depot de lui-meme.
+
+    Le repertoire de travail est un dossier vide et temporaire. Claude Code
+    est un agent : lance dans le depot, il explore, lit CLAUDE.md, et se met
+    a raisonner sur le projet au lieu de la seance qu'on lui donne. Dans un
+    dossier vide, il n'a rien a trouver.
+
+    Enfin on ne garde que -p et --output-format text, les deux drapeaux les
+    plus stables.
     """
-    import subprocess
-    invite = (resume_ia.SYSTEME
-              + "\n\nVoici la seance a analyser.\n\n" + contexte_json)
+    import subprocess, tempfile, shutil
+    bac = tempfile.mkdtemp(prefix="resume-")
     try:
-        r = subprocess.run([cible, "-p", invite], capture_output=True,
-                           text=True, encoding="utf-8", errors="replace",
-                           timeout=300)
+        r = subprocess.run(
+            [cible, "-p", contexte_json,
+             "--system-prompt", resume_ia.SYSTEME,
+             "--output-format", "text"],
+            cwd=bac, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=300)
     except subprocess.TimeoutExpired:
         return None, "pas de reponse en 5 minutes"
+    finally:
+        shutil.rmtree(bac, ignore_errors=True)
     if r.returncode != 0:
         return None, (r.stderr or r.stdout or "").strip()[:300]
     sortie = (r.stdout or "").strip()

@@ -104,6 +104,12 @@ def contexte(seance, plan, calibration, precedentes):
     return {
         "date": seance["date"],
         "jour_de_semaine": jd,
+        # Sans cette borne, une seance anterieure au plan sortait avec une
+        # semaine vide, et l'analyse concluait "impossible de dire si cette
+        # sortie correspond au programme" au lieu de la bonne reponse : elle
+        # est anterieure, elle sert de point de depart.
+        "premier_jour_du_plan": plan["semaines"][0]["lundi"],
+        "jour_de_la_course": plan["courses"][-1]["date"],
         "semaine_du_plan": sem["semaine"] if sem else None,
         "bloc": sem.get("bloc_desc") if sem else None,
         "prevu_au_plan": prevu,
