@@ -109,6 +109,7 @@
 
   --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --num:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --mono:var(--num);
 }
 
 /* ------------------------------------------------------------
@@ -673,6 +674,40 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   border-radius:var(--r1)}
 .dotb{position:absolute;top:8px;right:calc(50% - 17px);width:8px;height:8px;
   border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--craie)}
+
+/* ---------- commandes ----------
+   Deux actions qui vivent hors de la page. Elles ont le droit d'etre des
+   objets fermes : ce sont des choses sur lesquelles on appuie. */
+.act{display:flex;flex-direction:column;border-top:1px solid var(--filet)}
+.act-r{border-bottom:1px solid var(--filet);padding:var(--s4) 0;display:flex;
+  align-items:center;justify-content:space-between;gap:var(--s4);
+  flex-wrap:wrap}
+.act-k{flex:1;min-width:min(100%,240px)}
+.act-t{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
+.act-s{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin-top:var(--s1);max-width:56ch;text-wrap:pretty}
+.act-e:not(:empty){margin-top:var(--s3)}
+.act-p{font-size:var(--t2);color:var(--sourd);font-family:var(--num)}
+.act-p.ok{color:var(--ok);font-weight:500}
+.act-p.ko{color:var(--alerte);font-weight:500}
+.act-f{display:flex;gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap}
+.act-f input{flex:1;min-width:200px;font-family:var(--num);
+  font-size:var(--t2);color:var(--encre);background:var(--surface);
+  border:1px solid var(--filet);border-radius:var(--r2);
+  padding:var(--s3) var(--s4)}
+.act-f input:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.btn{appearance:none;border:1px solid var(--bitume);background:var(--bitume);
+  color:var(--craie);font-family:inherit;font-size:var(--t3);font-weight:500;
+  padding:var(--s3) var(--s4);border-radius:var(--r2);cursor:pointer;
+  white-space:nowrap;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn-q{background:none;color:var(--encre);border-color:var(--filet);
+  margin-top:var(--s3)}
+.btn-q:hover{opacity:1;border-color:var(--acier)}
+.bl-s a{color:var(--mesure)}
 
 /* ---------- mobile ----------
    Le mobile deplace l'echelle d'un cran, et tout ce qui s'y appuie suit. */

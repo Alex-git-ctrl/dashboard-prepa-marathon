@@ -1,0 +1,68 @@
+name: Envoyer les seances sur la montre
+
+# Declenchable a la main uniquement : depuis l'onglet Actions, depuis le
+# bouton du tableau de bord, ou en local avec
+#   gh workflow run export-garmin.yml -f semaines=3
+#
+# Ce workflow ECRIT sur le calendrier Intervals.icu, qui pousse ensuite les
+# seances vers Garmin Connect. Il n'est donc jamais programme : c'est une
+# action volontaire, pas une collecte.
+on:
+  workflow_dispatch:
+    inputs:
+      semaines:
+        description: "Nombre de semaines a envoyer"
+        required: false
+        default: "3"
+        type: choice
+        options: ["1", "2", "3", "4", "6"]
+      simulation:
+        description: "Simuler sans rien ecrire"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+# Deux envois simultanes se marcheraient dessus : le second supprimerait les
+# evenements que le premier vient de poser.
+concurrency:
+  group: export-garmin
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Envoyer les seances
+        env:
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+        run: |
+          python scripts/export_garmin.py \
+            --semaines ${{ inputs.semaines }} \
+            ${{ inputs.simulation == false && '--envoyer' || '' }}
+
+      # Le suivi des evenements poses doit revenir dans le depot, sinon le
+      # prochain envoi ne saurait pas quoi remplacer et empilerait les
+      # doublons sur le calendrier.
+      - name: Memoriser ce qui a ete pose
+        if: ${{ inputs.simulation == false }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/export_garmin.json
+          git diff --staged --quiet && echo "Rien a memoriser." && exit 0
+          git commit -m "Seances envoyees sur la montre"
+          git pull --rebase
+          git push

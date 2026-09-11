@@ -715,6 +715,43 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .dotb{position:absolute;top:5px;right:calc(50% - 17px);width:8px;height:8px;
   border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--surface)}
 
+/* ---------- commandes ----------
+   Deux actions qui vivent hors de la page. Le bouton plein bleu est le seul
+   de tout le tableau de bord : le guide le reserve a une action par section,
+   et ici il y en a exactement deux sur la page entiere. */
+.act{display:flex;flex-direction:column;gap:var(--s2)}
+.act-r{background:var(--surface);border-radius:var(--r3);padding:var(--pad);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s4);flex-wrap:wrap}
+.act-k{flex:1;min-width:min(100%,240px)}
+.act-t{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+.act-s{font-size:var(--t2);color:var(--acier);line-height:1.45;
+  margin-top:var(--s1);max-width:56ch;text-wrap:pretty}
+.act-e:not(:empty){margin-top:var(--s3)}
+.act-p{font-size:var(--t2);color:var(--sourd)}
+.act-p.ok{color:var(--ok);font-weight:600}
+.act-p.ko{color:var(--alerte);font-weight:600}
+.act-f{display:flex;gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap}
+.act-f input{flex:1;min-width:200px;font-family:var(--mono);
+  font-size:var(--t2);color:var(--encre);background:var(--surface);
+  border:1px solid var(--filet);border-radius:var(--r2);
+  padding:var(--s3) var(--s4)}
+.act-f input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn{appearance:none;border:0;background:var(--mesure);color:#fff;
+  font-family:inherit;font-size:var(--t3);font-weight:500;
+  padding:11px var(--s4);border-radius:var(--r2);cursor:pointer;
+  letter-spacing:-.01em;white-space:nowrap;transition:opacity .18s}
+.btn:hover{opacity:.85}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* Le bouton fantome du guide : contour seul, pour une action secondaire. */
+.btn-q{background:none;color:var(--encre);border:1px solid var(--filet);
+  margin-top:var(--s3)}
+.btn-q:hover{opacity:1;border-color:var(--encre)}
+.bl-s a{color:var(--lien);text-decoration:none}
+.bl-s a:hover{text-decoration:underline}
+
 /* ---------- mobile ----------
    Apple reduit ses corps sur petit ecran au lieu de les augmenter : les
    grandes tailles sont faites pour etre vues de loin sur un ecran large, pas

@@ -79,6 +79,8 @@ __THEME__
       <div class="card" id="verdict"></div></div>
     <div class="sec"><h2>Le raisonnement</h2><div class="list" id="vrows"></div></div>
     <div class="sec"><h2>Ce que la montre remonte</h2><div class="list" id="cover"></div></div>
+    <div class="sec"><h2>Commandes</h2><div id="cmd"></div>
+      <p class="note" id="cmd-n"></p></div>
     <div class="sec"><h2>Confidentialité</h2><div class="card" id="priv"></div></div>
   </section>
 </main>
@@ -2025,4 +2027,190 @@ $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées
   à chaque course. Ces projections supposent une endurance spécifique déjà
   construite : à lire comme une borne optimiste tant que les courses de
   calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
+
+
+/* ---------- commandes ----------
+   Deux actions qui vivent ailleurs que dans la page : relancer la collecte, et
+   poser les seances sur le calendrier Intervals.icu, qui les pousse vers la
+   montre. Les deux sont des workflows GitHub declenchables a la main.
+
+   LE PROBLEME D'AUTHENTIFICATION. Cette page est servie par GitHub Pages
+   depuis un depot PUBLIC : tout ce qu'elle contient est lisible par n'importe
+   qui. Un jeton d'API ecrit dans le code serait donc un jeton offert. Il y a
+   donc deux modes, et le second est facultatif :
+
+     - sans jeton, le bouton ouvre la page Actions du depot, ou il reste un
+       clic a faire. Rien a configurer, rien a stocker.
+     - avec un jeton colle une fois par l'utilisateur, le bouton declenche
+       directement. Le jeton ne quitte jamais le navigateur : il vit dans le
+       localStorage de CE telephone, n'est jamais envoye ailleurs que chez
+       GitHub, et n'entre jamais dans le depot.
+
+   Un jeton a portee fine limite a Actions sur ce seul depot ne permet rien
+   d'autre que relancer ces deux workflows. */
+(function () {
+  const DEPOT = 'Alex-git-ctrl/dashboard-prepa-marathon';
+  const CLE = 'sub4.gh.jeton';
+  const API = 'https://api.github.com/repos/' + DEPOT;
+
+  const ACTIONS = [
+    {id:'update.yml', nom:'Mettre à jour les données',
+     desc:'Relance la collecte Intervals.icu, recalcule le plan et reconstruit '
+       + 'la page. Compte environ deux minutes, puis recharge.',
+     verbe:'Lancer', inputs:{}},
+    {id:'export-garmin.yml', nom:'Envoyer les séances sur la montre',
+     desc:'Pose les trois prochaines semaines sur le calendrier Intervals.icu, '
+       + 'qui les synchronise vers Garmin Connect. Tu les retrouves dans le '
+       + 'menu Entraînements de la Forerunner.',
+     verbe:'Envoyer', confirme:true, inputs:{semaines:'3', simulation:'false'}},
+  ];
+
+  const jeton = () => { try { return localStorage.getItem(CLE) || ''; }
+                        catch (e) { return ''; } };
+  const poseJeton = v => { try { v ? localStorage.setItem(CLE, v)
+                                  : localStorage.removeItem(CLE); }
+                           catch (e) {} };
+
+  const lien = a => 'https://github.com/' + DEPOT + '/actions/workflows/' + a.id;
+
+  function dessine() {
+    const armee = !!jeton();
+    $('cmd').innerHTML = '<div class="act">' + ACTIONS.map((a, i) =>
+      '<div class="act-r"><div class="act-k"><div class="act-t">' + a.nom
+      + '</div><div class="act-s">' + a.desc + '</div>'
+      + '<div class="act-e" data-etat="' + i + '"></div></div>'
+      + '<button type="button" class="btn" data-i="' + i + '">'
+      + (armee ? a.verbe : 'Ouvrir') + '</button></div>').join('')
+      + '</div>'
+      + '<details class="bl"><summary><span class="bl-t">'
+      + (armee ? 'Déclenchement direct activé' : 'Activer le déclenchement direct')
+      + '</span><span class="bl-r">' + (armee ? 'jeton présent' : 'facultatif')
+      + '</span>' + CHEVRON
+      + '<div class="bl-d"><p class="bl-s">Sans jeton, les boutons ouvrent '
+      + 'simplement la page GitHub où il reste un clic à faire. Avec un jeton, '
+      + 'ils déclenchent directement.</p>'
+      + '<p class="bl-s"><b>Le jeton ne quitte pas ce navigateur.</b> Il est '
+      + 'rangé dans le stockage local de cet appareil, n’est envoyé qu’à '
+      + 'GitHub, et n’entre jamais dans le dépôt, qui est public. Crée un '
+      + 'jeton <i>fine-grained</i> limité à ce seul dépôt, avec la permission '
+      + '<b>Actions : read and write</b>, et rien d’autre.</p>'
+      + '<p class="bl-s"><a href="https://github.com/settings/personal-access-'
+      + 'tokens/new" target="_blank" rel="noopener">Créer le jeton sur GitHub</a>'
+      + '</p>'
+      + (armee
+         ? '<button type="button" class="btn btn-q" id="cmd-oubli">Retirer le '
+           + 'jeton de cet appareil</button>'
+         : '<div class="act-f"><input type="password" id="cmd-jeton" '
+           + 'placeholder="github_pat_..." autocomplete="off" '
+           + 'spellcheck="false"><button type="button" class="btn" '
+           + 'id="cmd-garde">Enregistrer</button></div>')
+      + '</div></details>';
+
+    $('cmd-n').innerHTML = armee
+      ? 'Les deux commandes partent d’ici. La page, elle, ne se met pas à jour '
+        + 'toute seule : recharge-la une fois le travail terminé.'
+      : 'La collecte tourne de toute façon seule à 7h et à 21h. Ces commandes '
+        + 'servent quand tu veux le résultat tout de suite, par exemple en '
+        + 'rentrant d’une sortie.';
+  }
+
+  function etat(i, texte, cls) {
+    const el = document.querySelector('[data-etat="' + i + '"]');
+    if (el) el.innerHTML = texte
+      ? '<span class="act-p ' + (cls || '') + '">' + texte + '</span>' : '';
+  }
+
+  async function gh(chemin, options) {
+    const r = await fetch(API + chemin, Object.assign({
+      headers: {'Authorization': 'Bearer ' + jeton(),
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'},
+    }, options || {}));
+    return r;
+  }
+
+  /** Suit le dernier run du workflow jusqu'a ce qu'il se termine. */
+  async function suit(a, i) {
+    const debut = Date.now();
+    for (let essai = 0; essai < 60; essai++) {
+      await new Promise(r => setTimeout(r, essai < 3 ? 3000 : 6000));
+      let d;
+      try {
+        const r = await gh('/actions/workflows/' + a.id + '/runs?per_page=1');
+        if (!r.ok) continue;
+        d = await r.json();
+      } catch (e) { continue; }
+      const run = (d.workflow_runs || [])[0];
+      // Un run anterieur au clic n'est pas le notre : on attend le bon.
+      if (!run || new Date(run.created_at).getTime() < debut - 120000) continue;
+      if (run.status !== 'completed') {
+        etat(i, 'En cours depuis ' + Math.round((Date.now() - debut) / 1000)
+                + ' s');
+        continue;
+      }
+      if (run.conclusion === 'success') {
+        etat(i, a.id === 'update.yml'
+             ? 'Terminé. Recharge la page pour voir les nouvelles données.'
+             : 'Terminé. Les séances arriveront sur la montre à la prochaine '
+               + 'synchronisation Garmin.', 'ok');
+      } else {
+        etat(i, 'Échec (' + run.conclusion + '). Ouvre le détail sur GitHub.',
+             'ko');
+      }
+      return;
+    }
+    etat(i, 'Toujours en cours. Regarde sur GitHub.');
+  }
+
+  async function lance(a, i, bouton) {
+    bouton.disabled = true;
+    etat(i, 'Demande envoyée');
+    try {
+      const r = await gh('/actions/workflows/' + a.id + '/dispatches', {
+        method: 'POST',
+        body: JSON.stringify({ref: 'main', inputs: a.inputs}),
+      });
+      if (r.status === 204) { await suit(a, i); }
+      else if (r.status === 401 || r.status === 403) {
+        etat(i, 'Jeton refusé. Vérifie qu’il donne Actions en écriture sur ce '
+                + 'dépôt.', 'ko');
+      } else {
+        etat(i, 'GitHub a répondu ' + r.status + '.', 'ko');
+      }
+    } catch (e) {
+      etat(i, 'Requête impossible. Connexion ?', 'ko');
+    }
+    bouton.disabled = false;
+    dessineBouton(a, i, bouton);
+  }
+
+  function dessineBouton(a, i, b) { b.textContent = a.verbe; delete b.dataset.sur; }
+
+  $('cmd').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'cmd-garde') {
+      const v = ($('cmd-jeton').value || '').trim();
+      if (v) { poseJeton(v); dessine(); }
+      return;
+    }
+    if (b.id === 'cmd-oubli') { poseJeton(''); dessine(); return; }
+    if (b.dataset.i == null) return;
+    const a = ACTIONS[+b.dataset.i], i = +b.dataset.i;
+    if (!jeton()) { window.open(lien(a), '_blank', 'noopener'); return; }
+    // Poser des seances sur un calendrier se voit depuis l'exterieur : on
+    // demande une seconde pression plutot qu'une boite de dialogue.
+    if (a.confirme && b.dataset.sur !== '1') {
+      b.dataset.sur = '1';
+      b.textContent = 'Confirmer';
+      etat(i, 'Appuie une seconde fois pour confirmer.');
+      setTimeout(() => { if (b.dataset.sur === '1') {
+        dessineBouton(a, i, b); etat(i, ''); } }, 6000);
+      return;
+    }
+    lance(a, i, b);
+  });
+
+  dessine();
+})();
 </script>
