@@ -109,8 +109,8 @@ def binaire_claude():
     return shutil.which("claude")
 
 
-def redige(cible, contexte_json):
-    """Fait ecrire l'analyse par Claude Code, donc sur l'abonnement.
+def redige_avec(cible, systeme, contenu):
+    """Fait ecrire un texte par Claude Code, donc sur l'abonnement.
 
     Trois precautions, toutes apprises du premier essai rate.
 
@@ -120,18 +120,17 @@ def redige(cible, contexte_json):
 
     Le repertoire de travail est un dossier vide et temporaire. Claude Code
     est un agent : lance dans le depot, il explore, lit CLAUDE.md, et se met
-    a raisonner sur le projet au lieu de la seance qu'on lui donne. Dans un
+    a raisonner sur le projet au lieu du dossier qu'on lui donne. Dans un
     dossier vide, il n'a rien a trouver.
 
     Enfin on ne garde que -p et --output-format text, les deux drapeaux les
     plus stables.
     """
     import subprocess, tempfile, shutil
-    bac = tempfile.mkdtemp(prefix="resume-")
+    bac = tempfile.mkdtemp(prefix="claude-")
     try:
         r = subprocess.run(
-            [cible, "-p", contexte_json,
-             "--system-prompt", resume_ia.SYSTEME,
+            [cible, "-p", contenu, "--system-prompt", systeme,
              "--output-format", "text"],
             cwd=bac, capture_output=True, text=True,
             encoding="utf-8", errors="replace", timeout=300)
@@ -151,10 +150,46 @@ def redige(cible, contexte_json):
         return None, "JSON illisible : %s" % e
 
 
+def redige(cible, contexte_json):
+    """Le cas particulier du resume de seance."""
+    return redige_avec(cible, resume_ia.SYSTEME,
+                       "Voici la seance a analyser.\n\n" + contexte_json)
+
+
 # Les sequences que produit un texte UTF-8 relu comme du cp1252. Si l'une
 # d'elles apparait, le texte est deja abime et il ne faut pas l'ecrire.
 MOJIBAKE = ("\u00c3\u00a9", "\u00c3\u00a8", "\u00c3\u00a0", "\u00c3\u00aa",
             "\u00e2\u20ac", "\u00c3\u00a7", "\u00c5\u0093")
+
+
+def normalise(out, cles):
+    """Repare l'espace avant les deux-points, que le modele oublie parfois.
+
+    Le francais demande une espace devant : ; ! ?. On ne touche QUE le cas
+    lettre suivie de deux-points suivie d'une espace : ca laisse tranquilles
+    les heures (16:56) et les allures (5:41/km), ou ce serait faux.
+    """
+    import re
+    motif = re.compile(r"(?<=[a-zA-Zà-ÿÀ-ÿ])([:;!?])(?= )")
+    for k in cles:
+        if isinstance(out.get(k), str):
+            out[k] = motif.sub(" \\1", out[k])
+    return out
+
+
+def valide_texte(out, cles):
+    """Aucun cadratin, aucun accent casse, dans les champs indiques."""
+    for k in cles:
+        v = out.get(k)
+        if not isinstance(v, str):
+            continue
+        if "—" in v or "–" in v:
+            return "le champ %s contient un tiret cadratin" % k
+        for m in MOJIBAKE:
+            if m in v:
+                return ("le champ %s contient des accents casses (%r) : le "
+                        "texte n'a pas ete lu en UTF-8" % (k, m))
+    return None
 
 
 def valide(out):
@@ -162,17 +197,7 @@ def valide(out):
     absentes = [k for k in CLES if k not in out]
     if absentes:
         return "cles manquantes : " + ", ".join(absentes)
-    for k in CLES:
-        v = out[k]
-        if not isinstance(v, str):
-            continue
-        if "\u2014" in v or "\u2013" in v:
-            return "le champ %s contient un tiret cadratin" % k
-        for m in MOJIBAKE:
-            if m in v:
-                return ("le champ %s contient des accents casses (%r) : le "
-                        "texte n'a pas ete lu en UTF-8" % (k, m))
-    return None
+    return valide_texte(out, CLES)
 
 
 def range_resume(date, out, R, metrics):
@@ -266,6 +291,7 @@ def main():
             if out is None:
                 print("echec (%s)" % err)
                 continue
+            normalise(out, CLES)
             souci = valide(out)
             if souci:
                 print("refuse (%s)" % souci)
@@ -314,6 +340,7 @@ def main():
             out = json.loads(brut[d:f + 1])
         except json.JSONDecodeError as e:
             sys.exit("JSON illisible : %s" % e)
+        normalise(out, CLES)
         souci = valide(out)
         if souci:
             sys.exit(souci)

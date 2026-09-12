@@ -39,6 +39,7 @@ __THEME__
     <h1>Progression</h1>
     <p class="lede">Un indicateur isolé ne dit rien. C'est la pente sur plusieurs
       semaines qui indique si la préparation fonctionne.</p>
+    <div class="sec"><h2>Où tu en es</h2><div id="bilan"></div></div>
     <div class="sec"><h2>Indicateurs</h2><div class="grid" id="kpis"></div></div>
     <div class="sec"><h2>Évolution</h2><div id="charts"></div></div>
   </section>
@@ -2028,6 +2029,52 @@ $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées
   construite : à lire comme une borne optimiste tant que les courses de
   calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
 
+
+/* ---------- le bilan general ----------
+   Pas un resume de seance : la question qu'on se pose une fois par semaine.
+   La confiance est affichee au meme rang que le verdict, parce qu'un
+   "tu peux viser plus haut" adosse a trois sorties ne vaut rien, et que la
+   page doit le dire au lieu de le laisser croire. */
+const BILAN_V = {
+  avance:['En avance', 'ok'],
+  conforme:['Conforme au plan', 'no'],
+  retard:['En retard', 'al'],
+  trop_tot:['Trop tôt pour juger', 'no'],
+};
+const BILAN_C = {
+  faible:'Confiance faible',
+  moyenne:'Confiance moyenne',
+  haute:'Confiance haute',
+};
+
+(function () {
+  const b = M.bilan;
+  if (!b || !b.titre) {
+    $('bilan').innerHTML = '<div class="wait" style="margin:0">Le bilan '
+      + 'général est rédigé à la mise à jour de 23h, dès qu’une séance ou une '
+      + 'semaine a bougé.</div>';
+    return;
+  }
+  const [mot, cls] = BILAN_V[b.verdict] || BILAN_V.conforme;
+  const Q = [
+    ['Où tu en es', b.ou_tu_en_es],
+    ['Peux-tu viser plus haut ?', b.viser_plus_haut],
+    ['Ce qui doit changer', b.a_changer],
+  ].filter(q => q[1]);
+  $('bilan').innerHTML = '<div class="ia"><div class="ia-h">'
+    + '<span class="pill ' + cls + '">' + mot + '</span>'
+    + '<span class="pill ' + (b.confiance === 'haute' ? 'ok'
+        : b.confiance === 'faible' ? 'al' : 'no') + '">'
+    + (BILAN_C[b.confiance] || 'Confiance inconnue') + '</span>'
+    + '<span class="ia-t">' + b.titre + '</span></div>'
+    + Q.map(q => '<div class="ia-q">' + q[0] + '</div><div class="ia-r">'
+      + q[1] + '</div>').join('')
+    + '<div class="ia-s">Rédigé par Claude sur cette machine'
+    + (b.quand ? ' le ' + dshort(b.quand.slice(0, 10)) : '')
+    + ', à partir des semaines terminées, des tendances sur 28 jours et des '
+    + 'dix dernières sorties. Aucune analyse facturée : le dossier envoyé est '
+    + 'plafonné et ne grandit pas avec l’historique.</div></div>';
+})();
 
 /* ---------- commandes ----------
    Deux actions qui vivent ailleurs que dans la page : relancer la collecte, et

@@ -150,6 +150,12 @@ def main():
           [PY, "scripts/resume.py", "--auto"], obligatoire=False)
     ANALYSES["apres"] = compte_analyses()
 
+    # Le bilan general ne se refait que si une seance ou une semaine a bouge :
+    # une vue d'ensemble ne change pas d'un jour a l'autre, et la relancer
+    # chaque nuit serait payer sept fois pour trois lectures utiles.
+    etape("Refaire le bilan general si besoin",
+          [PY, "scripts/bilan.py", "--auto"], obligatoire=False)
+
     # Avant la reconstruction : la page inline metrics.json, donc le compte
     # rendu doit y etre AVANT que build_site ne la fabrique.
     ecris_journal("ok")
