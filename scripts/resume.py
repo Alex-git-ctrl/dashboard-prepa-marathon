@@ -21,7 +21,7 @@ l'analyse par regles. C'est exactement ce qui a ete fait pour la seance du
 
   python scripts/resume.py --pose 2026-09-09 < analyse.json
       Range l'analyse et la fige. Le JSON attendu porte les cles verdict,
-      titre, execution, conformite et objectif.
+      titre, essentiel, execution, conformite et objectif.
 
   python scripts/resume.py --auto
       La chaine complete, en une commande, pour toutes les seances qui
@@ -50,7 +50,8 @@ sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import resume_ia  # noqa: E402
 
 CACHE = os.path.join(ROOT, "docs", "resumes.json")
-CLES = ("verdict", "titre", "execution", "conformite", "objectif")
+CLES = ("verdict", "titre", "essentiel", "execution", "conformite",
+        "objectif")
 
 
 def charge():
@@ -168,12 +169,16 @@ def normalise(out, cles):
     Le francais demande une espace devant : ; ! ?. On ne touche QUE le cas
     lettre suivie de deux-points suivie d'une espace : ca laisse tranquilles
     les heures (16:56) et les allures (5:41/km), ou ce serait faux.
+
+    Meme chose pour le pourcentage, que le modele colle une fois sur deux :
+    la page ecrit partout « 85 % », il serait seul a ecrire « 85% ».
     """
     import re
     motif = re.compile(r"(?<=[a-zA-Zà-ÿÀ-ÿ])([:;!?])(?= )")
+    pct = re.compile(r"(?<=[0-9])%")
     for k in cles:
         if isinstance(out.get(k), str):
-            out[k] = motif.sub(" \\1", out[k])
+            out[k] = pct.sub(" %", motif.sub(" \\1", out[k]))
     return out
 
 

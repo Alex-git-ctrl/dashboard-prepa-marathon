@@ -712,6 +712,16 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .btn-q:hover{opacity:1;border-color:var(--acier)}
 .bl-s a{color:var(--mesure)}
 
+/* La ligne qui suffit. */
+.ia-e{font-size:var(--t4);line-height:1.45;margin:0 0 var(--s3);max-width:50ch;
+  text-wrap:pretty;color:var(--encre)}
+.ia-e+.bl{margin-top:0}
+/* Le detail se replie dans l'analyse : il s'aligne sur le texte, il ne
+   se met pas en retrait comme une carte a l'interieur d'une carte. */
+.ia>.bl{padding-left:0;padding-right:0}
+.ia>.bl>summary{padding:var(--s3) 0}
+.ia>.bl+.ia-s{margin-top:var(--s3)}
+
 /* ---------- la serie des bilans ---------- */
 .hist{margin-top:var(--s5)}
 .hist-t{font-family:var(--num);font-size:var(--t1);font-weight:500;

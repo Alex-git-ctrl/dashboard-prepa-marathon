@@ -445,10 +445,9 @@ function splits(s) {
       + '<u style="left:' + w(moy) + '%"></u></span>'
       + '<span class="a">' + allure(x.allure_s_km) + '</span>'
       + '<span class="f">' + (x.fc ? x.fc + ' bpm' : '') + '</span>').join('')
-    + '</div><div class="sp-l">La barre porte le temps du kilomètre : plus elle '
-    + 'est longue, plus il a été lent. Le trait vertical marque l’allure moyenne '
-    + 'de la séance. Une dernière ligne en gris est un kilomètre incomplet, et '
-    + 'son allure est ramenée au kilomètre.</div>';
+    + '</div><div class="sp-l">Barre longue, kilomètre lent. Le trait vertical '
+    + 'est l’allure moyenne. Une dernière ligne grise est un kilomètre '
+    + 'incomplet, ramené au kilomètre.</div>';
 }
 
 /** Les deux moities, par distance et non par temps. C'est la question que se
@@ -604,11 +603,9 @@ function dynamique(s) {
       '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('')
       + '</div>';
   if (dispo.length)
-    h += '<div class="sp-l">Les cinq bandes sont la distribution que Garmin '
-      + 'publie sur l’ensemble de ses coureurs, pas une cible personnelle. Un '
-      + 'coureur grand et lourd n’a pas les mêmes valeurs qu’un coureur léger. '
-      + 'Ce qui compte ici est le sens dans lequel elles bougent chez toi, '
-      + 'séance après séance.</div>';
+    h += '<div class="sp-l">Les cinq bandes sont la distribution de tous les '
+      + 'coureurs Garmin, pas une cible : la taille et le poids les déplacent. '
+      + 'Regarde le sens dans lequel elles bougent chez toi.</div>';
   return h;
 }
 
@@ -822,15 +819,12 @@ function histoZones(s) {
     + Math.round(z.part * 100) + ' %<em>'
     + (z.secondes ? duree(z.secondes) : '0:00') + '</em></span>').join('')
     + '</div>';
-  h += '<div class="sp-l">Les bornes sont celles de ta Forerunner : 50, 60, '
-    + '70, 80 et 90 % d’une fréquence maximale de 200. Les temps sont '
-    + 'recalculés seconde par seconde et tombent sur ceux de la montre.'
-    + (hors >= 15 ? ' ' + duree(hors) + ' passées sous 101 bpm n’entrent dans '
-       + 'aucune zone, comme sur la montre.' : '')
-    + ' Les pourcentages, eux, peuvent différer d’un ou deux points : ils sont '
-    + 'calculés sur le temps réellement passé en zone, donc ils totalisent '
-    + '100, alors que la montre divise par la durée entière de l’activité.'
-    + '</div>';
+  h += '<div class="sp-l">Bornes de ta Forerunner : 50 à 90 % d’une FC max de '
+    + '200. Les temps tombent sur ceux de la montre.'
+    + (hors >= 15 ? ' ' + duree(hors) + ' sous 101 bpm sont hors zone, comme '
+       + 'sur la montre.' : '')
+    + ' Les pourcentages peuvent varier d’un point : ils totalisent 100 sur le '
+    + 'temps en zone, la montre divise par l’activité entière.</div>';
   return h;
 }
 
@@ -868,13 +862,18 @@ function resumeIA(s) {
     ['Est-ce conforme au plan ?', r.conformite],
     ['À quoi servait cette séance ?', r.objectif],
   ].filter(q => q[1]);
+  const detail = Q.map(q => '<div class="ia-q">' + q[0] + '</div>'
+    + '<div class="ia-r">' + q[1] + '</div>').join('');
   return '<div class="ia"><div class="ia-h"><span class="pill ' + cls + '">'
     + mot + '</span>'
     + (r.titre && r.titre !== 'Analyse automatique'
        ? '<span class="ia-t">' + r.titre + '</span>' : '')
     + '</div>'
-    + Q.map(q => '<div class="ia-q">' + q[0] + '</div><div class="ia-r">'
-      + q[1] + '</div>').join('')
+    // La ligne qui suffit. Le detail existe toujours, mais replie : la page
+    // doit se lire d'un coup d'oeil, pas se depouiller.
+    + (r.essentiel ? '<p class="ia-e">' + r.essentiel + '</p>' : '')
+    + (r.essentiel ? (detail ? bloc('Le détail', '', detail, false) : '')
+                   : detail)
     + '<div class="ia-s">' + src(r) + '</div></div>';
 }
 
@@ -1126,8 +1125,7 @@ function detailSeance(s) {
       + (w.adapte ? ' <b>Volume réécrit</b> à partir de ce que tu as fait, '
          + 'voir l’onglet Plan.' : '')
       + (w.note ? ' ' + w.note : '')
-      + ' Les allures viennent de ta calibration et se recalculent après chaque '
-      + 'course.'
+      + ' Les allures se recalculent après chaque course.'
       + ' <b>Les jours sont des suggestions.</b> Ce qui compte est l’espacement, '
       + 'pas le calendrier : fais les séances dans l’ordre que tu veux tant que '
       + 'la sortie longue garde 48 h de marge avec la séance exigeante.';
@@ -2073,7 +2071,9 @@ const BILAN_C = {
     + '<div class="ia-r">' + q[1] + '</div>').join('');
 
   let h = '<div class="ia"><div class="ia-h">' + pastilles(b)
-    + '<span class="ia-t">' + b.titre + '</span></div>' + corps(b)
+    + '<span class="ia-t">' + b.titre + '</span></div>'
+    + (b.essentiel ? '<p class="ia-e">' + b.essentiel + '</p>' : '')
+    + (b.essentiel ? bloc('Le détail', '', corps(b), false) : corps(b))
     + '<div class="ia-s">Rédigé par Claude sur cette machine'
     + (b.quand ? ' le ' + dshort(b.quand.slice(0, 10)) : '')
     + ', à partir des semaines terminées, des tendances sur 28 jours et des '
@@ -2091,10 +2091,11 @@ const BILAN_C = {
       const quand = x.quand ? dshort(x.quand.slice(0, 10)) : '';
       const [mot] = BILAN_V[x.verdict] || BILAN_V.conforme;
       const dedans = x.abrege
-        ? '<p class="hist-v">Le texte complet n’est plus conservé : au-delà '
-          + 'des huit derniers, seule la ligne de verdict est gardée pour ne '
-          + 'pas alourdir la page.</p>'
-        : '<div class="ia-h">' + pastilles(x) + '</div>' + corps(x);
+        ? (x.essentiel ? '<p class="ia-e">' + x.essentiel + '</p>' : '')
+          + '<p class="hist-v">Bilan ancien : seule cette ligne est gardée.</p>'
+        : '<div class="ia-h">' + pastilles(x) + '</div>'
+          + (x.essentiel ? '<p class="ia-e">' + x.essentiel + '</p>' : '')
+          + corps(x);
       return bloc(quand + ' · ' + (x.titre || ''), mot, dedans, false);
     }).join('');
   }
