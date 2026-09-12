@@ -548,7 +548,9 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   max-width:62ch;text-wrap:pretty}
 .card{background:none;border:0;border-top:1px solid var(--filet);
   border-radius:0;padding:var(--s4) 0 0;font-size:var(--t4);line-height:1.55;
-  color:var(--sourd);max-width:66ch}
+  color:var(--sourd)}
+/* Le filet va au bord comme les autres, le texte garde sa mesure. */
+.card-in{max-width:66ch}
 .card b{color:var(--encre);font-weight:600}
 .code{background:var(--creux);color:var(--encre);border-radius:var(--r1);
   border-left:3px solid var(--acier);padding:var(--s2) var(--s3);

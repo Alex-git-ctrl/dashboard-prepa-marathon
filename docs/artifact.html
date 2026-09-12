@@ -578,8 +578,11 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 
 .note{font-size:var(--t2);color:var(--acier);margin-top:var(--s4);
   line-height:1.5;max-width:62ch;text-wrap:pretty}
-.card{font-size:var(--t4);line-height:1.5;color:var(--sourd);max-width:64ch;
+.card{font-size:var(--t4);line-height:1.5;color:var(--sourd);
   letter-spacing:-.022em}
+/* La boite va au bord comme les autres, c'est le texte qui garde sa
+   mesure : une ligne de 90 signes ne se lit pas. */
+.card-in{max-width:64ch}
 .card b{color:var(--encre);font-weight:600}
 .code{background:var(--creux);color:var(--encre);border-radius:var(--r1);
   padding:var(--s3) var(--s4);margin-top:var(--s3);font-family:var(--mono);
@@ -881,7 +884,7 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
       <p class="note" id="sea-n"></p></div>
     <div class="sec"><h2>Jours sans course</h2><div id="journal"></div></div>
     <div class="sec"><h2>Comment remplir le journal</h2>
-      <div class="card" id="howto"></div></div>
+      <div class="card"><div class="card-in" id="howto"></div></div></div>
   </section>
 
   <section class="tab" id="t-data" role="tabpanel" aria-labelledby="b-data">
@@ -889,12 +892,12 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
     <p class="lede">D'où viennent les chiffres, ce qui arrive réellement de la
       montre, et sur quoi repose la projection de chrono.</p>
     <div class="sec"><h2>L'objectif est-il atteignable ?</h2>
-      <div class="card" id="verdict"></div></div>
+      <div class="card"><div class="card-in" id="verdict"></div></div></div>
     <div class="sec"><h2>Le raisonnement</h2><div class="list" id="vrows"></div></div>
     <div class="sec"><h2>Ce que la montre remonte</h2><div class="list" id="cover"></div></div>
     <div class="sec"><h2>Commandes</h2><div id="cmd"></div>
       <p class="note" id="cmd-n"></p></div>
-    <div class="sec"><h2>Confidentialité</h2><div class="card" id="priv"></div></div>
+    <div class="sec"><h2>Confidentialité</h2><div class="card"><div class="card-in" id="priv"></div></div></div>
   </section>
 </main>
 
