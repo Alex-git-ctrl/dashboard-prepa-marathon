@@ -2073,9 +2073,39 @@ $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées
 
   const lien = a => 'https://github.com/' + DEPOT + '/actions/workflows/' + a.id;
 
+  /** Le compte rendu de la derniere tache planifiee.
+
+      Une tache qui tourne a 23h pendant qu'on dort ne dit rien d'elle-meme :
+      sans cette ligne, la seule facon de savoir si elle a tourne serait
+      d'ouvrir l'observateur de taches de Windows. */
+  function derniereMaj() {
+    const J = M.maj_locale;
+    if (!J || !J.quand) return '<div class="act-j">La mise à jour '
+      + 'automatique de 23h n’a pas encore tourné.</div>';
+    const d = new Date(J.quand);
+    const jours = Math.round((new Date(today.getFullYear(), today.getMonth(),
+      today.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate()))
+      / 86400000);
+    const quand = jours === 0 ? "aujourd’hui" : jours === 1 ? 'hier'
+      : 'il y a ' + jours + ' jours';
+    const heure = String(d.getHours()).padStart(2, '0') + 'h'
+      + String(d.getMinutes()).padStart(2, '0');
+    const n = J.analyses_redigees || 0;
+    return '<div class="act-j' + (J.etat === 'ok' ? '' : ' ko') + '">'
+      + (J.etat === 'ok' ? 'Dernière mise à jour automatique ' : 'Dernière '
+         + 'tentative de mise à jour ')
+      + quand + ' à ' + heure
+      + (J.etat === 'ok'
+         ? ', en ' + Math.round(J.secondes) + ' s'
+           + (n ? ', ' + n + ' analyse' + (n > 1 ? 's' : '') + ' rédigée'
+                + (n > 1 ? 's' : '') : ', aucune analyse à écrire')
+         : ' : échec sur « ' + (J.detail || 'une étape') + ' »')
+      + '.</div>';
+  }
+
   function dessine() {
     const armee = !!jeton();
-    $('cmd').innerHTML = '<div class="act">' + ACTIONS.map((a, i) =>
+    $('cmd').innerHTML = derniereMaj() + '<div class="act">' + ACTIONS.map((a, i) =>
       '<div class="act-r"><div class="act-k"><div class="act-t">' + a.nom
       + '</div><div class="act-s">' + a.desc + '</div>'
       + '<div class="act-e" data-etat="' + i + '"></div></div>'

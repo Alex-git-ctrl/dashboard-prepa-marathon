@@ -678,6 +678,9 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 /* ---------- commandes ----------
    Deux actions qui vivent hors de la page. Elles ont le droit d'etre des
    objets fermes : ce sont des choses sur lesquelles on appuie. */
+.act-j{font-size:var(--t2);color:var(--acier);margin-bottom:var(--s3);
+  line-height:1.45;max-width:60ch;text-wrap:pretty}
+.act-j.ko{color:var(--alerte)}
 .act{display:flex;flex-direction:column;border-top:1px solid var(--filet)}
 .act-r{border-bottom:1px solid var(--filet);padding:var(--s4) 0;display:flex;
   align-items:center;justify-content:space-between;gap:var(--s4);
