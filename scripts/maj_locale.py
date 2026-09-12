@@ -35,6 +35,22 @@ PY = sys.executable
 
 
 JOURNAL = []
+# Combien d'analyses redigees avant et apres l'etape de redaction. Compter
+# l'ETAPE ne dit rien : elle reussit aussi quand il n'y avait rien a ecrire,
+# et la page annoncait alors "1 analyse redigee" sur un passage a vide.
+ANALYSES = {}
+
+
+def compte_analyses():
+    """Le nombre de seances portant une analyse redigee, pas mecanique."""
+    import json
+    try:
+        with open(os.path.join(ROOT, "docs", "resumes.json"),
+                  encoding="utf-8") as fh:
+            return sum(1 for v in json.load(fh).values()
+                       if v.get("source") in ("claude", "claude_conversation"))
+    except (OSError, ValueError):
+        return 0
 
 
 def etape(titre, cmd, obligatoire=True, cwd=ROOT):
@@ -78,8 +94,7 @@ def ecris_journal(etat, detail=None):
             m = json.load(fh)
     except (OSError, ValueError):
         return
-    redigees = sum(1 for e in JOURNAL
-                   if e["etape"].startswith("Rediger") and e["ok"])
+    redigees = ANALYSES.get("apres", 0) - ANALYSES.get("avant", 0)
     m["maj_locale"] = {
         "quand": datetime.now().isoformat(timespec="seconds"),
         "etat": etat,
@@ -130,8 +145,10 @@ def main():
     # La seule etape qui a besoin de la session Claude de cette machine. Si le
     # binaire manque, le script le dit et l'enchainement continue : une page
     # sans analyse redigee vaut mieux qu'une page pas reconstruite.
+    ANALYSES["avant"] = compte_analyses()
     etape("Rediger les analyses manquantes",
           [PY, "scripts/resume.py", "--auto"], obligatoire=False)
+    ANALYSES["apres"] = compte_analyses()
 
     # Avant la reconstruction : la page inline metrics.json, donc le compte
     # rendu doit y etre AVANT que build_site ne la fabrique.
