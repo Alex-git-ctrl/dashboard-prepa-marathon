@@ -15,12 +15,11 @@ jour quand l'ordinateur est allume, pas a heure fixe.
   python scripts/maj_locale.py --resumes   # seulement les analyses
 
 Pour le rendre automatique, une tache planifiee suffit. La forme ci-dessous
-se declenche a l'ouverture de session et rattrape les jours ou la machine
-etait eteinte :
+tourne tous les soirs a 23h :
 
   schtasks /Create /TN "Sub4 marathon" /TR "\\"%LOCALAPPDATA%\\..\\..\\
     OneDrive\\Documents\\Claude\\Projects\\Sport\\scripts\\maj_locale.cmd\\""
-    /SC DAILY /ST 20:00 /F
+    /SC DAILY /ST 23:00 /F
 
 Le fichier maj_locale.cmd, a cote, fait le meme travail en un double-clic.
 """
@@ -35,8 +34,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
 
 
+JOURNAL = []
+
+
 def etape(titre, cmd, obligatoire=True, cwd=ROOT):
-    """Une etape de l'enchainement. Renvoie True si elle a abouti."""
+    """Une etape de l'enchainement. Renvoie True si elle a abouti.
+
+    Chaque passage laisse une trace dans JOURNAL : sans ca, une tache qui
+    tourne a 23h pendant qu'on dort ne dit jamais ce qu'elle a fait, ni si
+    elle a seulement tourne.
+    """
     # flush explicite : sans lui, la sortie du parent est mise en tampon quand
     # elle ne va pas vers un terminal, et le journal d'une tache planifiee
     # affiche les etapes APRES le texte des commandes qu'elles lancent.
@@ -44,13 +51,45 @@ def etape(titre, cmd, obligatoire=True, cwd=ROOT):
     t0 = time.time()
     r = subprocess.run(cmd, cwd=cwd)
     d = time.time() - t0
+    JOURNAL.append({"etape": titre, "secondes": round(d, 1),
+                    "ok": r.returncode == 0, "code": r.returncode})
     if r.returncode == 0:
         print("   ok en %.0f s" % d, flush=True)
         return True
     if obligatoire:
+        ecris_journal("echec", titre)
         sys.exit("   echec (code %d). On s'arrete ici." % r.returncode)
     print("   ignoree (code %d)." % r.returncode, flush=True)
     return False
+
+
+def ecris_journal(etat, detail=None):
+    """Range le compte rendu dans metrics.json, que la page inline au build.
+
+    Un fichier a part obligerait a inventer un troisieme emplacement dans le
+    gabarit. metrics.json est deja transporte jusqu'a la page : le compte
+    rendu voyage avec.
+    """
+    import json
+    from datetime import datetime
+    chemin = os.path.join(ROOT, "docs", "metrics.json")
+    try:
+        with open(chemin, encoding="utf-8") as fh:
+            m = json.load(fh)
+    except (OSError, ValueError):
+        return
+    redigees = sum(1 for e in JOURNAL
+                   if e["etape"].startswith("Rediger") and e["ok"])
+    m["maj_locale"] = {
+        "quand": datetime.now().isoformat(timespec="seconds"),
+        "etat": etat,
+        "detail": detail,
+        "secondes": round(sum(e["secondes"] for e in JOURNAL), 1),
+        "analyses_redigees": redigees,
+        "etapes": JOURNAL,
+    }
+    with open(chemin, "w", encoding="utf-8") as fh:
+        json.dump(m, fh, ensure_ascii=False, separators=(",", ":"))
 
 
 def git(*args):
@@ -94,6 +133,9 @@ def main():
     etape("Rediger les analyses manquantes",
           [PY, "scripts/resume.py", "--auto"], obligatoire=False)
 
+    # Avant la reconstruction : la page inline metrics.json, donc le compte
+    # rendu doit y etre AVANT que build_site ne la fabrique.
+    ecris_journal("ok")
     etape("Reconstruire la page", [PY, "scripts/build_site.py"])
 
     if args.sans_git:
@@ -118,10 +160,29 @@ def main():
         return
     p = git("push", "--quiet")
     if p.returncode != 0:
-        print("   echec de la publication :")
-        print("   " + (p.stderr or "").strip()[:300])
-        print("   Le commit est fait. Relance : git pull --rebase && git push")
-        return
+        # La collecte automatique peut avoir pousse entre le rattrapage du
+        # debut et maintenant. Un rejet n'est donc pas une erreur, c'est une
+        # course : on se remet a jour et on retente une fois.
+        print("   rejete, la collecte automatique est passee entre-temps.")
+        r = git("pull", "--rebase", "--quiet")
+        if r.returncode != 0:
+            print("   rattrapage impossible :")
+            print("   " + (r.stderr or "").strip()[:300])
+            print("   Le commit est fait, rien n'est perdu.")
+            return
+        # Le rebase rejoue notre commit sur des donnees plus fraiches : la
+        # page doit etre refaite avant d'etre publiee.
+        subprocess.run([PY, "scripts/build_site.py"], cwd=ROOT,
+                       capture_output=True)
+        if git("status", "--porcelain", "docs/").stdout.strip():
+            git("add", "docs/")
+            git("commit", "--quiet", "--amend", "--no-edit")
+        p = git("push", "--quiet")
+        if p.returncode != 0:
+            print("   echec de la publication :")
+            print("   " + (p.stderr or "").strip()[:300])
+            print("   Le commit est fait. Relance : git pull --rebase && git push")
+            return
     print("   publie. La page sera en ligne dans une minute environ.")
 
 
