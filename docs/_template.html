@@ -1705,23 +1705,44 @@ function nuits(box) {
           fill="${couleurNuit(j.sommeil_score)}"/>`;
       });
     } else {
-      const segs = []; let cur = [];
+      // Une nuit sans montre coupait la courbe en deux et laissait un vide
+      // au milieu du panneau. Les points se rejoignent maintenant quel que
+      // soit l'ecart, mais le segment qui enjambe le trou est en pointille :
+      // la ligne redevient continue sans faire croire a une mesure. Les
+      // points isoles, qui disparaissaient completement, sont gardes.
+      const pts = [];
       J.forEach((j, i) => {
         const v = j[p.cle];
-        if (v == null) { if (cur.length > 1) segs.push(cur); cur = []; return; }
-        cur.push([cx(i), p.Y(v)]);
+        if (v != null) pts.push([cx(i), p.Y(v), i]);
       });
-      if (cur.length > 1) segs.push(cur);
-      segs.forEach(sg => {
-        const pts = sg.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
-        g += `<path d="M${sg[0][0].toFixed(1)},${bas} L${pts.replace(/ /g, ' L')}`
-          + ` L${sg[sg.length - 1][0].toFixed(1)},${bas} Z" class="aire"
-            fill="${p.col}" fill-opacity=".13" stroke="none"/>`
-          + `<polyline class="trait" points="${pts}" fill="none" stroke="${p.col}"
-            stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>`;
-        sg.forEach(q => { g += `<circle class="pt" cx="${q[0].toFixed(1)}"
-          cy="${q[1].toFixed(1)}" r="2.6" fill="${p.col}"/>`; });
-      });
+      const xy = q => q[0].toFixed(1) + ',' + q[1].toFixed(1);
+      if (pts.length > 1) {
+        const suite = pts.map(xy).join(' ');
+        g += `<path d="M${pts[0][0].toFixed(1)},${bas} L`
+          + pts.map(xy).join(' L')
+          + ` L${pts[pts.length - 1][0].toFixed(1)},${bas} Z" class="aire"
+            fill="${p.col}" fill-opacity=".13" stroke="none"/>`;
+        // Le pointille passe partout, le trait plein le recouvre exactement
+        // la ou les nuits se suivent. Ne reste visible en pointille que ce
+        // qui n'a pas ete mesure.
+        g += `<polyline class="trait" points="${suite}" fill="none"
+          stroke="${p.col}" stroke-width="1.9" stroke-linejoin="round"
+          stroke-linecap="round" stroke-dasharray="4 3"/>`;
+        let cur = [pts[0]];
+        const pleins = [];
+        for (let k = 1; k < pts.length; k++) {
+          if (pts[k][2] === pts[k - 1][2] + 1) cur.push(pts[k]);
+          else { if (cur.length > 1) pleins.push(cur); cur = [pts[k]]; }
+        }
+        if (cur.length > 1) pleins.push(cur);
+        pleins.forEach(sg => {
+          g += `<polyline class="trait" points="${sg.map(xy).join(' ')}"
+            fill="none" stroke="${p.col}" stroke-width="1.9"
+            stroke-linejoin="round" stroke-linecap="round"/>`;
+        });
+      }
+      pts.forEach(q => { g += `<circle class="pt" cx="${q[0].toFixed(1)}"
+        cy="${q[1].toFixed(1)}" r="2.6" fill="${p.col}"/>`; });
     }
 
     const haut = p.inv ? p.mn : p.mx, low = p.inv ? p.mx : p.mn;
