@@ -1,1 +1,35 @@
-{"2026-09-05":{"verdict":"correct","titre":"Sortie vallonnée, hors plan","essentiel":"179 m de D+ sur 5,6 km : allure ajustée à 6:04/km, dans le bas de la fourchette endurance fondamentale (6:03-6:42).","execution":"FC moyenne 147, dérive cardiaque à -1,1 % donc pas de dérive malgré le relief. 25 % du temps en Z4 pour un effort perçu de 4/10 seulement, logique vu les 179 m de D+ ; deuxième moitié quasi stable (7:04 vs 6:59).","conformite":"Le plan démarre le 7 septembre : cette séance du 5 septembre est hors plan, rien à comparer.","objectif":"Sortie d'endurance sur terrain vallonné avant le début de la préparation : rôle rempli, allure ajustée cohérente et cardio maîtrisé malgré le dénivelé.","source":"claude_conversation","fige":true,"date_redaction":"2026-09-12"},"2026-09-09":{"verdict":"attention","titre":"Facile mais allure trop vive","essentiel":"Tu as couru à 5:58/km alors que ton endurance fondamentale vise 6:03-6:42 : allure trop vive pour une sortie facile.","execution":"FC moyenne à 143 avec une dérive de 7.4 % sur seulement 36 minutes, c'est haut pour un effort ressenti à 3/10. Tu as fini plus vite qu'au départ (6:21 puis 5:56), et 79 % du temps s'est passé en Z3 au lieu de Z2.","conformite":"Le plan ne précise rien pour cette séance précise, mais ses 6.11 km s'inscrivent dans l'objectif de 19.5 km de la semaine 1.","objectif":"Cette sortie devait construire de l'endurance en Z2 facile, et l'allure trop rapide t'a poussé en Z3 la majorité du temps.","source":"claude_conversation","fige":true,"date_redaction":"2026-09-12"},"2026-09-11":{"verdict":"correct","titre":"Allure correcte, cœur trop sollicité","essentiel":"FC à 147 (85 % du temps en Z3) alors que l'allure de 6:09/km visait un fondamental en Z2.","execution":"Allure de 6:09/km, bien dans la fourchette fondamentale (6:03 à 6:42). Mais négative split (6:18 puis 6:00/km) avec 8 % de dérive cardiaque : tu accélères alors que le cœur dérive déjà.","conformite":"Volume déjà à 21,75 km cette semaine (5,62 + 6,11 + 10,02) contre un objectif de 19,5 km, dès la semaine 1.","objectif":"Séance de base aérobie pour construire du volume à FC basse : le cœur reste 85 % du temps en Z3, objectif partiellement rempli.","source":"claude_conversation","fige":true,"date_redaction":"2026-09-12"}}
+{
+  "2026-09-05": {
+    "verdict": "correct",
+    "titre": "Sortie vallonnée, hors plan",
+    "essentiel": "179 m de D+ sur 5,6 km : allure ajustée à 6:04/km, dans le bas de la fourchette endurance fondamentale (6:03-6:42).",
+    "execution": "FC moyenne 147, dérive cardiaque à -1,1 % donc pas de dérive malgré le relief. 25 % du temps en Z4 pour un effort perçu de 4/10 seulement, logique vu les 179 m de D+ ; deuxième moitié quasi stable (7:04 vs 6:59).",
+    "conformite": "Le plan démarre le 7 septembre : cette séance du 5 septembre est hors plan, rien à comparer.",
+    "objectif": "Sortie d'endurance sur terrain vallonné avant le début de la préparation : rôle rempli, allure ajustée cohérente et cardio maîtrisé malgré le dénivelé.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-12"
+  },
+  "2026-09-09": {
+    "verdict": "attention",
+    "titre": "Facile mais allure trop vive",
+    "essentiel": "Tu as couru à 5:58/km alors que ton endurance fondamentale vise 6:03-6:42 : allure trop vive pour une sortie facile.",
+    "execution": "FC moyenne à 143 avec une dérive de 7.4 % sur seulement 36 minutes, c'est haut pour un effort ressenti à 3/10. Tu as fini plus vite qu'au départ (6:21 puis 5:56), et 79 % du temps s'est passé en Z3 au lieu de Z2.",
+    "conformite": "Le plan ne précise rien pour cette séance précise, mais ses 6.11 km s'inscrivent dans l'objectif de 19.5 km de la semaine 1.",
+    "objectif": "Cette sortie devait construire de l'endurance en Z2 facile, et l'allure trop rapide t'a poussé en Z3 la majorité du temps.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-12"
+  },
+  "2026-09-11": {
+    "verdict": "correct",
+    "titre": "Allure correcte, cœur trop sollicité",
+    "essentiel": "FC à 147 (85 % du temps en Z3) alors que l'allure de 6:09/km visait un fondamental en Z2.",
+    "execution": "Allure de 6:09/km, bien dans la fourchette fondamentale (6:03 à 6:42). Mais négative split (6:18 puis 6:00/km) avec 8 % de dérive cardiaque : tu accélères alors que le cœur dérive déjà.",
+    "conformite": "Volume déjà à 21,75 km cette semaine (5,62 + 6,11 + 10,02) contre un objectif de 19,5 km, dès la semaine 1.",
+    "objectif": "Séance de base aérobie pour construire du volume à FC basse : le cœur reste 85 % du temps en Z3, objectif partiellement rempli.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-12"
+  }
+}
