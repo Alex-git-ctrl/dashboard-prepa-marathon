@@ -21,13 +21,11 @@ le fichier envoye a Garmin.
 JOUR_S1, JOUR_S2, JOUR_LONGUE = "mardi", "jeudi", "samedi"
 JOUR_RENFO = ("mercredi", "vendredi")
 
-LIBRE = ("libre", "N'importe quel jour, c'est une séance facile.")
+LIBRE = ("libre", None)
 ESPACEE = ("espacee", "Au moins 48 h avant ou après la sortie longue.")
-LONGUE = ("espacee", "Au moins 48 h après la séance de qualité. "
-                     "C'est la seule séance qui demande vraiment un créneau.")
-RENFO_SOUPLESSE = ("libre", "N'importe quel jour, mais pas la veille de la "
-                            "sortie longue : les bras fatigués passent, les "
-                            "abdominaux courbaturés non.")
+LONGUE = ("espacee", "Au moins 48 h après la séance de qualité.")
+RENFO_SOUPLESSE = ("libre", "N'importe quel jour, sauf la veille de la "
+                            "sortie longue.")
 
 ECHAUFFEMENT_S = 600     # 10 min avant une seance de qualite
 RETOUR_S = 600           # 10 min apres
@@ -37,20 +35,19 @@ RETOUR_S = 600           # 10 min apres
 QUALITE = {
     5:  {"nom": "3 × 6 min à allure semi", "reps": 3, "effort_s": 360,
          "recup_s": 120, "zone": "semi",
-         "pourquoi": "Première séance au-dessus de l'endurance. Elle habitue "
-                     "la foulée au rythme du semi sans coûter de récupération."},
+         "pourquoi": "Habitue la foulée au rythme du semi, sans coûter "
+                     "de récupération."},
     13: {"nom": "2 × 15 min à allure marathon", "reps": 2, "effort_s": 900,
          "recup_s": 180, "zone": "marathon",
-         "pourquoi": "L'allure marathon doit devenir un automatisme. Quinze "
-                     "minutes suffisent pour l'installer sans fatiguer."},
+         "pourquoi": "Installe l'allure marathon comme un automatisme."},
     17: {"nom": "3 × 10 min au seuil", "reps": 3, "effort_s": 600,
          "recup_s": 180, "zone": "seuil",
-         "pourquoi": "Le seuil relève le plafond. C'est lui qui rend l'allure "
-                     "marathon plus confortable ensuite."},
+         "pourquoi": "Le seuil relève le plafond : l'allure marathon "
+                     "devient plus confortable."},
     26: {"nom": "4 × 3 min à allure marathon", "reps": 4, "effort_s": 180,
          "recup_s": 90, "zone": "marathon",
-         "pourquoi": "Affûtage : on rappelle l'allure aux jambes, on ne "
-                     "construit plus rien."},
+         "pourquoi": "Affûtage : on rappelle l'allure aux jambes, rien de "
+                     "plus."},
 }
 
 # Sorties longues qui se terminent plus vite que leur debut.
@@ -97,66 +94,53 @@ PHASES = [
     {
         "jusqu_a": 9,
         "nom": "Fondations",
-        "quoi": "Neuf semaines pour construire du volume propre. Aucune "
-                "compétence nouvelle ne tient sans une base de tractions et "
-                "de dips stricts derrière.",
+        "quoi": "Neuf semaines de volume propre : rien ne tient sans "
+                "tractions et dips stricts.",
         "seances": [
             {
                 "nom": "Tirage et gainage",
-                "pourquoi": "Le dos et la ceinture abdominale tiennent la "
-                            "posture quand la fatigue arrive au 30e "
-                            "kilomètre. Ils portent aussi tout le reste de "
-                            "la calisthénie.",
+                "pourquoi": "Le dos et la ceinture tiennent la posture quand "
+                            "la fatigue arrive.",
                 "exos": [
                     _ex("Tractions strictes", "5 séries, 2 répétitions de réserve",
-                        "Départ bras tendus, menton au-dessus de la barre, "
-                        "aucun balancement.",
-                        "Quand 5 × 8 passent proprement, ajoute 5 kg."),
+                        "Bras tendus en bas, menton au-dessus, aucun balancement.",
+                        "5 × 8 propres : ajoute 5 kg."),
                     _ex("Tractions australiennes lentes", "3 × 10",
-                        "Trois secondes de descente. Corps aligné des talons "
-                        "à la nuque.",
-                        "Pieds surélevés quand 3 × 12 passent sans à-coup."),
+                        "Trois secondes de descente, corps aligné.",
+                        "3 × 12 sans à-coup : pieds surélevés."),
                     _ex("Suspension à la barre", "3 × 45 s",
-                        "Épaules actives, pas pendues dans le vide. C'est ce "
-                        "qui prépare les coudes au muscle-up.",
-                        "60 s, puis suspension à un bras en alternance."),
+                        "Épaules actives, jamais pendues dans le vide.",
+                        "60 s, puis un bras en alternance."),
                     _ex("Hollow body", "3 × 30 s",
-                        "Bas du dos plaqué au sol. Si il décolle, remonte les "
-                        "jambes.",
-                        "Bras tendus au-dessus de la tête quand 45 s passent."),
+                        "Bas du dos plaqué. S'il décolle, remonte les jambes.",
+                        "45 s : bras tendus au-dessus de la tête."),
                     _ex("Gainage latéral", "3 × 40 s par côté",
                         "Bassin haut, épaule à l'aplomb du coude."),
                 ],
             },
             {
                 "nom": "Poussée et équilibre",
-                "pourquoi": "Les dips et l'ATR construisent la poussée "
-                            "verticale. L'équilibre sur les mains est une "
-                            "compétence de répétition : c'est la fréquence "
-                            "qui la donne, pas l'intensité.",
+                "pourquoi": "Poussée verticale. L'ATR vient de la fréquence, "
+                            "pas de l'intensité.",
                 "exos": [
                     _ex("Dips aux barres parallèles", "4 × 8",
-                        "Descente jusqu'à ce que le bras casse l'angle droit, "
-                        "buste légèrement penché.",
-                        "Lest de 5 kg quand 4 × 10 passent."),
+                        "Descends sous l'angle droit, buste légèrement penché.",
+                        "4 × 10 : lest de 5 kg."),
                     _ex("Pompes déclinées", "3 × 12",
                         "Pieds surélevés d'environ 40 cm, corps en planche.",
-                        "Passe aux pompes pseudo-planche, mains à hauteur de "
-                        "hanches."),
+                        "Puis pseudo-planche, mains à hauteur de hanches."),
                     _ex("ATR face au mur", "5 × 30 s",
-                        "Ventre au mur, mains à 15 cm du mur. C'est la "
-                        "position qui apprend l'alignement, pas la banane.",
+                        "Ventre au mur, mains à 15 cm. Alignement, pas banane.",
                         "Décolle un pied, puis alterne les deux."),
                     _ex("Pike push-ups", "3 × 8",
                         "Bassin haut, tête entre les bras, front vers le sol.",
                         "Pieds surélevés, puis pompes ATR au mur."),
                     _ex("L-sit", "4 × 20 s",
-                        "Aux barres ou au sol. Genoux groupés si les jambes "
-                        "tendues font arrondir le dos.",
+                        "Genoux groupés si le dos s'arrondit.",
                         "30 s groupé, puis jambes tendues."),
                     _ex("Mollets debout", "3 × 15",
-                        "Le seul travail de jambes du programme. Il protège "
-                        "le tendon d'Achille du volume qui arrive."),
+                        "Le seul travail de jambes : il protège le tendon "
+                        "d'Achille."),
                 ],
             },
         ],
@@ -164,70 +148,57 @@ PHASES = [
     {
         "jusqu_a": 19,
         "nom": "Force et compétences",
-        "quoi": "Le volume de base est là. Dix semaines pour attaquer "
-                "vraiment le muscle-up et l'ATR libre, pendant que la course "
-                "monte de son côté.",
+        "quoi": "Dix semaines sur le muscle-up et l'ATR libre, pendant "
+                "que la course monte.",
         "seances": [
             {
                 "nom": "Vers le muscle-up",
-                "pourquoi": "Le muscle-up ne s'obtient pas en faisant plus de "
-                            "tractions. Il demande de la hauteur, une "
-                            "transition apprise à part, et un dos capable de "
-                            "tenir le corps horizontal.",
+                "pourquoi": "Pas plus de tractions : de la hauteur, une "
+                            "transition apprise à part, un dos horizontal.",
                 "exos": [
                     _ex("Tractions lestées", "5 × 5, 1 répétition de réserve",
-                        "Le lest est là pour rendre la traction à vide facile, "
-                        "pas pour battre un record.",
-                        "Ajoute 2,5 kg quand les 5 séries passent sans "
-                        "ralentir."),
+                        "Le lest rend la traction à vide facile, rien de plus.",
+                        "5 séries sans ralentir : ajoute 2,5 kg."),
                     _ex("Tractions explosives", "5 × 3",
-                        "Tirer le plus haut possible, poitrine vers la barre. "
-                        "Repos complet entre les séries.",
-                        "Quand la barre touche le bas du sternum, tu as la "
-                        "hauteur du muscle-up."),
+                        "Le plus haut possible, poitrine vers la barre. Repos "
+                        "complet.",
+                        "Barre au bas du sternum : tu as la hauteur."),
                     _ex("Négatifs de muscle-up", "4 × 3",
-                        "Départ en appui bras tendus sur la barre, descente en "
-                        "5 secondes en repassant la transition.",
-                        "Quand la descente est contrôlée sur les 3, tente le "
-                        "mouvement complet avec une légère impulsion."),
+                        "Départ en appui bras tendus, descente en 5 secondes.",
+                        "Les 3 contrôlés : tente le mouvement complet."),
                     _ex("Front lever groupé", "5 × 15 s",
                         "Bras tendus, dos rond, bassin à hauteur des épaules.",
                         "Une jambe tendue, puis demi-écart, puis jambes "
                         "tendues."),
                     _ex("Rowing inversé pieds surélevés", "3 × 10",
-                        "Il construit le dos horizontal, ce que la traction "
-                        "verticale ne fait pas."),
+                        "Le dos horizontal, que la traction verticale ne "
+                        "travaille pas."),
                 ],
             },
             {
                 "nom": "Vers l'ATR libre",
-                "pourquoi": "L'équilibre sur les mains se joue aux poignets et "
-                            "aux doigts, pas dans les épaules. Le mur sert à "
-                            "installer l'alignement, puis il faut le quitter.",
+                "pourquoi": "L'équilibre se joue aux poignets, pas aux "
+                            "épaules. Le mur s'installe, puis se quitte.",
                 "exos": [
                     _ex("Dips lestés", "4 × 6",
-                        "Même règle que la traction : le lest doit rendre le "
-                        "poids de corps facile.",
-                        "Ajoute 2,5 kg quand 4 × 8 passent."),
+                        "Comme la traction : le poids de corps doit rester "
+                        "facile.",
+                        "4 × 8 : ajoute 2,5 kg."),
                     _ex("ATR dos au mur", "5 × 40 s",
-                        "Talons au mur, mains éloignées, corps aligné. Cherche "
-                        "à décoller les talons.",
-                        "Éloigne les mains de 10 cm à chaque fois que 40 s "
-                        "passent, puis lâche un appui."),
+                        "Talons au mur, corps aligné. Cherche à décoller les "
+                        "talons.",
+                        "40 s tenues : éloigne les mains de 10 cm."),
                     _ex("Pompes ATR au mur", "4 × 5",
-                        "Face au mur, descente jusqu'à ce que la tête frôle le "
-                        "sol.",
-                        "Mains surélevées sur des cales pour gagner "
-                        "l'amplitude."),
+                        "Face au mur, tête qui frôle le sol.",
+                        "Mains sur des cales pour gagner l'amplitude."),
                     _ex("Pompes pseudo-planche", "3 × 8",
-                        "Mains à hauteur de hanches, coudes le long du corps, "
-                        "épaules devant les mains."),
+                        "Mains aux hanches, coudes au corps, épaules devant."),
                     _ex("L-sit", "4 × 30 s",
                         "Jambes tendues, pointes de pieds tirées.",
-                        "Passe au V-sit quand 40 s tiennent."),
+                        "40 s tenues : passe au V-sit."),
                     _ex("Ischios nordiques", "3 × 6",
-                        "Descente freinée. Protège l'ischio, qui est le muscle "
-                        "qui lâche sur les sorties longues."),
+                        "Descente freinée. C'est l'ischio qui lâche sur les "
+                        "sorties longues."),
                 ],
             },
         ],
@@ -235,37 +206,32 @@ PHASES = [
     {
         "jusqu_a": 99,
         "nom": "Entretien",
-        "quoi": "La course prend toute la priorité : sortie longue à 30 km, "
-                "test 30K, puis affûtage. Ici on ne construit plus rien, on "
-                "garde ce qui a été acquis avec le minimum de fatigue.",
+        "quoi": "La course prend la priorité. On garde l'acquis, on ne "
+                "construit plus.",
         "seances": [
             {
                 "nom": "Entretien tirage",
-                "pourquoi": "Deux séances légères par semaine suffisent à "
-                            "conserver la force. Chercher à progresser "
-                            "maintenant coûterait des jambes lourdes le "
-                            "dimanche.",
+                "pourquoi": "Conserver, pas progresser : progresser coûterait "
+                            "des jambes lourdes le dimanche.",
                 "exos": [
                     _ex("Tractions strictes", "4 × 5",
-                        "Sans lest, sans aller à l'échec. Tu dois sortir de la "
-                        "série en pouvant en faire trois de plus."),
+                        "Sans lest. Sors de la série avec trois répétitions en "
+                        "réserve."),
                     _ex("Front lever groupé", "4 × 15 s",
                         "Entretien de la compétence, pas de progression."),
                     _ex("Hollow body", "3 × 30 s",
-                        "Le gainage reste utile jusqu'au dernier jour : c'est "
-                        "lui qui tient la posture au 35e kilomètre."),
+                        "Il tient la posture au 35e kilomètre."),
                 ],
             },
             {
                 "nom": "Entretien poussée",
-                "pourquoi": "Même logique : maintenir l'ATR par la fréquence, "
-                            "sans jamais chercher la fatigue.",
+                "pourquoi": "Maintenir l'ATR par la fréquence, sans chercher "
+                            "la fatigue.",
                 "exos": [
                     _ex("Dips", "4 × 6",
                         "Poids de corps uniquement."),
                     _ex("ATR dos au mur", "4 × 30 s",
-                        "C'est la répétition qui garde l'équilibre, pas la "
-                        "durée."),
+                        "La répétition garde l'équilibre, pas la durée."),
                     _ex("L-sit", "3 × 20 s"),
                     _ex("Gainage latéral", "3 × 45 s par côté"),
                 ],
@@ -295,24 +261,23 @@ def calisthenie(w):
     # La consigne de la semaine, dans l'ordre ou elle prime : une course
     # passe avant l'affutage, qui passe avant une simple decharge.
     if w.get("type") == "COURSE":
-        consigne = ("Une course est prévue cette semaine. Rien ici dans les "
-                    "deux jours qui la précèdent, et rien qui laisse des "
-                    "courbatures.")
+        consigne = ("Course cette semaine : rien dans les deux jours qui "
+                    "la précèdent, rien qui laisse des courbatures.")
     elif affutage:
-        consigne = ("Dernière ligne droite avant Barcelone : une seule séance, "
-                    "à volume réduit. On ne construit plus, on entretient.")
+        consigne = ("Dernière ligne droite : une seule séance, à volume "
+                    "réduit.")
     elif allege:
-        consigne = ("Semaine allégée côté course : retire une série à chaque "
-                    "exercice ici aussi. Deux charges qui montent ensemble, "
-                    "c'est une blessure.")
+        consigne = ("Semaine allégée : retire une série à chaque exercice "
+                    "ici aussi.")
     else:
         consigne = None
 
     out = []
     for s in seances:
-        note = "Phase « %s ». %s" % (ph["nom"], ph["quoi"])
-        if consigne:
-            note += " " + consigne
+        # La phase est deja nommee dans l'en-tete de la carte et son
+        # intention est rappelee une seule fois au-dessus du programme.
+        # Ne reste donc ici que ce qui demande une decision cette semaine.
+        note = consigne
         out.append({"type": "renfo", "nom": s["nom"], "discipline": "calisthénie",
                     "phase": ph["nom"], "pourquoi": s["pourquoi"],
                     "exos": s["exos"], "note": note,
@@ -354,13 +319,11 @@ def _etape(nom, zones, cle, duree_s=None, distance_m=None, consigne=None):
 def _endurance(minutes, zones, nom="Endurance fondamentale"):
     return {
         "type": "course", "nom": nom, "duree_min": minutes,
-        "pourquoi": "La séance qui construit la base aérobie : plus de "
-                    "capillaires, un cœur qui remplit mieux, une meilleure "
-                    "utilisation des graisses. Elle ne vaut que si elle reste "
-                    "lente.",
+        "pourquoi": "Construit la base aérobie. Ne compte que si elle "
+                    "reste lente.",
         "etapes": [_etape("Endurance", zones, "ef", duree_s=minutes * 60,
-                          consigne="Tu dois pouvoir tenir une conversation "
-                                   "entière. Si ce n'est pas le cas, ralentis.")],
+                          consigne="Conversation entière possible. Sinon, "
+                                   "ralentis.")],
     }
 
 
@@ -370,8 +333,7 @@ def _qualite(q, zones):
     for i in range(q["reps"]):
         et.append(_etape("Effort %d sur %d" % (i + 1, q["reps"]), zones,
                          q["zone"], duree_s=q["effort_s"],
-                         consigne="Allure régulière du début à la fin de "
-                                  "l'intervalle."))
+                         consigne="Allure régulière du début à la fin."))
         if i < q["reps"] - 1:
             et.append(_etape("Récupération", zones, "ef", duree_s=q["recup_s"],
                              consigne="Trot lent, pas d'arrêt complet."))
@@ -388,18 +350,16 @@ def _longue(km, zones, finale):
     # Sans ce cas, le test 30K sortait avec une etape d'endurance de 0,0 km.
     if finale and km - finale["km"] <= .5:
         et.append(_etape("Échauffement", zones, "ef", distance_m=2000,
-                         consigne="Deux kilomètres tranquilles avant de "
-                                  "prendre l'allure cible."))
+                         consigne="Deux kilomètres tranquilles avant "
+                                  "l'allure cible."))
         et.append(_etape("Test à allure marathon", zones, finale["zone"],
                          distance_m=round(km * 1000),
-                         consigne="L'allure doit rester tenue du premier au "
-                                  "dernier kilomètre. C'est ce que dira la "
-                                  "seconde moitié qui compte."))
+                         consigne="Allure tenue du premier au dernier "
+                                  "kilomètre. La seconde moitié décide."))
         return {"type": "course", "nom": "Test %s km à allure marathon" % _km(km),
                 "distance_km": km,
-                "pourquoi": "L'indicateur le plus fiable avant Barcelone. Tenir "
-                            "l'allure cible sur 30 km valide la préparation, "
-                            "ou dit qu'il faut revoir l'objectif.",
+                "pourquoi": "L'indicateur le plus fiable avant Barcelone : "
+                            "tenir l'allure sur 30 km, ou revoir l'objectif.",
                 "etapes": et}
     if finale:
         et.append(_etape("Endurance", zones, "ef",
@@ -409,17 +369,15 @@ def _longue(km, zones, finale):
                                           else "allure semi"),
                          zones, finale["zone"],
                          distance_m=round(finale["km"] * 1000),
-                         consigne="C'est ici que la séance se joue : accélérer "
-                                  "sur des jambes déjà fatiguées."))
-        pourquoi = ("Une sortie longue à finale rapide reproduit ce qui se "
-                    "passe au 30e kilomètre d'un marathon : tenir l'allure "
-                    "quand le glycogène baisse.")
+                         consigne="Accélérer sur des jambes déjà fatiguées."))
+        pourquoi = ("Accélérer sur des jambes vides : c'est le 30e "
+                    "kilomètre du marathon.")
     else:
         et.append(_etape("Endurance", zones, "ef", distance_m=round(km * 1000),
-                         consigne="Allure constante, aucune accélération. "
-                                  "Bois toutes les 20 minutes au-delà de 90 min."))
-        pourquoi = ("La séance qui décide d'un marathon : réserves de "
-                    "glycogène, résistance des appuis, tolérance à l'inconfort.")
+                         consigne="Allure constante. Bois toutes les "
+                                  "20 min au-delà de 1 h 30."))
+        pourquoi = ("La séance qui décide d'un marathon : réserves, "
+                    "appuis, tolérance à l'inconfort.")
     return {"type": "course", "nom": "Sortie longue %s km" % _km(km),
             "distance_km": km, "pourquoi": pourquoi, "etapes": et}
 
@@ -502,6 +460,7 @@ def construit(plan, calibration, ajustees, semaine_courante, combien=3):
             "semaine": w["semaine"], "lundi": w["lundi"], "dimanche": w["dimanche"],
             "bloc": w["bloc"], "note": w.get("note"),
             "phase_calisthenie": _phase(w["semaine"])["nom"],
+            "phase_quoi": _phase(w["semaine"])["quoi"],
             "volume_km": eff["volume_km"], "adapte": bool(a),
             "seances": programme(eff, calibration, plan["courses"]),
         })

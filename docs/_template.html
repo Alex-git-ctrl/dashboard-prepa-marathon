@@ -1120,15 +1120,17 @@ function detailSeance(s) {
         + '</article>';
     }).join('');
 
-    $('prog-n').innerHTML = 'Semaine ' + w.semaine + ' du ' + dshort(w.lundi)
-      + ' au ' + dshort(w.dimanche) + ', objectif ' + km1(w.volume_km) + ' km.'
-      + (w.adapte ? ' <b>Volume réécrit</b> à partir de ce que tu as fait, '
-         + 'voir l’onglet Plan.' : '')
+    $('prog-n').innerHTML = 'Semaine ' + w.semaine + ', objectif '
+      + km1(w.volume_km) + ' km, du ' + dshort(w.lundi) + ' au '
+      + dshort(w.dimanche) + '.'
+      + (w.adapte ? ' <b>Volume réécrit</b> d’après ce que tu as fait.' : '')
       + (w.note ? ' ' + w.note : '')
-      + ' Les allures se recalculent après chaque course.'
-      + ' <b>Les jours sont des suggestions.</b> Ce qui compte est l’espacement, '
-      + 'pas le calendrier : fais les séances dans l’ordre que tu veux tant que '
-      + 'la sortie longue garde 48 h de marge avec la séance exigeante.';
+      // L'intention de la phase de calisthenie : une fois ici, au lieu d'une
+      // fois sur chacune des deux cartes.
+      + (w.phase_quoi ? ' Calisthénie, phase ' + w.phase_calisthenie + ' : '
+         + w.phase_quoi : '')
+      + ' <b>Les jours sont des suggestions</b>, sauf 48 h entre la sortie '
+      + 'longue et la séance exigeante.';
   }
 
   $('prog-sem').addEventListener('click', e => {
