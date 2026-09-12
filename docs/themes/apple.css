@@ -755,6 +755,15 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .bl-s a{color:var(--lien);text-decoration:none}
 .bl-s a:hover{text-decoration:underline}
 
+/* ---------- la serie des bilans ----------
+   Le dernier est deplie au-dessus ; les precedents s'empilent, replies, du
+   plus recent au plus ancien. */
+.hist{margin-top:var(--s5)}
+.hist-t{font-size:var(--t2);font-weight:600;color:var(--acier);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s2)}
+.hist-v{font-size:var(--t2);color:var(--acier);line-height:1.5;margin:0;
+  max-width:60ch;text-wrap:pretty}
+
 /* ---------- mobile ----------
    Apple reduit ses corps sur petit ecran au lieu de les augmenter : les
    grandes tailles sont faites pour etre vues de loin sur un ecran large, pas

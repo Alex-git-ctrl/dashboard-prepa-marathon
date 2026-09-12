@@ -41,6 +41,17 @@ SEANCES_ENVOYEES = 10
 POINTS_EFFICACITE = 12
 FENETRE_TENDANCE = 28        # jours sur lesquels une pente est calculee
 
+# Les bilans s'empilent au lieu de s'ecraser : c'est l'evolution du jugement
+# qui a de la valeur, pas seulement le dernier etat. Mais ils ne peuvent pas
+# s'empiler indefiniment dans une page que le telephone telecharge en entier.
+# Les PLEINS derniers gardent leur texte ; au-dela, il ne reste qu'une trace
+# d'une ligne, qui suffit a lire la trajectoire.
+BILANS_PLEINS = 8
+# Ce que le prochain bilan voit du passe. Trois suffisent pour dire ce qui a
+# change, et ca ne fait grossir le dossier que de quelques centaines d'octets.
+BILANS_RELUS = 3
+TRACE = ("quand", "verdict", "confiance", "titre")
+
 SYSTEME = """Tu fais le bilan d'ensemble de la préparation d'un coureur pour \
 le marathon de Barcelone du 14 mars 2027, objectif sous 4 heures, soit 5:41 \
 au kilomètre. Il court trois fois par semaine et fait deux séances de \
@@ -79,7 +90,13 @@ les pentes de forme et de récupération.
   "viser_plus_haut" : 2 à 3 phrases. Réponse franche, et ce qu'il faudrait \
 observer pour trancher.
   "a_changer"       : 2 à 3 phrases. Une seule priorité, concrète, pour les \
-deux semaines à venir."""
+deux semaines à venir.
+
+Le dossier contient tes bilans précédents sous "bilans_precedents". Quand il \
+y en a, "ou_tu_en_es" DOIT dire ce qui a changé depuis le dernier, et \
+"a_changer" doit dire si la priorité que tu avais fixée a été suivie, en \
+t'appuyant sur les chiffres. Si rien n'a bougé, dis-le franchement plutôt que \
+de reformuler le bilan precedent."""
 
 CLES = ("verdict", "confiance", "titre", "ou_tu_en_es", "viser_plus_haut",
         "a_changer")
@@ -189,6 +206,9 @@ def contexte():
         "repartition_zones_montre_pct": (m.get("zones_montre") or {}).get("pct"),
         "seances_recentes": recentes,
         "alertes_ouvertes": [a.get("titre") for a in (m.get("alertes") or [])],
+        "bilans_precedents": [
+            {k: b.get(k) for k in TRACE + ("a_changer",)}
+            for b in (m.get("bilans") or [])[-BILANS_RELUS:]],
     }
 
 
@@ -260,6 +280,17 @@ def cout():
     print("  n'augmente plus. Il n'y a pas d'effet boule de neige.")
 
 
+def elague(serie):
+    """Garde le texte des derniers bilans, une trace pour les plus anciens."""
+    garde = []
+    for i, b in enumerate(serie):
+        if len(serie) - i <= BILANS_PLEINS:
+            garde.append(b)
+        else:
+            garde.append(dict({k: b.get(k) for k in TRACE}, abrege=True))
+    return garde
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -280,14 +311,17 @@ def main():
         return
 
     if not args.auto:
-        b = (_lis("metrics.json").get("bilan") or {})
-        if not b:
+        serie = _lis("metrics.json").get("bilans") or []
+        if not serie:
             print("Aucun bilan pour l'instant.")
             print("  python scripts/bilan.py --auto")
             return
-        print("%s  (%s, confiance %s)"
-              % (b.get("titre"), b.get("verdict"), b.get("confiance")))
-        print("  rédigé le", b.get("quand", "?")[:16].replace("T", " à "))
+        print("%d bilan(s), du plus ancien au plus récent :" % len(serie))
+        for b in serie:
+            print("  %s  %-10s %-9s %s%s"
+                  % ((b.get("quand") or "?")[:10], b.get("verdict", "?"),
+                     b.get("confiance", "?"), b.get("titre", ""),
+                     "  (abrégé)" if b.get("abrege") else ""))
         return
 
     m = _lis("metrics.json")
@@ -323,6 +357,9 @@ def main():
     out["quand"] = datetime.now().isoformat(timespec="seconds")
     out["empreinte"] = empreinte
     out["source"] = "claude_conversation"
+    m["bilans"] = elague((m.get("bilans") or []) + [out])
+    # Conserve pour compatibilite : la page lit la serie, mais un vieux
+    # gabarit ou un script tiers pourrait encore chercher le dernier ici.
     m["bilan"] = out
     io.open(os.path.join(ROOT, "docs", "metrics.json"), "w",
             encoding="utf-8").write(

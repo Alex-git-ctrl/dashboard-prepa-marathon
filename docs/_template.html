@@ -2048,32 +2048,58 @@ const BILAN_C = {
 };
 
 (function () {
-  const b = M.bilan;
-  if (!b || !b.titre) {
+  const serie = M.bilans || (M.bilan ? [M.bilan] : []);
+  if (!serie.length) {
     $('bilan').innerHTML = '<div class="wait" style="margin:0">Le bilan '
       + 'général est rédigé à la mise à jour de 23h, dès qu’une séance ou une '
       + 'semaine a bougé.</div>';
     return;
   }
-  const [mot, cls] = BILAN_V[b.verdict] || BILAN_V.conforme;
-  const Q = [
-    ['Où tu en es', b.ou_tu_en_es],
-    ['Peux-tu viser plus haut ?', b.viser_plus_haut],
-    ['Ce qui doit changer', b.a_changer],
-  ].filter(q => q[1]);
-  $('bilan').innerHTML = '<div class="ia"><div class="ia-h">'
-    + '<span class="pill ' + cls + '">' + mot + '</span>'
-    + '<span class="pill ' + (b.confiance === 'haute' ? 'ok'
-        : b.confiance === 'faible' ? 'al' : 'no') + '">'
-    + (BILAN_C[b.confiance] || 'Confiance inconnue') + '</span>'
-    + '<span class="ia-t">' + b.titre + '</span></div>'
-    + Q.map(q => '<div class="ia-q">' + q[0] + '</div><div class="ia-r">'
-      + q[1] + '</div>').join('')
+  const b = serie[serie.length - 1];
+  const passes = serie.slice(0, -1).reverse();
+
+  const pastilles = x => {
+    const [mot, cls] = BILAN_V[x.verdict] || BILAN_V.conforme;
+    return '<span class="pill ' + cls + '">' + mot + '</span>'
+      + '<span class="pill ' + (x.confiance === 'haute' ? 'ok'
+          : x.confiance === 'faible' ? 'al' : 'no') + '">'
+      + (BILAN_C[x.confiance] || 'Confiance inconnue') + '</span>';
+  };
+  const corps = x => [
+    ['Où tu en es', x.ou_tu_en_es],
+    ['Peux-tu viser plus haut ?', x.viser_plus_haut],
+    ['Ce qui doit changer', x.a_changer],
+  ].filter(q => q[1]).map(q => '<div class="ia-q">' + q[0] + '</div>'
+    + '<div class="ia-r">' + q[1] + '</div>').join('');
+
+  let h = '<div class="ia"><div class="ia-h">' + pastilles(b)
+    + '<span class="ia-t">' + b.titre + '</span></div>' + corps(b)
     + '<div class="ia-s">Rédigé par Claude sur cette machine'
     + (b.quand ? ' le ' + dshort(b.quand.slice(0, 10)) : '')
     + ', à partir des semaines terminées, des tendances sur 28 jours et des '
     + 'dix dernières sorties. Aucune analyse facturée : le dossier envoyé est '
     + 'plafonné et ne grandit pas avec l’historique.</div></div>';
+
+  // La serie. Un bilan isole ne dit pas grand-chose ; c'est le deplacement du
+  // jugement, semaine apres semaine, qui raconte la preparation.
+  h += '<div class="hist"><div class="hist-t">Comment ton bilan a évolué</div>';
+  if (!passes.length) {
+    h += '<p class="hist-v">C’est le premier. Les suivants s’ajouteront ici, '
+      + 'et chacun dira ce qui a changé depuis le précédent.</p>';
+  } else {
+    h += passes.map(x => {
+      const quand = x.quand ? dshort(x.quand.slice(0, 10)) : '';
+      const [mot] = BILAN_V[x.verdict] || BILAN_V.conforme;
+      const dedans = x.abrege
+        ? '<p class="hist-v">Le texte complet n’est plus conservé : au-delà '
+          + 'des huit derniers, seule la ligne de verdict est gardée pour ne '
+          + 'pas alourdir la page.</p>'
+        : '<div class="ia-h">' + pastilles(x) + '</div>' + corps(x);
+      return bloc(quand + ' · ' + (x.titre || ''), mot, dedans, false);
+    }).join('');
+  }
+  h += '</div>';
+  $('bilan').innerHTML = h;
 })();
 
 /* ---------- commandes ----------

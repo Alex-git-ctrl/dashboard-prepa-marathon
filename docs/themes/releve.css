@@ -712,6 +712,14 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .btn-q:hover{opacity:1;border-color:var(--acier)}
 .bl-s a{color:var(--mesure)}
 
+/* ---------- la serie des bilans ---------- */
+.hist{margin-top:var(--s5)}
+.hist-t{font-family:var(--num);font-size:var(--t1);font-weight:500;
+  color:var(--sourd);text-transform:uppercase;letter-spacing:.14em;
+  margin-bottom:var(--s2)}
+.hist-v{font-size:var(--t2);color:var(--acier);line-height:1.5;margin:0;
+  max-width:60ch;text-wrap:pretty}
+
 /* ---------- mobile ----------
    Le mobile deplace l'echelle d'un cran, et tout ce qui s'y appuie suit. */
 @media (max-width:640px){
