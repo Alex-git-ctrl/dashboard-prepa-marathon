@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-11T21:37:39",
+  "maj": "2026-09-12T08:53:52",
   "nb_activites": 3,
   "semaines": {
     "1": {
@@ -3853,13 +3853,36 @@
       "ctl": 2.077306,
       "atl": 10.297856,
       "ramp_rate": 2.077306,
-      "pas": 18767,
+      "pas": 19113,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": 3.4
+    },
+    {
+      "date": "2026-09-12",
+      "hrv": null,
+      "fc_repos": 52,
+      "poids": null,
+      "vo2max": null,
+      "readiness": null,
+      "sommeil_score": null,
+      "fc_sommeil": null,
+      "spo2": null,
+      "respiration": null,
+      "masse_grasse": null,
+      "ctl": 2.0284305,
+      "atl": 8.926984,
+      "ramp_rate": 1.3931661,
+      "pas": 10915,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
+      "sommeil_h": null
     }
   ],
   "derives": [
@@ -3950,10 +3973,10 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 2.077306,
-    "atl": 10.297856,
-    "ramp_rate": 2.077306,
-    "pas": 18767,
+    "ctl": 2.0284305,
+    "atl": 8.926984,
+    "ramp_rate": 1.3931661,
+    "pas": 10915,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -3966,7 +3989,7 @@
   },
   "couverture": {
     "hrv": 8,
-    "fc_repos": 10,
+    "fc_repos": 11,
     "poids": 1,
     "vo2max": 3,
     "readiness": 0,
@@ -3975,17 +3998,17 @@
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 10,
-    "atl": 10,
-    "ramp_rate": 3,
-    "pas": 10,
+    "ctl": 11,
+    "atl": 11,
+    "ramp_rate": 4,
+    "pas": 11,
     "courbatures": 0,
     "fatigue": 0,
     "moral": 0,
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 10,
+  "jours_wellness": 11,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -3997,7 +4020,7 @@
   ],
   "dates": {
     "hrv": "2026-09-11",
-    "fc_repos": "2026-09-11",
+    "fc_repos": "2026-09-12",
     "poids": "2026-09-02",
     "vo2max": "2026-09-11",
     "readiness": null,
@@ -4006,10 +4029,10 @@
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-09-11",
-    "atl": "2026-09-11",
-    "ramp_rate": "2026-09-11",
-    "pas": "2026-09-11",
+    "ctl": "2026-09-12",
+    "atl": "2026-09-12",
+    "ramp_rate": "2026-09-12",
+    "pas": "2026-09-12",
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -4021,7 +4044,7 @@
     "cadence": "2026-09-11",
     "volume": "2026-09-11"
   },
-  "derniere_donnee": "2026-09-11",
+  "derniere_donnee": "2026-09-12",
   "derniere_seance": "2026-09-11",
   "journal": [
     {
@@ -4225,7 +4248,7 @@
         "fatigue_indice": null
       },
       {
-        "pas": 18767,
+        "pas": 19113,
         "sommeil_h": 3.4,
         "sommeil_score": 32.0,
         "fc_repos": 52,
@@ -4234,11 +4257,22 @@
         "spo2": null,
         "date": "2026-09-11",
         "fatigue_indice": null
+      },
+      {
+        "pas": 10915,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "fc_repos": 52,
+        "hrv": null,
+        "poids": null,
+        "spo2": null,
+        "date": "2026-09-12",
+        "fatigue_indice": null
       }
     ],
     "actuel": {
-      "pas": 18767,
-      "pas_date": "2026-09-11",
+      "pas": 10915,
+      "pas_date": "2026-09-12",
       "sommeil_h": 3.4,
       "sommeil_h_date": "2026-09-11",
       "sommeil_score": 32.0,
@@ -4246,7 +4280,7 @@
       "fatigue_indice": null,
       "fatigue_indice_date": null,
       "fc_repos": 52,
-      "fc_repos_date": "2026-09-11",
+      "fc_repos_date": "2026-09-12",
       "hrv": 33.0,
       "hrv_date": "2026-09-11",
       "poids": 82.0,
