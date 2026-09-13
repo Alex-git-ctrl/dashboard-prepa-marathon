@@ -790,6 +790,23 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .hist-v{font-size:var(--t2);color:var(--acier);line-height:1.5;margin:0;
   max-width:60ch;text-wrap:pretty}
 
+/* ---------- bulles d'information ----------
+   Le point d'interrogation reste discret : il suit l'intitule, il ne le
+   concurrence pas. La zone tactile depasse le dessin, sinon il faut viser
+   un cercle de treize pixels avec un pouce. */
+.aide{appearance:none;border:0;background:none;padding:0;margin-left:5px;
+  width:14px;height:14px;border-radius:50%;font:inherit;font-size:10px;
+  font-weight:600;line-height:14px;text-align:center;cursor:pointer;
+  color:var(--surface);background-color:var(--acier);vertical-align:middle;
+  position:relative;flex:0 0 auto;transition:background-color .15s}
+.aide::after{content:"";position:absolute;inset:-9px}
+.aide:hover,.aide[aria-expanded="true"]{background-color:var(--encre)}
+.aide:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.bulle{position:fixed;z-index:80;max-width:min(300px,calc(100vw - 24px));
+  background:var(--encre);color:var(--surface);border-radius:var(--r1);
+  padding:var(--s3) var(--s4);font-size:var(--t2);line-height:1.5;
+  text-wrap:pretty;box-shadow:0 8px 28px rgba(0,0,0,.22)}
+
 /* ---------- mobile ----------
    Apple reduit ses corps sur petit ecran au lieu de les augmenter : les
    grandes tailles sont faites pour etre vues de loin sur un ecran large, pas

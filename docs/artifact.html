@@ -796,6 +796,23 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .hist-v{font-size:var(--t2);color:var(--acier);line-height:1.5;margin:0;
   max-width:60ch;text-wrap:pretty}
 
+/* ---------- bulles d'information ----------
+   Le point d'interrogation reste discret : il suit l'intitule, il ne le
+   concurrence pas. La zone tactile depasse le dessin, sinon il faut viser
+   un cercle de treize pixels avec un pouce. */
+.aide{appearance:none;border:0;background:none;padding:0;margin-left:5px;
+  width:14px;height:14px;border-radius:50%;font:inherit;font-size:10px;
+  font-weight:600;line-height:14px;text-align:center;cursor:pointer;
+  color:var(--surface);background-color:var(--acier);vertical-align:middle;
+  position:relative;flex:0 0 auto;transition:background-color .15s}
+.aide::after{content:"";position:absolute;inset:-9px}
+.aide:hover,.aide[aria-expanded="true"]{background-color:var(--encre)}
+.aide:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.bulle{position:fixed;z-index:80;max-width:min(300px,calc(100vw - 24px));
+  background:var(--encre);color:var(--surface);border-radius:var(--r1);
+  padding:var(--s3) var(--s4);font-size:var(--t2);line-height:1.5;
+  text-wrap:pretty;box-shadow:0 8px 28px rgba(0,0,0,.22)}
+
 /* ---------- mobile ----------
    Apple reduit ses corps sur petit ecran au lieu de les augmenter : les
    grandes tailles sont faites pour etre vues de loin sur un ecran large, pas
@@ -1212,6 +1229,157 @@ function bilanZones(s) {
 }
 
 /** Grille de chiffres cles. */
+/* ---------- bulles d'information ----------
+   La cle vient de l'intitule affiche, mis a plat : pas de table de
+   correspondance a tenir a jour a cote des libelles, donc pas de bulle qui
+   survit a un libelle renomme. Un indicateur sans entree n'a pas de bouton.
+
+   Chaque texte repond a deux questions et s'arrete : ce que la valeur
+   mesure, et ce qu'on en fait. Une definition qui ne dit pas quoi en faire
+   ne vaut pas l'espace qu'elle prend. */
+const GLOSSAIRE = {
+  'derive-cardiaque':
+    'La fréquence cardiaque de la seconde moitié comparée à la première, à '
+    + 'allure égale. Sous 5 % l’endurance suit. Au-delà de 8 %, la sortie '
+    + 'était trop longue, trop rapide ou trop chaude pour ta forme du jour.',
+  'variabilite-cardiaque':
+    'L’écart entre deux battements au repos, mesuré pendant la nuit. Elle '
+    + 'monte quand tu récupères et chute avant que tu sentes la fatigue. '
+    + 'C’est sa tendance sur une semaine qui parle, jamais la valeur d’un '
+    + 'seul matin.',
+  'fc-de-repos':
+    'Tes battements par minute au plus calme de la nuit. Elle baisse quand '
+    + 'la forme monte. Trois nuits de suite nettement au-dessus de ta '
+    + 'moyenne signalent une fatigue accumulée ou une infection qui démarre.',
+  'volume-cette-semaine':
+    'Les kilomètres courus depuis lundi, sorties longues comprises. C’est la '
+    + 'grandeur qui construit un marathon, et celle qui blesse quand elle '
+    + 'monte trop vite : au-delà de 10 % par semaine, le risque grimpe.',
+  'forme-de-fond':
+    'La moyenne de ta charge sur les six dernières semaines. Elle monte '
+    + 'lentement et représente ce que ton corps encaisse durablement. Une '
+    + 'hausse propre s’accompagne d’une VFC stable, pas d’une VFC qui tombe.',
+  'charge':
+    'Le coût d’une séance en un seul nombre, tiré de sa durée et de son '
+    + 'intensité cardiaque. Il sert à comparer ce qui n’est pas comparable : '
+    + 'une sortie longue lente et un fractionné court.',
+  'vo2max':
+    'L’estimation par la montre du volume d’oxygène que tu utilises au '
+    + 'maximum. Sa valeur absolue vaut peu, sa pente sur deux mois vaut '
+    + 'beaucoup.',
+  'vdot-calcule':
+    'Une note de moteur aérobie déduite d’un chrono, qui sert à calculer '
+    + 'toutes tes allures d’entraînement. La tienne vient d’un 10 km estimé '
+    + 'et non couru : elle se recalculera sur ton chrono du 26 septembre.',
+  'cadence':
+    'Le nombre de pas par minute, les deux pieds comptés. Monter la cadence '
+    + 'raccourcit la foulée et réduit le freinage à chaque appui. Autour de '
+    + '170 à 180 pour la plupart des coureurs.',
+  'cadence-moyenne':
+    'Le nombre de pas par minute, les deux pieds comptés. Monter la cadence '
+    + 'raccourcit la foulée et réduit le freinage à chaque appui. Autour de '
+    + '170 à 180 pour la plupart des coureurs.',
+  'puissance-moyenne':
+    'L’effort mécanique estimé en watts. Contrairement à l’allure, il ne '
+    + 'change pas avec la pente ni le vent : c’est ce qui permet de comparer '
+    + 'deux sorties sur des terrains différents.',
+  'ajustee-du-denivele':
+    'L’allure que tu aurais tenue à plat pour le même effort. Elle ne '
+    + 's’affiche que quand le relief a vraiment pesé, sinon elle ferait '
+    + 'croire à une correction là où il n’y a que du bruit.',
+  'score-de-sommeil':
+    'La note que la montre donne à ta nuit, durée et phases confondues. '
+    + 'C’est le premier indicateur qui décroche quand une préparation '
+    + 'devient trop lourde, avant les jambes.',
+  'indice-de-fatigue':
+    'Une note de fatigue accumulée, construite sur quatorze nuits de '
+    + 'sommeil, de VFC et de FC de repos. Elle demande donc deux semaines de '
+    + 'mesures avant de vouloir dire quelque chose.',
+  'sommeil':
+    'La durée dormie, telle que la montre la découpe. Sous 7 heures '
+    + 'régulières la progression ralentit, quelle que soit la qualité des '
+    + 'séances.',
+  'poids':
+    'Utile par sa tendance sur un mois, pas par sa valeur du jour : une '
+    + 'variation de un à deux kilos entre deux pesées n’est que de l’eau.',
+};
+
+const A_ACCENTS = 'àâäãéèêëïîìôöòõùûüçñ';
+const A_PLATS = 'aaaaeeeeiiioooouuucn';
+
+/** L'intitule affiche, mis a plat, sert de cle : un libelle renomme perd
+    sa bulle au lieu d'en garder une fausse. */
+function _cleAide(l) {
+  let out = '';
+  for (const c of l.toLowerCase()) {
+    const i = A_ACCENTS.indexOf(c);
+    out += i < 0 ? c : A_PLATS[i];
+  }
+  return out.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/** Le bouton, s'il y a quelque chose a expliquer. Sinon rien du tout. */
+function aide(libelle) {
+  const k = _cleAide(libelle);
+  if (!GLOSSAIRE[k]) return '';
+  return '<button type="button" class="aide" data-aide="' + k
+    + '" aria-label="Ce que veut dire : ' + libelle + '">?</button>';
+}
+
+(function () {
+  // Une seule bulle pour toute la page, posee sur le body : dans le flux
+  // elle decalerait la grille de chiffres a chaque ouverture, et elle serait
+  // coupee par le debordement cache des cartes.
+  const b = document.createElement('div');
+  b.className = 'bulle';
+  b.setAttribute('role', 'dialog');
+  b.hidden = true;
+  document.body.appendChild(b);
+  let source = null;
+
+  const ferme = () => {
+    if (!source) return;
+    source.setAttribute('aria-expanded', 'false');
+    source = null; b.hidden = true;
+  };
+
+  const place = bouton => {
+    const r = bouton.getBoundingClientRect();
+    b.hidden = false;
+    b.style.left = '0px'; b.style.top = '0px';
+    const l = b.getBoundingClientRect();
+    const marge = 12;
+    let x = r.left + r.width / 2 - l.width / 2;
+    x = Math.max(marge, Math.min(x, window.innerWidth - l.width - marge));
+    // Au-dessous si la place y est, au-dessus sinon, et dans l'ecran dans
+    // tous les cas : un bouton hors du cadre visible posait la bulle hors
+    // du cadre visible avec lui.
+    let y = r.bottom + 8;
+    if (y + l.height > window.innerHeight - marge) y = r.top - l.height - 8;
+    y = Math.max(marge, Math.min(y, window.innerHeight - l.height - marge));
+    b.style.left = Math.round(x) + 'px';
+    b.style.top = Math.round(y) + 'px';
+  };
+
+  document.addEventListener('click', e => {
+    const bouton = e.target.closest('.aide');
+    if (!bouton) { if (!e.target.closest('.bulle')) ferme(); return; }
+    e.preventDefault();
+    e.stopPropagation();
+    if (source === bouton) { ferme(); return; }
+    ferme();
+    b.textContent = GLOSSAIRE[bouton.dataset.aide] || '';
+    source = bouton;
+    bouton.setAttribute('aria-expanded', 'true');
+    place(bouton);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') ferme(); });
+  // Une bulle posee en position fixe ne suit pas la page : plutot que de la
+  // faire courir apres le defilement, on la referme.
+  window.addEventListener('scroll', ferme, true);
+  window.addEventListener('resize', ferme);
+})();
+
 function chiffres(s) {
   // Douze nombres a la suite ne se lisent pas : l'oeil n'a aucune raison de
   // s'arreter quelque part. On les range donc par question posee, et chaque
@@ -1248,7 +1416,7 @@ function chiffres(s) {
       + '<div class="cg-n">' + vus.map(n =>
         '<div><div class="n">' + n[0]
         + (n[1] ? '<em>' + n[1] + '</em>' : '') + '</div>'
-        + '<div class="c">' + n[2] + '</div></div>').join('')
+        + '<div class="c">' + n[2] + aide(n[2]) + '</div></div>').join('')
       + '</div></div>';
   };
   return '<div class="chiffres">' + G.map(bloc).join('') + '</div>';
@@ -2029,7 +2197,7 @@ function detailSeance(s) {
 const volCum = Object.values(M.semaines).reduce((s, w) => s + w.km, 0);
 const tuile = ([l, v, u, dt, att]) => {
   const has = v !== null && v !== undefined;
-  return `<div class="tile"><div class="l">${l}</div>
+  return `<div class="tile"><div class="l">${l}${aide(l)}</div>
     ${has ? `<div class="v">${nf(v)}<em>${u}</em></div>
       <div class="d">${dt ? dshort(dt) : ''}</div>`
       : `<div class="w">${att}</div>`}</div>`;
@@ -2745,14 +2913,16 @@ function lectureNuits() {
   $('sante-tuiles').innerHTML = T.map(([cle, nom, u, dec, att]) => {
     const v = S.actuel[cle];
     const dt = S.actuel[cle + '_date'];
-    if (v == null) return '<div class="tile"><div class="l">' + nom + '</div>'
+    if (v == null) return '<div class="tile"><div class="l">' + nom
+      + aide(nom) + '</div>'
       + '<div class="w">' + att + '</div></div>';
     // Une durée de sommeil se dit en heures et minutes. Personne ne dort 4,2 h.
     if (cle === 'sommeil_h') return '<div class="tile"><div class="l">' + nom
-      + '</div><div class="v">' + heuresMin(v).replace(' h ', '<em>h</em>')
+      + aide(nom) + '</div><div class="v">'
+      + heuresMin(v).replace(' h ', '<em>h</em>')
       + '<em>min</em></div><div class="d">' + (dt ? dshort(dt) : '')
       + '</div></div>';
-    return '<div class="tile"><div class="l">' + nom + '</div>'
+    return '<div class="tile"><div class="l">' + nom + aide(nom) + '</div>'
       + '<div class="v">' + nf(dec ? Number(v.toFixed(dec)) : Math.round(v))
       + '<em>' + u + '</em></div>'
       + '<div class="d">' + (dt ? dshort(dt) : '') + '</div></div>';
@@ -2884,8 +3054,8 @@ $('vrows').innerHTML = [
   ['Cible retenue', CAL.cible_marathon.temps + ' · ' + CAL.cible_marathon.allure],
   ['Volume, départ → pic', '12 → ' + km1(PLAN.pic_volume_km) + ' km'],
   ['Sortie longue, départ → pic', '6 → ' + km1(PLAN.pic_sortie_longue_km) + ' km'],
-].map(r => '<div class="li"><div class="li-k">' + r[0] + '</div>'
-  + '<div class="li-v">' + r[1] + '</div></div>').join('');
+].map(r => '<div class="li"><div class="li-k">' + r[0] + aide(r[0])
+  + '</div><div class="li-v">' + r[1] + '</div></div>').join('');
 
 (function () {
   const cv = M.couverture || {};
