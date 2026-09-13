@@ -60,7 +60,7 @@ WEEKS = [
     (14, 22,  45, 45, "specifique","Derniers 5 km de la sortie longue à allure marathon."),
     (15, 24,  45, 45, "specifique","Cap des 24 km. Tester le ravitaillement en course."),
     (16, 16,  35, 40, "decharge",  ""),
-    (17, 25,  45, 45, "specifique","Séance 2 : 3 × 10 min au seuil."),
+    (17, 25,  45, 45, "specifique","Séance 2 : 3 × 8 min au seuil."),
     (18, 27,  45, 45, "specifique","Derniers 8 km à allure marathon."),
     (19, 29,  45, 45, "specifique","Sortie la plus longue avant le test 30K."),
     (20, 18,  35, 40, "decharge",  ""),

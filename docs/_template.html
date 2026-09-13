@@ -1140,6 +1140,45 @@ function detailSeance(s) {
       + 'longue et la séance exigeante.';
   }
 
+  // La bande defile. Au doigt ca marche tout seul, a la souris non : il
+  // faut pouvoir l'attraper, et faire tourner la molette dessus.
+  const bande = $('prog-sem').firstElementChild;
+  if (bande && bande.classList.contains('seg-l')) {
+    let tire = false, x0 = 0, g0 = 0, bouge = 0;
+    bande.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') return;   // le defilement natif suffit
+      tire = true; bouge = 0; x0 = e.clientX; g0 = bande.scrollLeft;
+      bande.setPointerCapture(e.pointerId);
+      bande.classList.add('seg-tire');
+    });
+    bande.addEventListener('pointermove', e => {
+      if (!tire) return;
+      const d = e.clientX - x0;
+      bouge = Math.max(bouge, Math.abs(d));
+      bande.scrollLeft = g0 - d;
+    });
+    const lache = e => {
+      if (!tire) return;
+      tire = false; bande.classList.remove('seg-tire');
+      try { bande.releasePointerCapture(e.pointerId); } catch (x) {}
+    };
+    bande.addEventListener('pointerup', lache);
+    bande.addEventListener('pointercancel', lache);
+    // Un glisse de plus de quelques pixels n'est pas un clic : sans ca,
+    // attraper la bande changerait de semaine en la lachant.
+    bande.addEventListener('click', e => {
+      if (bouge > 4) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    // La molette verticale fait defiler la bande plutot que la page.
+    bande.addEventListener('wheel', e => {
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!d) return;
+      const avant = bande.scrollLeft;
+      bande.scrollLeft = avant + d;
+      if (bande.scrollLeft !== avant) e.preventDefault();
+    }, {passive: false});
+  }
+
   $('prog-sem').addEventListener('click', e => {
     const b = e.target.closest('button');
     if (!b) return;
@@ -1152,6 +1191,11 @@ function detailSeance(s) {
     dessine(k);
   });
   dessine(0);
+  // La semaine en cours est la premiere : elle est deja visible. On garde
+  // le geste au cas ou la bande aurait ete restauree ailleurs.
+  const actif = $('prog-sem').querySelector('button[aria-pressed="true"]');
+  if (actif && actif.scrollIntoView)
+    actif.scrollIntoView({block: 'nearest', inline: 'center'});
 })();
 
 /* ---------- tuiles ---------- */

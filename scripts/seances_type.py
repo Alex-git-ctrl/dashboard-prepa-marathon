@@ -30,25 +30,108 @@ RENFO_SOUPLESSE = ("libre", "N'importe quel jour, sauf la veille de la "
 ECHAUFFEMENT_S = 600     # 10 min avant une seance de qualite
 RETOUR_S = 600           # 10 min apres
 
-# Les seances de qualite, par semaine du plan. Elles viennent des notes ecrites
-# a la main, mais en structure plutot qu'en prose.
+# Les seances de qualite, par semaine du plan.
+#
+# Une par semaine, le jeudi, sauf quand il n'y a pas la place : semaine de
+# course, semaine du test, et les semaines ou la sortie longue porte deja
+# l'intensite dans sa finale rapide. Ces semaines-la recoivent des lignes
+# droites, qui reveillent la foulee sans couter de recuperation.
+#
+# La progression suit les blocs. Bloc 1 et 2 : du court et du seuil, pour
+# lever le plafond pendant que le volume est encore bas. Bloc 3 et 4 :
+# l'allure marathon devient la priorite, le seuil l'entretient. Bloc 5 :
+# on rappelle l'allure aux jambes, on ne construit plus.
+#
+#   forme "intervalles" : echauffement, reps, retour au calme
+#   forme "lignes"      : endurance, puis des accelerations breves a la fin
 QUALITE = {
-    5:  {"nom": "3 × 6 min à allure semi", "reps": 3, "effort_s": 360,
-         "recup_s": 120, "zone": "semi",
-         "pourquoi": "Habitue la foulée au rythme du semi, sans coûter "
-                     "de récupération."},
-    13: {"nom": "2 × 15 min à allure marathon", "reps": 2, "effort_s": 900,
-         "recup_s": 180, "zone": "marathon",
+    2:  {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "Réveille la foulée sans coûter de récupération."},
+    4:  {"forme": "intervalles", "nom": "8 × 1 min vite", "reps": 8,
+         "effort_s": 60, "recup_s": 60, "zone": "vma",
+         "pourquoi": "Première séance rapide : de l'économie de foulée, pas "
+                     "de la fatigue."},
+    5:  {"forme": "intervalles", "nom": "3 × 6 min à allure semi", "reps": 3,
+         "effort_s": 360, "recup_s": 120, "zone": "semi",
+         "pourquoi": "Habitue la foulée au rythme du semi, sans coûter de "
+                     "récupération."},
+    6:  {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "L'intensité est dans la sortie longue de samedi. Jeudi "
+                     "reste léger."},
+    8:  {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "Semaine de récupération après le semi. Rien de dur, "
+                     "juste de quoi ne pas s'endormir."},
+    9:  {"forme": "intervalles", "nom": "5 × 3 min à allure 10 km", "reps": 5,
+         "effort_s": 180, "recup_s": 90, "zone": "dix",
+         "pourquoi": "Première séance avec les zones recalibrées sur le semi."},
+    10: {"forme": "intervalles", "nom": "2 × 10 min au seuil", "reps": 2,
+         "effort_s": 600, "recup_s": 180, "zone": "seuil",
+         "pourquoi": "Le seuil relève le plafond : l'allure marathon devient "
+                     "plus confortable."},
+    11: {"forme": "intervalles", "nom": "3 × 8 min à allure semi", "reps": 3,
+         "effort_s": 480, "recup_s": 150, "zone": "semi",
+         "pourquoi": "Entre le seuil et l'allure marathon, le rythme qui les "
+                     "relie."},
+    12: {"forme": "intervalles", "nom": "8 × 1 min vite", "reps": 8,
+         "effort_s": 60, "recup_s": 60, "zone": "vma",
+         "pourquoi": "Semaine de décharge : du court et du vif, rien de long."},
+    13: {"forme": "intervalles", "nom": "2 × 15 min à allure marathon",
+         "reps": 2, "effort_s": 900, "recup_s": 180, "zone": "marathon",
          "pourquoi": "Installe l'allure marathon comme un automatisme."},
-    17: {"nom": "3 × 10 min au seuil", "reps": 3, "effort_s": 600,
-         "recup_s": 180, "zone": "seuil",
-         "pourquoi": "Le seuil relève le plafond : l'allure marathon "
-                     "devient plus confortable."},
-    26: {"nom": "4 × 3 min à allure marathon", "reps": 4, "effort_s": 180,
-         "recup_s": 90, "zone": "marathon",
+    14: {"forme": "lignes", "reps": 8, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "L'intensité est dans les 5 derniers kilomètres de "
+                     "samedi. Jeudi reste léger."},
+    15: {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
+         "effort_s": 480, "recup_s": 120, "zone": "seuil",
+         "pourquoi": "Le seuil entretient le plafond pendant que le volume "
+                     "monte."},
+    16: {"forme": "intervalles", "nom": "6 × 2 min à allure 10 km", "reps": 6,
+         "effort_s": 120, "recup_s": 90, "zone": "dix",
+         "pourquoi": "Semaine de décharge : court, vif, et court à finir."},
+    17: {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
+         "effort_s": 480, "recup_s": 120, "zone": "seuil",
+         "pourquoi": "Le seuil relève le plafond : l'allure marathon devient "
+                     "plus confortable."},
+    18: {"forme": "lignes", "reps": 8, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "L'intensité est dans les 8 derniers kilomètres de "
+                     "samedi. Jeudi reste léger."},
+    19: {"forme": "intervalles", "nom": "2 × 15 min à allure marathon",
+         "reps": 2, "effort_s": 900, "recup_s": 180, "zone": "marathon",
+         "pourquoi": "L'allure marathon sur des jambes déjà chargées par le "
+                     "volume."},
+    20: {"forme": "intervalles", "nom": "6 × 1 min vite", "reps": 6,
+         "effort_s": 60, "recup_s": 60, "zone": "vma",
+         "pourquoi": "Semaine de décharge avant le dernier bloc."},
+    21: {"forme": "lignes", "reps": 8, "effort_s": 20, "recup_s": 40,
+         "zone": "vma",
+         "pourquoi": "Répétition générale samedi. Jeudi ne doit rien coûter."},
+    22: {"forme": "intervalles", "nom": "2 × 10 min au seuil", "reps": 2,
+         "effort_s": 600, "recup_s": 180, "zone": "seuil",
+         "pourquoi": "Semaine du pic de volume : du seuil, mais court."},
+    24: {"forme": "intervalles", "nom": "4 × 3 min à allure 10 km", "reps": 4,
+         "effort_s": 180, "recup_s": 90, "zone": "dix",
+         "pourquoi": "Assimilation du test : on garde du vif, rien de long."},
+    25: {"forme": "intervalles", "nom": "3 × 7 min à allure marathon",
+         "reps": 3, "effort_s": 420, "recup_s": 150, "zone": "marathon",
+         "pourquoi": "Début de l'affûtage : l'allure reste, le volume baisse."},
+    26: {"forme": "intervalles", "nom": "4 × 3 min à allure marathon",
+         "reps": 4, "effort_s": 180, "recup_s": 90, "zone": "marathon",
          "pourquoi": "Affûtage : on rappelle l'allure aux jambes, rien de "
                      "plus."},
+    27: {"forme": "intervalles", "nom": "3 × 90 s à allure marathon",
+         "reps": 3, "effort_s": 90, "recup_s": 90, "zone": "marathon",
+         "pourquoi": "Dernier rappel avant Barcelone. Tu dois finir frais."},
 }
+
+# Ce qu'une seance de qualite garde comme marge autour du travail. Le
+# fractionne et le seuil demandent d'arriver chaud ; l'allure marathon, moins.
+MARGE = {"marathon": (8, 4), "semi": (10, 5)}
+MARGE_DEFAUT = (12, 5)
 
 # Sorties longues qui se terminent plus vite que leur debut.
 FINALE = {
@@ -327,19 +410,87 @@ def _endurance(minutes, zones, nom="Endurance fondamentale"):
     }
 
 
-def _qualite(q, zones):
-    et = [_etape("Échauffement", zones, "ef", duree_s=ECHAUFFEMENT_S,
+def _travail_s(reps, q):
+    """Duree du bloc de travail, recuperations comprises."""
+    return reps * q["effort_s"] + max(0, reps - 1) * q["recup_s"]
+
+
+def _tient(q, minutes):
+    """Combien de repetitions tiennent dans le creneau prevu par le plan.
+
+    Le creneau vient du plan, et le plan le tient du midi d'Alex : une
+    seance qui deborde ne se fait pas. Plutot que d'allonger la seance, on
+    retire des repetitions, en gardant l'echauffement et le retour au calme
+    intacts. Une semaine allegee par l'adaptation raccourcit donc aussi sa
+    seance de qualite, ce qui est exactement ce qu'on veut.
+    """
+    ech, ret = MARGE.get(q["zone"], MARGE_DEFAUT)
+    place = minutes * 60 - (ech + ret) * 60
+    reps = q["reps"]
+    while reps > 1 and _travail_s(reps, q) > place:
+        reps -= 1
+    return reps
+
+
+def _qualite(q, zones, minutes):
+    """Une seance de qualite qui remplit le creneau, sans le deborder.
+
+    Le travail est fixe, c'est l'echauffement et le retour au calme qui
+    absorbent ce qui reste. Avant, la seance durait ce qu'elle durait et le
+    programme affichait 36 min la ou la semaine en comptait 45.
+    """
+    reps = _tient(q, minutes)
+    ech_min, ret_min = MARGE.get(q["zone"], MARGE_DEFAUT)
+    reste = max(0, minutes * 60 - _travail_s(reps, q))
+    # Les deux tiers du reste devant, un tiers derriere : on court mieux
+    # chaud qu'on ne recupere en trottant.
+    ech = max(ech_min * 60, int(reste * .62))
+    ret = max(ret_min * 60, reste - ech)
+
+    nom = q.get("nom")
+    if reps != q["reps"] and nom:
+        nom = nom.replace("%d ×" % q["reps"], "%d ×" % reps, 1)
+
+    et = [_etape("Échauffement", zones, "ef", duree_s=ech,
                  consigne="Progressif, sans jamais forcer.")]
-    for i in range(q["reps"]):
-        et.append(_etape("Effort %d sur %d" % (i + 1, q["reps"]), zones,
+    for i in range(reps):
+        et.append(_etape("Effort %d sur %d" % (i + 1, reps), zones,
                          q["zone"], duree_s=q["effort_s"],
                          consigne="Allure régulière du début à la fin."))
-        if i < q["reps"] - 1:
+        if i < reps - 1:
             et.append(_etape("Récupération", zones, "ef", duree_s=q["recup_s"],
                              consigne="Trot lent, pas d'arrêt complet."))
-    et.append(_etape("Retour au calme", zones, "ef", duree_s=RETOUR_S))
-    duree = sum(e["duree_s"] for e in et) // 60
-    return {"type": "course", "nom": q["nom"], "duree_min": duree,
+    et.append(_etape("Retour au calme", zones, "ef", duree_s=ret,
+                     consigne="Jusqu'à ce que la respiration redevienne "
+                              "normale."))
+    return {"type": "course", "nom": nom, "duree_min": sum(
+        e["duree_s"] for e in et) // 60, "pourquoi": q["pourquoi"],
+        "etapes": et, "qualite": True}
+
+
+def _lignes(q, zones, minutes):
+    """De l'endurance, puis des accelerations breves.
+
+    Une ligne droite n'est pas une seance de qualite : elle dure vingt
+    secondes, elle ne creuse aucune fatigue, et elle garde la foulee vive
+    les semaines ou la sortie longue porte deja tout le travail.
+    """
+    bloc = _travail_s(q["reps"], q)
+    ef = max(60, minutes * 60 - bloc)
+    et = [_etape("Endurance", zones, "ef", duree_s=ef,
+                 consigne="Conversation entière possible. Sinon, ralentis.")]
+    for i in range(q["reps"]):
+        et.append(_etape("Ligne droite %d sur %d" % (i + 1, q["reps"]), zones,
+                         q["zone"], duree_s=q["effort_s"],
+                         consigne="Vite mais relâché, jamais en force."))
+        if i < q["reps"] - 1:
+            et.append(_etape("Retour au trot", zones, "ef",
+                             duree_s=q["recup_s"],
+                             consigne="Marche ou trot, la respiration doit "
+                                      "redescendre."))
+    return {"type": "course",
+            "nom": "Endurance et %d lignes droites" % q["reps"],
+            "duree_min": sum(e["duree_s"] for e in et) // 60,
             "pourquoi": q["pourquoi"], "etapes": et}
 
 
@@ -404,8 +555,12 @@ def programme(w, calibration, courses):
 
     s2 = w.get("seance2_min")
     q = QUALITE.get(w["semaine"])
-    if q and s2:
-        out.append(pose(_qualite(q, zones), JOUR_S2, ESPACEE))
+    if q and s2 and q["forme"] == "lignes":
+        # Des lignes droites ne fatiguent pas : elles peuvent tomber
+        # n'importe quel jour, comme une sortie facile.
+        out.append(pose(_lignes(q, zones, s2), JOUR_S2, LIBRE))
+    elif q and s2:
+        out.append(pose(_qualite(q, zones, s2), JOUR_S2, ESPACEE))
     elif s2:
         out.append(pose(_endurance(s2, zones), JOUR_S2, LIBRE))
 

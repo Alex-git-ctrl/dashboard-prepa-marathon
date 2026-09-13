@@ -490,8 +490,13 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 /* Vingt-sept semaines ne se partagent pas une ligne : la bande defile et
    chaque bouton garde sa largeur. La barre de defilement est masquee, le
    geste reste. */
-.seg-l{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.seg-l::-webkit-scrollbar{display:none}
+.seg-l{overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;cursor:grab;overscroll-behavior-x:contain}
+.seg-l.seg-tire{cursor:grabbing;scroll-behavior:auto}
+.seg-l.seg-tire button{pointer-events:none}
+.seg-l::-webkit-scrollbar{height:6px}
+.seg-l::-webkit-scrollbar-thumb{background:var(--acier);border-radius:3px}
+.seg-l::-webkit-scrollbar-track{background:transparent}
 .seg-l button{flex:0 0 auto;padding-left:var(--s4);padding-right:var(--s4)}
 
 .seg button:hover{color:var(--encre)}

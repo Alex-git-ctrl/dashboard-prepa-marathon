@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-09-12",
+  "genere_le": "2026-09-13",
   "athlete": "Alex Gourdou",
   "depart": {
     "volume_km": 12,
@@ -316,7 +316,7 @@
       "seance2_min": 45,
       "volume_km": 39.8,
       "course": null,
-      "note": "Séance 2 : 3 × 10 min au seuil."
+      "note": "Séance 2 : 3 × 8 min au seuil."
     },
     {
       "semaine": 18,

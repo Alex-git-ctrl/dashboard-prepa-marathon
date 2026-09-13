@@ -29,6 +29,11 @@ ZONES = [
      "Fractions spécifiques à partir de la semaine 13"),
     ("seuil", "Seuil", 0.86, 0.89, "Séances de 3 × 10 min, blocs 3 et 4"),
     ("dix", "Allure 10 km", 0.90, 0.93, "Rythme de course sur 10 km"),
+    # Le fractionne court se court au-dessus de l'allure 10 km. La borne
+    # haute reste sous la vitesse a VO2max : on cherche l'economie de
+    # foulee, pas un record sur 400 m.
+    ("vma", "Fractionné court", 0.95, 0.98,
+     "Répétitions de 1 à 3 min, blocs 1 et 2"),
 ]
 
 
