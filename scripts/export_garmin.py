@@ -96,14 +96,22 @@ def workout_doc(seance):
 
 
 def evenements(programme, semaines):
-    """Un evenement par seance de course, sur les N premieres semaines."""
+    """Un evenement par seance de course a venir, sur les N premieres semaines.
+
+    La semaine en cours est presque toujours entamee : sans le filtre sur la
+    date, l envoi posait sur le calendrier les seances de lundi et mardi qui
+    sont deja courues, et la montre proposait de refaire hier.
+    """
     out = []
+    today = date.today()
     for w in programme[:semaines]:
         lundi = date.fromisoformat(w["lundi"])
         for s in w["seances"]:
             if s["type"] != "course" or s.get("course") or not s.get("etapes"):
                 continue
             jour = lundi + timedelta(days=JOURS.index(s["jour_suggere"]))
+            if jour < today:
+                continue
             doc = workout_doc(s)
             # Pas de `description` : elle ferait recompiler la seance depuis le
             # texte et effacerait toutes les etapes.
