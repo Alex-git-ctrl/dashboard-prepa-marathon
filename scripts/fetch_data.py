@@ -373,10 +373,16 @@ def main():
 
     # Le programme detaille suit l'adaptation : il doit dire ce qu'il faut
     # faire vraiment, pas ce que le plan demandait avant de t'ecouter.
+    # Tout le plan restant, pas seulement les trois semaines suivantes : on
+    # veut pouvoir regarder a quoi ressemblera le bloc de janvier. Brut, ca
+    # pese une centaine de kilo-octets, mais les consignes se repetent d'une
+    # semaine a l'autre et le tout descend a six kilo-octets une fois
+    # compresse, ce que fait GitHub Pages.
     metrics["programme"] = seances_type.construit(
         PLAN, metrics["calibration"],
         metrics["adaptation"]["semaines_ajustees"],
-        metrics["adaptation"]["semaine_courante"])
+        metrics["adaptation"]["semaine_courante"],
+        combien=len(PLAN["semaines"]))
 
     metrics["resumes"] = resume_ia.construit(
         seances, PLAN, metrics["calibration"], ROOT)

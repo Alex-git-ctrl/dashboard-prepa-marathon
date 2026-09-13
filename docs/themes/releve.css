@@ -487,6 +487,13 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
   padding:var(--s2) var(--s1);border-radius:var(--r1);font-family:inherit;
   font-size:var(--t3);font-weight:500;color:var(--sourd);cursor:pointer;
   transition:background .15s,color .15s;letter-spacing:-.01em}
+/* Vingt-sept semaines ne se partagent pas une ligne : la bande defile et
+   chaque bouton garde sa largeur. La barre de defilement est masquee, le
+   geste reste. */
+.seg-l{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg-l::-webkit-scrollbar{display:none}
+.seg-l button{flex:0 0 auto;padding-left:var(--s4);padding-right:var(--s4)}
+
 .seg button:hover{color:var(--encre)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--encre);
   font-weight:600}

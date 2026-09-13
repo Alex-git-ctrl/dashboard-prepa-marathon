@@ -1060,11 +1060,17 @@ function detailSeance(s) {
   const auj = JOURS[(today.getDay() + 6) % 7];
   let k = 0;
 
-  $('prog-sem').innerHTML = '<div class="seg" role="group" '
-    + 'aria-label="Semaine du programme">' + P.map((w, i) =>
-      '<button type="button" data-i="' + i + '" aria-pressed="' + (i === 0)
-      + '">S' + w.semaine + (i === 0 ? ' · en cours' : '') + '</button>').join('')
-    + '</div>';
+  // Le plan entier est la, pas seulement les trois semaines suivantes. Au-dela
+  // de quatre boutons la bande ne peut plus les partager : elle defile.
+  $('prog-sem').innerHTML = '<div class="seg' + (P.length > 4 ? ' seg-l' : '')
+    + '" role="group" aria-label="Semaine du programme">' + P.map((w, i) => {
+      // Une semaine de course se repere de loin : c'est ce qu'on cherche
+      // quand on fait defiler vingt-sept boutons.
+      const course = (w.seances || []).some(x => x.course);
+      return '<button type="button" data-i="' + i + '" aria-pressed="'
+        + (i === 0) + '">S' + w.semaine
+        + (i === 0 ? ' · en cours' : course ? ' · course' : '') + '</button>';
+    }).join('') + '</div>';
 
   function duree(s) {
     if (s.duree_min) return s.duree_min + ' min';
@@ -1120,9 +1126,10 @@ function detailSeance(s) {
         + '</article>';
     }).join('');
 
-    $('prog-n').innerHTML = 'Semaine ' + w.semaine + ', objectif '
-      + km1(w.volume_km) + ' km, du ' + dshort(w.lundi) + ' au '
-      + dshort(w.dimanche) + '.'
+    $('prog-n').innerHTML = 'Semaine ' + w.semaine + ' sur '
+      + PLAN.semaines.length + ', objectif ' + km1(w.volume_km) + ' km, du '
+      + dshort(w.lundi) + ' au ' + dshort(w.dimanche)
+      + (i === 0 ? ', en cours' : ' · dans ' + jrs(w.lundi) + ' jours') + '.'
       + (w.adapte ? ' <b>Volume réécrit</b> d’après ce que tu as fait.' : '')
       + (w.note ? ' ' + w.note : '')
       // L'intention de la phase de calisthenie : une fois ici, au lieu d'une
@@ -1137,7 +1144,10 @@ function detailSeance(s) {
     const b = e.target.closest('button');
     if (!b) return;
     k = +b.dataset.i;
-    [...$('prog-sem').children].forEach(x =>
+    // Les boutons vivent dans .seg, ils ne sont pas enfants directs de
+    // #prog-sem : viser les enfants directs posait aria-pressed sur la bande
+    // elle-meme, et la pastille restait collee sur la premiere semaine.
+    $('prog-sem').querySelectorAll('button').forEach(x =>
       x.setAttribute('aria-pressed', +x.dataset.i === k ? 'true' : 'false'));
     dessine(k);
   });
