@@ -52,6 +52,11 @@ BILANS_PLEINS = 8
 BILANS_RELUS = 3
 TRACE = ("quand", "verdict", "confiance", "titre", "essentiel")
 
+# Le cache des bilans. metrics.json est reconstruit de zero a chaque
+# collecte : ce qui n'a pas de fichier a soi disparait au prochain
+# passage de fetch_data. C'est le meme role que docs/resumes.json.
+CACHE = "bilans.json"
+
 SYSTEME = """Tu fais le bilan d'ensemble de la préparation d'un coureur pour \
 le marathon de Barcelone du 14 mars 2027, objectif sous 4 heures, soit 5:41 \
 au kilomètre. Il court trois fois par semaine et fait deux séances de \
@@ -291,6 +296,20 @@ def cout():
     print("  n'augmente plus. Il n'y a pas d'effet boule de neige.")
 
 
+def lis_cache():
+    """La serie des bilans, depuis son fichier. Vide si le fichier manque."""
+    chemin = os.path.join(ROOT, "docs", CACHE)
+    if not os.path.exists(chemin):
+        return []
+    with io.open(chemin, encoding="utf-8") as fh:
+        return json.load(fh) or []
+
+
+def ecris_cache(serie):
+    io.open(os.path.join(ROOT, "docs", CACHE), "w", encoding="utf-8").write(
+        json.dumps(serie, ensure_ascii=False, indent=1))
+
+
 def elague(serie):
     """Garde le texte des derniers bilans, une trace pour les plus anciens."""
     garde = []
@@ -322,7 +341,7 @@ def main():
         return
 
     if not args.auto:
-        serie = _lis("metrics.json").get("bilans") or []
+        serie = lis_cache()
         if not serie:
             print("Aucun bilan pour l'instant.")
             print("  python scripts/bilan.py --auto")
@@ -336,7 +355,8 @@ def main():
         return
 
     m = _lis("metrics.json")
-    vieux = m.get("bilan") or {}
+    serie = lis_cache()
+    vieux = serie[-1] if serie else {}
     empreinte = _empreinte(c)
     # Un bilan general ne change pas d'un jour a l'autre. On ne le refait que
     # si une seance ou une semaine a bouge : c'est ce qui borne la depense a
@@ -368,9 +388,13 @@ def main():
     out["quand"] = datetime.now().isoformat(timespec="seconds")
     out["empreinte"] = empreinte
     out["source"] = "claude_conversation"
-    m["bilans"] = elague((m.get("bilans") or []) + [out])
-    # Conserve pour compatibilite : la page lit la serie, mais un vieux
-    # gabarit ou un script tiers pourrait encore chercher le dernier ici.
+    serie = elague(serie + [out])
+    ecris_cache(serie)
+    # La page lit metrics.json, pas le cache : sans ce report le bilan
+    # n'apparaitrait qu'apres la prochaine collecte.
+    m["bilans"] = serie
+    # Conserve pour compatibilite : un vieux gabarit ou un script tiers
+    # pourrait encore chercher le dernier bilan ici.
     m["bilan"] = out
     io.open(os.path.join(ROOT, "docs", "metrics.json"), "w",
             encoding="utf-8").write(

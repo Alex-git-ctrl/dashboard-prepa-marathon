@@ -387,6 +387,17 @@ def main():
     metrics["resumes"] = resume_ia.construit(
         seances, PLAN, metrics["calibration"], ROOT)
 
+    # Les bilans ont leur propre fichier, comme les resumes : metrics.json
+    # etant reconstruit de zero ici, tout ce qui n'a pas de cache a soi
+    # disparaitrait au premier passage de la collecte automatique.
+    bilans = os.path.join(ROOT, "docs", "bilans.json")
+    if os.path.exists(bilans):
+        with open(bilans, encoding="utf-8") as fh:
+            serie = json.load(fh) or []
+        if serie:
+            metrics["bilans"] = serie
+            metrics["bilan"] = serie[-1]
+
     # ---- Alertes ----
     plan = PLAN
     sem_courante = (today - S1).days // 7 + 1
