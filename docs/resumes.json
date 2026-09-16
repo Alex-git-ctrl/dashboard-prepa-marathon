@@ -31,5 +31,14 @@
     "source": "claude_conversation",
     "fige": true,
     "date_redaction": "2026-09-12"
+  },
+  "2026-09-16": {
+    "verdict": "attention",
+    "titre": "Analyse automatique",
+    "execution": "38 % du temps en endurance. C'est trop rapide pour une séance qui doit construire la base aérobie. Dérive cardiaque de 30 %, au-delà du seuil de 5 % : la fin de séance a coûté cher. Première moitié à 6:16/km, seconde à 5:00/km. Avec 71 m de dénivelé, l'allure vaut 5:08/km sur le plat.",
+    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
+    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
+    "source": "regles",
+    "cle": "45ce9f55bc8412ef"
   }
 }
