@@ -34,11 +34,13 @@
   },
   "2026-09-16": {
     "verdict": "attention",
-    "titre": "Analyse automatique",
-    "execution": "38 % du temps en endurance. C'est trop rapide pour une séance qui doit construire la base aérobie. Dérive cardiaque de 30 %, au-delà du seuil de 5 % : la fin de séance a coûté cher. Première moitié à 6:16/km, seconde à 5:00/km. Avec 71 m de dénivelé, l'allure vaut 5:08/km sur le plat.",
-    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "45ce9f55bc8412ef"
+    "titre": "Sortie facile courue en allure seuil",
+    "essentiel": "5:17/km de moyenne avec 61 % du temps en Z4/Z5 et une dérive cardiaque de 30 % : bien trop intense pour 30 minutes.",
+    "execution": "FC moyenne à 160, pic à 198, proche du max sur toute la sortie. Tu es parti à 6:16/km puis as accéléré à 5:00/km en seconde moitié, largement en zone seuil.",
+    "conformite": "Rien n'était prévu au plan ce jour, mais le bloc vise l'endurance fondamentale (6:03 à 6:42/km) : tu as couru bien plus vite.",
+    "objectif": "Une séance de ce bloc doit poser du volume facile à basse intensité : ici l'intensité l'a empêchée de jouer ce rôle.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-16"
   }
 }

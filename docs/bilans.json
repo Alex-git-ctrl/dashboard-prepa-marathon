@@ -10,5 +10,29 @@
   "quand": "2026-09-12T17:30:22",
   "empreinte": "b7c10333b5dd6dcd",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Encore tôt, mais VFC redressée à 63 ms",
+  "essentiel": "1 semaine terminée sur 27, la VFC remonte à 63 ms comme demandé : trop tôt pour juger la trajectoire complète.",
+  "ou_tu_en_es": "Depuis le dernier bilan, la VFC est passée de 43 à 63 ms, quasiment au niveau demandé (64 ms). Semaine 1 bouclée à 16,1 km sur 19,5 prévus (2 séances sur 3), coût d'entraînement faible (indice 29) et forme de fond en hausse (+1,88/semaine). Seul point noir : la dérive cardiaque grimpe sortie après sortie, de -1,1 % à 8,0 %.",
+  "viser_plus_haut": "Le VDOT projette 3h40, largement sous les 3h59 visés, mais c'est calculé sur un 10 km estimé, jamais couru : ne relève pas l'objectif là-dessus. Il faudrait un 10 km chronométré réel et six semaines de plan bouclées avant de trancher.",
+  "a_changer": "La consigne VFC est tenue : elle est passée à 63 ms, proche des 64 ms visés. Priorité : ralentir les sorties d'endurance, 68,3 % du temps en zone 3, pour faire redescendre la dérive cardiaque à 8,0 %.",
+  "quand": "2026-09-14T23:25:58",
+  "empreinte": "bd22643c799d01b1",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Encore tôt, dérive cardiaque grimpe à 30 %",
+  "essentiel": "1 semaine bouclée sur 27 (ratio 0,826) et une dérive cardiaque à 30 % le 16/09 : trop tôt pour juger, mais le signal inquiète.",
+  "ou_tu_en_es": "Le temps en zone 3 recule de 68,3 % à 58,5 %, mais la dérive cardiaque grimpe à 30 % sur la sortie du 16/09. VFC et FC repos progressent bien (75 ms, 47 bpm), la forme de fond aussi (+1,9/semaine). Mais la fatigue explose (+8,4/semaine), le sommeil tombe à 5,7 h, et la semaine 2 n'affiche que 5,6 km sur 23,1 prévus.",
+  "viser_plus_haut": "La projection donne 3h40 (5:14/km), bien sous la cible de 3h59, mais elle sort d'un 10 km estimé, jamais couru. Il faudrait un vrai chrono sur 10 km ou semi pour trancher, pas avant.",
+  "a_changer": "La consigne de ralentir n'a pas tenu : la sortie du 16/09 était à 5:17/km, plus rapide qu'avant, avec une dérive à 30 %. Priorité : allure d'endurance nettement plus lente et sommeil remonté au-dessus de 6 h.",
+  "quand": "2026-09-16T23:14:10",
+  "empreinte": "7c747101843e4629",
+  "source": "claude_conversation"
  }
 ]
