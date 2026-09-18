@@ -1,0 +1,7 @@
+{
+  "nom": "Santé",
+  "resume": "D'après l'appli Santé d'Apple. Fond quasi noir, cartes gris foncé sans bordure ni ombre, une icône colorée par famille de signal devant chaque titre, des graphiques sans quadrillage.",
+  "theme_color_clair": "#000000",
+  "theme_color_sombre": "#000000",
+  "polices": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+}

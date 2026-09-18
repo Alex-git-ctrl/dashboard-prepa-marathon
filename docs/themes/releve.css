@@ -228,6 +228,30 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .rlg span{display:flex;align-items:center;gap:var(--s2)}
 .rlg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
 
+/* ---------- cartes santé : une reglure, pas une carte ----------
+   Meme patron que les deux autres themes (icone coloree, libelle, phrase,
+   filet, graphique), mais sans aplat ni rayon : ici aussi le contenu se pose
+   sur la craie, separe par un filet du haut comme .list. Sans ces regles,
+   .hcard-ic n'a aucun style et le svg garde son remplissage noir par defaut
+   du navigateur : l'icone reste "en mode sombre" quel que soit le theme. */
+.hcard{border-top:1px solid var(--filet);padding-top:var(--s4)}
+.hcard-h{display:flex;align-items:center;gap:var(--s3)}
+.hcard-ic{width:24px;height:24px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center}
+.hcard-ic svg{stroke:currentColor;fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.hcard-t{font-size:var(--t4);font-weight:600;letter-spacing:-.015em}
+.hcard-i{font-size:var(--t3);color:var(--sourd);line-height:1.45;
+  margin:var(--s3) 0 0}
+.hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
+.hcard .cb,.hcard .anneau,.hcard .gc{margin-top:var(--s3)}
+
+.bl-t{display:flex;align-items:center;gap:var(--s2)}
+.bl-ic{width:22px;height:22px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center}
+.bl-ic svg{stroke:currentColor;fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+
 /* ---------- alertes ----------
    Le filet de gauche portait deja le sens. La boite autour ne portait rien :
    elle disparait, le filet reste. */

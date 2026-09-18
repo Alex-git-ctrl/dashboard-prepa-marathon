@@ -2,8 +2,14 @@ name: Mise a jour du tableau de bord
 
 on:
   schedule:
-    - cron: '0 5 * * *'      # 07h00 heure de Paris : le bilan de la veille
-    - cron: '0 19 * * *'     # 21h00 heure de Paris : la seance du jour
+    - cron: '13 5 * * *'      # ~07h13 heure de Paris : le bilan de la veille
+    - cron: '17 19 * * *'     # ~21h17 heure de Paris : la seance du jour
+    # GitHub retarde les schedules programmes pile a l'heure ronde (grosse
+    # congestion partagee entre tous les depots). Decaler de quelques minutes
+    # ne supprime pas le retard sur un petit depot peu actif (deja constate :
+    # 2 a 5h de retard certains jours), mais le reduit. Seul un declencheur
+    # externe (service de cron qui appelle workflow_dispatch via l'API)
+    # garantirait l'heure pile.
   workflow_dispatch:          # bouton "Run workflow" dans l'onglet Actions
 
 permissions:

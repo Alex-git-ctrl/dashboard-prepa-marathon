@@ -2,11 +2,11 @@
  {
   "verdict": "trop_tot",
   "confiance": "faible",
-  "titre": "Encore trop tÃ´t, sommeil et VFC en alerte",
-  "essentiel": "0 semaine terminÃ©e sur 27 et une VFC tombÃ©e Ã  43 ms : rien ne permet encore de juger la prÃ©paration.",
-  "ou_tu_en_es": "16,1 km sur 19,5 prÃ©vus, 2 sÃ©ances sur 3, volume tenu Ã  83 %. VFC Ã  43 ms (moyenne 64,22) et sommeil Ã  5,2 h (moyenne 5,86) : identiques aux deux bilans du jour, rien n'a bougÃ©. DÃ©rive cardiaque en hausse continue, 68,3 % du temps passÃ© en zone 3 contre 22,8 % en zone 2.",
-  "viser_plus_haut": "Non : les 3h40 projetÃ©s reposent sur un 10 km de 48:00 jamais couru, pas une mesure. Il faut un chrono rÃ©el et six semaines de plan bouclÃ©es avant de rediscuter la cible.",
-  "a_changer": "Le sommeil n'a pas encore pu Ãªtre testÃ©, les chiffres sont identiques aux deux bilans prÃ©cÃ©dents (5,2 h, VFC 43 ms). PrioritÃ© inchangÃ©e : ne touche pas au volume tant que la VFC ne remonte pas vers 64 ms.",
+  "titre": "Encore trop tôt, sommeil et VFC en alerte",
+  "essentiel": "0 semaine terminée sur 27 et une VFC tombée à 43 ms : rien ne permet encore de juger la préparation.",
+  "ou_tu_en_es": "16,1 km sur 19,5 prévus, 2 séances sur 3, volume tenu à 83 %. VFC à 43 ms (moyenne 64,22) et sommeil à 5,2 h (moyenne 5,86) : identiques aux deux bilans du jour, rien n'a bougé. Dérive cardiaque en hausse continue, 68,3 % du temps passé en zone 3 contre 22,8 % en zone 2.",
+  "viser_plus_haut": "Non : les 3h40 projetés reposent sur un 10 km de 48:00 jamais couru, pas une mesure. Il faut un chrono réel et six semaines de plan bouclées avant de rediscuter la cible.",
+  "a_changer": "Le sommeil n'a pas encore pu être testé, les chiffres sont identiques aux deux bilans précédents (5,2 h, VFC 43 ms). Priorité inchangée : ne touche pas au volume tant que la VFC ne remonte pas vers 64 ms.",
   "quand": "2026-09-12T17:30:22",
   "empreinte": "b7c10333b5dd6dcd",
   "source": "claude_conversation"

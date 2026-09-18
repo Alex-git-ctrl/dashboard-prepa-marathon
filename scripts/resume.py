@@ -157,10 +157,14 @@ def redige(cible, contexte_json):
                        "Voici la seance a analyser.\n\n" + contexte_json)
 
 
-# Les sequences que produit un texte UTF-8 relu comme du cp1252. Si l'une
-# d'elles apparait, le texte est deja abime et il ne faut pas l'ecrire.
-MOJIBAKE = ("\u00c3\u00a9", "\u00c3\u00a8", "\u00c3\u00a0", "\u00c3\u00aa",
-            "\u00e2\u20ac", "\u00c3\u00a7", "\u00c5\u0093")
+# Les sequences que produit un texte UTF-8 relu comme du cp1252. Cette liste
+# a rate "t\u00c3\u00b4t" le 12/09 : elle enumerait les bigrammes deja vus (\u00c3\u00a9, \u00c3\u00a8, \u00c3 ,
+# \u00c3 \u00aa, \u00c3\u00a7, \u00c5"...) mais pas \u00c3\u00b4, ni \u00c3\u00a2, \u00c3\u00ae, \u00c3\u00b9, \u00c3\u00af, \u00c3\u00bc. Plutot que d'attendre
+# de decouvrir chaque lettre accentuee une par une, on detecte le symptome
+# lui-meme : le francais n'emploie jamais la lettre "\u00c3" isolee, donc sa
+# seule presence dans le texte signe un accent casse, quelle que soit la
+# lettre qui suit.
+MOJIBAKE = ("\u00c3",)
 
 
 def normalise(out, cles):

@@ -14,6 +14,7 @@ __THEME__
     <h1>Aujourd'hui</h1>
     <p class="lede" id="lede"></p>
     <div id="hero"></div>
+    <div class="sec" id="sec-tendances" hidden><h2>Tendances</h2><div id="tendances"></div></div>
     <div class="sec"><h2>Dernière séance</h2><div id="seance"></div></div>
     <div class="sec"><h2>Surveillance</h2><div id="alerts"></div></div>
     <div class="sec"><h2>Le programme</h2>
@@ -50,8 +51,18 @@ __THEME__
       toujours sur le sommeil et la récupération, rarement sur les séances.</p>
     <div class="sec"><h2>Aujourd'hui</h2><div class="grid" id="sante-tuiles"></div></div>
     <div class="sec"><h2>La nuit</h2>
-      <div class="gc" id="nuits"></div>
-      <p class="note" id="nuits-n"></p></div>
+      <div class="hcard">
+        <div class="hcard-h">
+          <i class="hcard-ic" style="color:var(--sante-sommeil, var(--m-puissance))">
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+              <path d="M15.8 3.5a8.6 8.6 0 1 0 4.7 10.4A7 7 0 0 1 15.8 3.5z"
+                stroke-linejoin="round"/></svg></i>
+          <span class="hcard-t" style="color:var(--sante-sommeil, var(--m-puissance))"
+            >Sommeil, VFC et FC de repos</span></div>
+        <p class="hcard-i" id="nuits-n"></p>
+        <div class="hcard-div"></div>
+        <div class="gc" id="nuits"></div>
+      </div></div>
     <div class="sec"><h2>Évolution</h2>
       <div class="seg" id="sante-seg" role="group"
         aria-label="Période d'agrégation"></div>
@@ -113,9 +124,20 @@ const km1 = v => nf(Math.round(v * 10) / 10);
 const CHEVRON = '<svg class="bl-c" viewBox="0 0 24 24" aria-hidden="true">'
   + '<path d="M6 9.5l6 6 6-6"/></svg>';
 
-function bloc(titre, resume, contenu, ouvert) {
+/** `meta`, s'il est fourni, est {icon, color} : un fragment de <path> et une
+    couleur CSS. Un theme sans regle .bl-ic l'ignore sans casser, l'icone
+    reste un petit trait colore de 16 px devant le titre grace a la taille
+    fixee en attribut plutot qu'en CSS. Sans meta le titre est identique a
+    avant : ce parametre est purement additif. */
+function bloc(titre, resume, contenu, ouvert, meta) {
+  const ttl = meta
+    ? '<span class="bl-t"><i class="bl-ic" style="color:' + meta.color + '">'
+      + '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">'
+      + meta.icon + '</svg></i><span style="color:' + meta.color + '">'
+      + titre + '</span></span>'
+    : '<span class="bl-t">' + titre + '</span>';
   return '<details class="bl"' + (ouvert ? ' open' : '') + '>'
-    + '<summary><span class="bl-t">' + titre + '</span>'
+    + '<summary>' + ttl
     + '<span class="bl-r">' + (resume || '') + '</span>' + CHEVRON
     + '</summary><div class="bl-d">' + contenu + '</div></details>';
 }
@@ -176,6 +198,32 @@ const SYM = {
   check:'<circle cx="12" cy="12" r="9.4"/><path d="M7.6 12.3l3 3 5.8-6.2"/>',
   dot:'<circle cx="12" cy="12" r="9.4"/><path d="M8.4 12h7.2"/>',
 };
+
+/* ---------- icones et couleurs des cartes sante ----------
+   Un petit vocabulaire reutilise par plusieurs graphiques : l'activite en
+   orange, le coeur en rouge ou en sarcelle selon qu'il s'agit de la FC de
+   repos ou de la VFC, le sommeil en violet, le score compose en bleu. Chaque
+   couleur passe par une variable --sante-* optionnelle avec un repli sur un
+   token deja exige de tous les themes (--veille, --m-fc, --m-puissance,
+   --mesure) : un theme qui ne connait pas la palette sante affiche quand
+   meme une icone coloree coherente, au lieu d'une icone noire ou invisible. */
+const IC_SANTE = {
+  activite:'<path d="M12 21c-4.1 0-7.4-2.9-7.4-7 0-3.5 2.2-5.7 3.3-8.7.5 2 '
+    + '1.9 2.8 2.8 2.1.7-2.8-.2-5.2-1-7 3.9.9 7.6 4.6 7.6 9.8 0 1-.1 1.8-.4 '
+    + '2.6 1-.7 1.7-1.9 2-3.2 1 1.5 1.5 3.1 1.5 4.4 0 4.1-3.4 7-7.4 7z"'
+    + ' stroke-linejoin="round"/>',
+  coeur:'<path d="M12 20.4C6.2 16.2 3 13.1 3 9.6A5 5 0 0 1 12 6.6 5 5 0 0 1 21 '
+    + '9.6c0 3.5-3.2 6.6-9 10.8z" stroke-linejoin="round"/>',
+  lune:'<path d="M15.8 3.5a8.6 8.6 0 1 0 4.7 10.4A7 7 0 0 1 15.8 3.5z"'
+    + ' stroke-linejoin="round"/>',
+  score:'<path d="M13.2 2.6 5.4 13.4h5.1l-1 8 8.1-11.3h-5.2l.8-7.5z"'
+    + ' stroke-linejoin="round"/>',
+};
+const COL_ACTIVITE = 'var(--sante-activite, var(--veille))';
+const COL_COEUR = 'var(--sante-coeur, var(--m-fc))';
+const COL_VFC = 'var(--sante-vfc, var(--m-fc))';
+const COL_SOMMEIL = 'var(--sante-sommeil, var(--m-puissance))';
+const COL_SCORE = 'var(--sante-score, var(--mesure))';
 const TABS = [['today', 'Accueil', "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
   ['prog', 'Progrès', 'Progression'], ['sante', 'Santé', 'Santé'],
   ['sea', 'Séances', 'Séances'], ['data', 'Données', 'Données']];
@@ -251,6 +299,204 @@ $('lede').textContent = cur < 1
       <span>Bloc 1 → 5</span></div></div>`;
   const rb = document.querySelector('.ruban');
   if (rb) rb.scrollLeft = Math.max(0, (cur - 1) / n * rb.scrollWidth - rb.clientWidth / 2);
+})();
+
+/* ================= tendances ================= */
+/* ---------- carte de tendance ----------
+   Des barres sourdes par periode, une ligne grise pour la moyenne de fond et
+   une ligne d'accent pour la moyenne recente. Pas de quadrillage, pas
+   d'axe des valeurs : la lecture tient dans les deux lignes et les deux
+   nombres qui les accompagnent, comme les cartes "tendance" de Sante d'Apple.
+   `pts` est un tableau ordonne de {v, lbl}, `lbl` etant l'etiquette affichee
+   uniquement sous la premiere et la derniere barre. */
+function tendance(box, pts, opt) {
+  opt = opt || {};
+  if (!pts.length) {
+    box.innerHTML = '<div class="wait">' + (opt.wait || 'En attente') + '</div>';
+    return null;
+  }
+  const W = 520, H = 118, L = 4, R = 4, TOP = 20, BOT = 20;
+  const n = pts.length;
+  const mx = Math.max(...pts.map(p => p.v), 1e-9);
+  const step = (W - L - R) / n;
+  const barW = Math.max(5, Math.min(30, step * .5));
+  const cx = i => L + step * i + step / 2;
+  const y = v => TOP + (1 - v / mx) * (H - TOP - BOT);
+  const nRecent = Math.min(opt.recent || 4, n);
+  const recent = pts.slice(-nRecent);
+  const moyRecent = recent.reduce((a, p) => a + p.v, 0) / recent.length;
+  const moyBase = pts.reduce((a, p) => a + p.v, 0) / n;
+  const col = opt.color || 'var(--mesure)';
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.alt || ''}">`;
+  pts.forEach((p, i) => {
+    const hb = Math.max(2, (H - TOP - BOT) * (p.v / mx));
+    s += `<rect x="${(cx(i) - barW / 2).toFixed(1)}" y="${(H - BOT - hb).toFixed(1)}"
+      width="${barW.toFixed(1)}" height="${hb.toFixed(1)}" rx="${(barW / 2).toFixed(1)}"
+      fill="var(--b3)"/>`;
+  });
+  // La moyenne de fond en pointille gris, celle des periodes recentes en
+  // trait plein de la couleur du panneau : c'est elle qui dit si ca monte.
+  const yb = y(moyBase), yr = y(moyRecent);
+  s += `<line x1="${L}" y1="${yb.toFixed(1)}" x2="${W - R}" y2="${yb.toFixed(1)}"
+    stroke="var(--acier)" stroke-width="1.6" stroke-dasharray="1 4"
+    stroke-linecap="round"/>`;
+  s += `<line x1="${L}" y1="${yr.toFixed(1)}" x2="${W - R}" y2="${yr.toFixed(1)}"
+    stroke="${col}" stroke-width="2.4" stroke-linecap="round"/>`;
+  s += `<text class="ax" x="${cx(0).toFixed(1)}" y="${H - 4}"
+    text-anchor="middle">${pts[0].lbl}</text>`;
+  s += `<text class="ax" x="${cx(n - 1).toFixed(1)}" y="${H - 4}"
+    text-anchor="end">${pts[n - 1].lbl}</text>`;
+  s += '</svg>';
+  box.innerHTML = s;
+  return {moyRecent, moyBase, nRecent, n};
+}
+
+/* ---------- anneau de preparation ----------
+   Garmin ne remonte ni Body Battery ni un score de recuperation tout fait.
+   On en construit un a partir de trois signaux deja mesures chaque nuit : le
+   score de sommeil, qui se lit deja sur 100 et compte donc pour 40 points ;
+   la variabilite cardiaque et la FC de repos, qui ne disent rien en valeur
+   absolue et comptent pour 35 et 25 points une fois comparees a la moyenne
+   des jours precedents de LA MEME PERSONNE, jamais a une norme externe.
+   Un signal absent ne fait pas chuter le score : il ne participe pas au
+   calcul, et son poids ne va a personne d'autre, exactement comme l'indice
+   de cout de l'adaptation du plan (§ plus haut, meme logique). */
+function arcPath(cx, cy, r, a0, a1) {
+  const rad = d => (d - 90) * Math.PI / 180;
+  const x0 = cx + r * Math.cos(rad(a0)), y0 = cy + r * Math.sin(rad(a0));
+  const x1 = cx + r * Math.cos(rad(a1)), y1 = cy + r * Math.sin(rad(a1));
+  const large = (a1 - a0) > 180 ? 1 : 0;
+  return `M${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large} 1 `
+    + `${x1.toFixed(2)},${y1.toFixed(2)}`;
+}
+
+function anneauPreparation(box) {
+  const S = M.sante || {};
+  const J = (S.jours || []);
+  const jour = J[J.length - 1];
+  if (!jour) {
+    box.innerHTML = '<div class="wait">Se calcule dès la première nuit mesurée.</div>';
+    return null;
+  }
+  const hist = J.slice(0, -1);
+  const moyenne = cle => {
+    const v = hist.map(j => j[cle]).filter(x => x != null);
+    return v.length >= 3 ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+  const baseHrv = moyenne('hrv'), baseFc = moyenne('fc_repos');
+  // Ecart relatif a la moyenne, plafonne a 40 % pour qu'une nuit isolee tres
+  // inhabituelle n'ecrase pas tout le score. inv=true pour la FC de repos,
+  // qui vaut mieux basse que haute.
+  const relatif = (v, base, inv) => {
+    let e = (v - base) / base;
+    if (inv) e = -e;
+    e = Math.max(-.4, Math.min(.4, e));
+    return 50 + e / .4 * 50;
+  };
+
+  const COMP = [];
+  if (jour.sommeil_score != null) COMP.push({nom:'Sommeil', max:40,
+    points:Math.round(jour.sommeil_score / 100 * 40),
+    valeur:Math.round(jour.sommeil_score) + '/100', col:COL_SOMMEIL});
+  if (jour.hrv != null && baseHrv) COMP.push({nom:'Variabilité cardiaque', max:35,
+    points:Math.round(relatif(jour.hrv, baseHrv, false) / 100 * 35),
+    valeur:Math.round(jour.hrv) + ' ms', col:COL_VFC});
+  if (jour.fc_repos != null && baseFc) COMP.push({nom:'FC de repos', max:25,
+    points:Math.round(relatif(jour.fc_repos, baseFc, true) / 100 * 25),
+    valeur:Math.round(jour.fc_repos) + ' bpm', col:COL_COEUR});
+  if (!COMP.length) {
+    box.innerHTML = '<div class="wait">Il faut au moins trois nuits mesurées avant '
+      + 'aujourd’hui pour calculer une moyenne de référence.</div>';
+    return null;
+  }
+  const maxTot = COMP.reduce((t, c) => t + c.max, 0);
+  const total = Math.round(COMP.reduce((t, c) => t + c.points, 0) / maxTot * 100);
+  const mot = total >= 80 ? 'Excellente' : total >= 60 ? 'Bonne'
+    : total >= 40 ? 'Correcte' : 'Faible';
+
+  const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
+  // Largeur et hauteur fixees en attribut, pas seulement en CSS : un theme
+  // qui ne connait pas .anneau svg ne doit pas heriter de la taille par
+  // defaut d'un SVG sans dimension, qui est enorme (300 x 150 CSS, ici
+  // carre donc 300 x 300).
+  let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
+    aria-label="Préparation du jour, ${total} sur 100, ${mot.toLowerCase()}">`;
+  COMP.forEach(c => {
+    const span = c.max / maxTot * 360;
+    const a0 = a + gap / 2, a1 = a + span - gap / 2;
+    svg += `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none"
+      stroke="var(--creux)" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const frac = Math.max(0, Math.min(1, c.points / c.max));
+    const rempli = a0 + (a1 - a0) * frac;
+    if (frac > 0) svg += `<path d="${arcPath(cx, cy, r, a0, rempli)}" fill="none"
+      stroke="${c.col}" stroke-width="${rw}" stroke-linecap="round"/>`;
+    a += span;
+  });
+  svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
+    fill="var(--encre)">${total}</text>
+    <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
+    fill="var(--acier)">sur 100</text></svg>`;
+
+  box.innerHTML = `<div class="anneau"><div class="anneau-c">${svg}
+    <div class="anneau-mot" style="color:${COL_SCORE}">${mot}</div></div>
+    <div class="gc-lg" style="flex-direction:column;align-items:flex-start">
+    ${COMP.map(c => `<span><i style="background:${c.col}"></i>${c.nom} · `
+      + `${c.valeur} · <b style="color:var(--encre)">${c.points}/${c.max}`
+      + '</b></span>').join('')}</div></div>`;
+  return {total, mot};
+}
+
+(function () {
+  const box = $('tendances');
+  if (!box) return;
+  let html = '';
+
+  /* --- volume hebdomadaire couru, en tendance --- */
+  const sems = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
+  const ptsVol = sems.map(k => ({v:M.semaines[k].km, lbl:'S' + k}));
+  if (ptsVol.length) {
+    html += '<div class="hcard"><div class="hcard-h">'
+      + '<i class="hcard-ic" style="color:' + COL_ACTIVITE + '">'
+      + '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">'
+      + IC_SANTE.activite + '</svg></i>'
+      + '<span class="hcard-t" style="color:' + COL_ACTIVITE
+      + '">Volume hebdomadaire</span></div>'
+      + '<p class="hcard-i">' + (ptsVol.length > 1
+        ? 'Le kilométrage réellement couru, semaine après semaine.'
+        : 'La première semaine du plan donne le premier repère.') + '</p>'
+      // .cb, pas .tend : c'est la classe deja largement au format
+      // "largeur 100 %, hauteur automatique" dans les trois themes, la
+      // meme que celle utilisee par lineChart(). Un theme qui ne connait
+      // pas .tend-cap garde quand meme un graphique a la bonne taille.
+      + '<div class="hcard-div"></div><div class="cb" id="tv-vol"></div>'
+      + '<div class="tend-cap" id="tv-vol-cap"></div></div>';
+  }
+
+  /* --- anneau de preparation du jour --- */
+  html += '<div class="hcard"><div class="hcard-h">'
+    + '<i class="hcard-ic" style="color:' + COL_SCORE + '">'
+    + '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">'
+    + IC_SANTE.score + '</svg></i>'
+    + '<span class="hcard-t" style="color:' + COL_SCORE + '">Préparation du jour</span>'
+    + '</div><p class="hcard-i">Sommeil, variabilité cardiaque et FC de repos, '
+    + 'comparés à tes propres moyennes récentes.</p>'
+    + '<div class="hcard-div"></div><div id="tv-anneau"></div></div>';
+
+  box.innerHTML = html;
+  box.hidden = false;
+  $('sec-tendances').hidden = false;
+
+  if (ptsVol.length) {
+    const r = tendance($('tv-vol'), ptsVol, {color:COL_ACTIVITE, recent:4,
+      alt:'Kilomètres courus par semaine'});
+    if (r) $('tv-vol-cap').innerHTML = '<span>moyenne sur ' + r.n
+      + (r.n > 1 ? ' semaines' : ' semaine') + ' · ' + nf(Math.round(r.moyBase))
+      + ' km</span><span style="color:' + COL_ACTIVITE + '">' + r.nRecent
+      + (r.nRecent > 1 ? ' dernières · ' : ' dernière · ')
+      + nf(Math.round(r.moyRecent)) + ' km</span>';
+  }
+  anneauPreparation($('tv-anneau'));
 })();
 
 /* ================= seances : le detail d'apres-course ================= */
@@ -1735,6 +1981,7 @@ $('kpis').innerHTML = [
   const CH = [
     {t:'Volume hebdomadaire', s:'Réalisé contre planifié, en kilomètres',
      k:[['Réalisé', 'var(--mesure)'], ['Planifié', 'var(--acier)']],
+     ic:{icon:IC_SANTE.activite, color:COL_ACTIVITE},
      draw(b) {
        if (!sk.length) { b.innerHTML = '<div class="wait">Se remplit dès la première '
          + 'séance. Le plan démarre lundi 7 septembre.</div>'; return false; }
@@ -1752,14 +1999,17 @@ $('kpis').innerHTML = [
        {wait:'Se construit sur environ 4 semaines de séances. La forme monte '
         + 'lentement, la fatigue vite : leur écart dit si la charge est tenable.'})},
     {t:'FC de repos', s:'Elle baisse quand le cœur se renforce',
+     ic:{icon:IC_SANTE.coeur, color:COL_COEUR},
      draw:b => lineChart(b, [{name:'FC repos', color:'var(--mesure)', data:g('fc_repos')}],
        {unit:' bpm', wait:'Trois nuits mesurées. La courbe devient lisible vers '
         + '3 semaines de données.'})},
     {t:'Variabilité cardiaque', s:'VFC rMSSD, indicateur de récupération',
+     ic:{icon:IC_SANTE.coeur, color:COL_VFC},
      draw:b => lineChart(b, [{name:'VFC', color:'var(--mesure)', data:g('hrv')}],
        {unit:' ms', wait:'Ce qui compte n’est pas la valeur brute mais sa moyenne '
         + 'glissante sur 7 jours. Encore trop peu de nuits.'})},
     {t:'Sommeil', s:'Durée par nuit, en heures',
+     ic:{icon:IC_SANTE.lune, color:COL_SOMMEIL},
      draw:b => lineChart(b, [{name:'Sommeil', color:'var(--mesure)', data:g('sommeil_h')}],
        {unit:' h', dec:1, wait:'La courbe apparaît après quelques nuits '
         + 'synchronisées.'})},
@@ -1788,7 +2038,7 @@ $('kpis').innerHTML = [
   // Le premier graphique reste ouvert, les autres attendent d'etre demandes.
   $('charts').innerHTML = CH.map((c, i) => bloc(c.t, '',
     '<p class="bl-s">' + c.s + '</p><div class="cb" id="ch' + i + '"></div>'
-    + '<div class="keys" id="k' + i + '"></div>', i === 0)).join('');
+    + '<div class="keys" id="k' + i + '"></div>', i === 0, c.ic)).join('');
   CH.forEach((c, i) => {
     const ok = c.draw($('ch' + i));
     if (ok && c.k) $('k' + i).innerHTML = c.k.map(([n, col]) =>
@@ -2057,6 +2307,17 @@ function lectureNuits() {
   const S = M.sante;
   if (!S) return;
   const J = S.jours || [];
+  // Icone et couleur par champ, pour l'entete des cartes d'evolution. Un
+  // champ absent de cette table (poids, spO2) garde l'entete neutre : ce
+  // ne sont pas des signaux que Sante d'Apple met en avant par une couleur.
+  const IC_CHAMP = {
+    pas:{icon:IC_SANTE.activite, color:COL_ACTIVITE},
+    sommeil_h:{icon:IC_SANTE.lune, color:COL_SOMMEIL},
+    sommeil_score:{icon:IC_SANTE.lune, color:COL_SOMMEIL},
+    fc_repos:{icon:IC_SANTE.coeur, color:COL_COEUR},
+    hrv:{icon:IC_SANTE.coeur, color:COL_VFC},
+    fatigue_indice:{icon:IC_SANTE.score, color:COL_SCORE},
+  };
 
   /* --- tuiles du jour --- */
   const T = [
@@ -2138,7 +2399,7 @@ function lectureNuits() {
              : Math.round(S.actuel[c.cle])) + ' ' + c.unite.replace('/100', '')
         : '',
       (NOTES[c.cle] ? '<p class="bl-s">' + NOTES[c.cle] + '</p>' : '')
-      + '<div class="cb" id="sc' + i + '"></div>', i === 0)).join('');
+      + '<div class="cb" id="sc' + i + '"></div>', i === 0, IC_CHAMP[c.cle])).join('');
     S.champs.forEach((c, i) => {
       const data = agrege(c.cle, mode);
       // Un champ note sur 100 n'a pas d'unite a suffixer. Le remplacement
