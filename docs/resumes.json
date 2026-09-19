@@ -42,5 +42,14 @@
     "source": "claude_conversation",
     "fige": true,
     "date_redaction": "2026-09-16"
+  },
+  "2026-09-19": {
+    "verdict": "bon",
+    "titre": "Analyse automatique",
+    "execution": "100 % du temps en endurance. Dérive cardiaque de 2,7 %, sous le seuil de 5 %. Première moitié à 6:05/km, seconde à 6:00/km. Avec 36 m de dénivelé, l'allure vaut 6:00/km sur le plat.",
+    "conformite": "Le plan prévoyait sortie longue de 10 km pour ce jour, et tu as couru 6,9 km en 41 min.",
+    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
+    "source": "regles",
+    "cle": "c67dbde6c653ae32"
   }
 }
