@@ -44,21 +44,25 @@
     "date_redaction": "2026-09-16"
   },
   "2026-09-19": {
-    "verdict": "bon",
-    "titre": "Analyse automatique",
-    "execution": "100 % du temps en endurance. Dérive cardiaque de 2,7 %, sous le seuil de 5 %. Première moitié à 6:05/km, seconde à 6:00/km. Avec 36 m de dénivelé, l'allure vaut 6:00/km sur le plat.",
-    "conformite": "Le plan prévoyait sortie longue de 10 km pour ce jour, et tu as couru 6,9 km en 41 min.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "2b363497d31b0160"
+    "verdict": "attention",
+    "titre": "Sortie longue coupée à 6,9 km",
+    "essentiel": "Tu as couru 6,9 km sur les 10 prévus, à allure et cardio parfaits (139 bpm, dérive 2,7 %).",
+    "execution": "Allure stable à 6:00/km, même légèrement négative (6:05 puis 6:00), en zone Z2/Z3 comme voulu. FC moyenne à 139 avec seulement 2,7 % de dérive : aisance cardiaque nickel.",
+    "conformite": "Le plan demandait 10 km de sortie longue, tu t'es arrêté à 6,9 km : 3,1 km manquants.",
+    "objectif": "Cette sortie construit l'endurance de base : l'allure et le cardio valident l'aisance, mais le volume raccourci limite l'effet recherché.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-20"
   },
   "2026-09-20": {
-    "verdict": "bon",
-    "titre": "Analyse automatique",
-    "execution": "100 % du temps en endurance. Dérive cardiaque de 2,1 %, sous le seuil de 5 %. Première moitié à 6:01/km, seconde à 5:57/km. Avec 65 m de dénivelé, l'allure vaut 5:58/km sur le plat.",
-    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "736768f6a6d7a7a4"
+    "verdict": "correct",
+    "titre": "Sortie longue maîtrisée, allure un peu vive",
+    "essentiel": "11,07 km à 5:59/km avec seulement 2,1 % de dérive cardiaque : bien couru, mais plus vite que les 6:03-6:42 prévus en fondamental.",
+    "execution": "FC moyenne à 144 (max 159), dérive de 2,1 % seulement : le cardio reste stable sur toute la sortie. Négative split léger (6:01 puis 5:57/km), cadence à 158, RPE à 3/10 : effort maîtrisé mais 87 % du temps passé en Z3 plutôt qu'en Z2.",
+    "conformite": "Pas de détail du plan pour cette séance, mais le volume hebdomadaire (23,6 km cumulés) colle à l'objectif de 23,1 km.",
+    "objectif": "Sortie longue de base aérobie censée construire l'endurance à faible intensité : allure un peu trop rapide, zone cardiaque haute (Z3) plutôt que Z2 facile.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-20"
   }
 }

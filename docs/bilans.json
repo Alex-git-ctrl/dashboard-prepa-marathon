@@ -34,5 +34,17 @@
   "quand": "2026-09-16T23:14:10",
   "empreinte": "7c747101843e4629",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Allure corrigée, mais VFC et sommeil s'effondrent",
+  "essentiel": "1 semaine bouclée sur 27 et VFC tombée à 40 ms (moyenne 62,47) : trop tôt pour juger, le signal physiologique inquiète.",
+  "ou_tu_en_es": "Consigne tenue sur l'allure : 5:59 à 6:01/km les 19 et 20/09 contre 5:17/km le 16/09, dérive retombée à 2,1-2,7 % contre 30 %. Mais la VFC s'effondre, de 63 ms le 14/09 à 40 ms aujourd'hui. Le sommeil reste sous la cible, 5,3 h contre 6,12 h de moyenne, dette de sommeil au maximum du score de coût (15/15).",
+  "viser_plus_haut": "Non : la projection 3h40 repose sur un 10 km de 48:00 estimé, jamais couru. Il faudrait une vraie course de référence et six semaines d'observance pour trancher.",
+  "a_changer": "L'allure a été corrigée comme demandé, priorité maintenant : remonter le sommeil, 5,3 h contre 6,12 h de moyenne, pour stopper la chute de VFC. Vise au moins 7 h cette semaine, quitte à raccourcir une séance.",
+  "quand": "2026-09-20T23:01:48",
+  "empreinte": "0ed92eea9d4c17b2",
+  "source": "claude_conversation"
  }
 ]
