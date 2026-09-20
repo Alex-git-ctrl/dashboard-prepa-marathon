@@ -50,6 +50,15 @@
     "conformite": "Le plan prévoyait sortie longue de 10 km pour ce jour, et tu as couru 6,9 km en 41 min.",
     "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
     "source": "regles",
-    "cle": "c67dbde6c653ae32"
+    "cle": "2b363497d31b0160"
+  },
+  "2026-09-20": {
+    "verdict": "bon",
+    "titre": "Analyse automatique",
+    "execution": "100 % du temps en endurance. Dérive cardiaque de 2,1 %, sous le seuil de 5 %. Première moitié à 6:01/km, seconde à 5:57/km. Avec 65 m de dénivelé, l'allure vaut 5:58/km sur le plat.",
+    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
+    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
+    "source": "regles",
+    "cle": "736768f6a6d7a7a4"
   }
 }
