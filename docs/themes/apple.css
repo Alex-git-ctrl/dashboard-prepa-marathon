@@ -268,7 +268,7 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
    Absente ici avant cette passe : la legende retombait en bloc simple sous
    .cb, sans les deux colonnes qui separent la moyenne de fond de la
    moyenne recente. */
-.tend-cap{display:flex;justify-content:space-between;gap:var(--s3);
+.tend-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
   margin-top:var(--s2);font-size:var(--t1);color:var(--acier);
   letter-spacing:-.01em}
 .tend-cap b{font-weight:600}

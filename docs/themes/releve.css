@@ -246,7 +246,7 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
 .hcard .cb,.hcard .anneau-row,.hcard .gc{margin-top:var(--s3)}
 
-.tend-cap{display:flex;justify-content:space-between;gap:var(--s3);
+.tend-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
   margin-top:var(--s2);font-size:var(--t1);color:var(--acier);
   font-family:var(--num)}
 .tend-cap b{font-weight:600}

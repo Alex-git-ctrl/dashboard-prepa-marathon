@@ -268,7 +268,7 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
    Le graphique lui-meme vit dans .cb, deja dimensionnee par tous les
    themes (largeur 100 %, hauteur automatique) : seule la legende sous le
    graphique est specifique a cette carte. */
-.tend-cap{display:flex;justify-content:space-between;gap:var(--s3);
+.tend-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
   margin-top:var(--s2);font-size:var(--t1);color:var(--acier);
   letter-spacing:-.01em}
 .tend-cap b{font-weight:700}
