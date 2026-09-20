@@ -262,7 +262,48 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .hcard-i{font-size:var(--t3);color:var(--sourd);line-height:1.45;
   margin:var(--s3) 0 0;max-width:60ch;text-wrap:pretty}
 .hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
-.hcard .cb,.hcard .anneau,.hcard .gc{margin-top:var(--s3)}
+.hcard .cb,.hcard .anneau-row,.hcard .gc{margin-top:var(--s3)}
+
+/* ---------- carte de tendance : legende sous le graphique ----------
+   Absente ici avant cette passe : la legende retombait en bloc simple sous
+   .cb, sans les deux colonnes qui separent la moyenne de fond de la
+   moyenne recente. */
+.tend-cap{display:flex;justify-content:space-between;gap:var(--s3);
+  margin-top:var(--s2);font-size:var(--t1);color:var(--acier);
+  letter-spacing:-.01em}
+.tend-cap b{font-weight:600}
+
+/* ---------- anneau de preparation ----------
+   Le mot qualitatif est un badge sous le chiffre, comme les pilules de
+   verdict utilisees partout ailleurs sur la page (memes classes .pill
+   .ok/.no/.al) : un premier essai en gros titre au-dessus de la ligne
+   dupliquait le role du sc-h ou du hcard-t juste au-dessus, "Ce que ca
+   t'a coute" suivi d'un "Coût normal" deux fois plus gros et de la meme
+   encre grise. Chaque entree de legende est sur deux lignes (libelle, puis
+   valeur et points en petit gris) au lieu d'une seule ligne longue : c'est
+   ce qui evite le debordement, la ou "Sommeil · 47/100 · 19/40" sur une
+   ligne finissait par se faire couper au bord de la carte sur un ecran
+   etroit. min-width:0 est la deuxieme moitie du correctif : par defaut un
+   enfant flex ne retrecit jamais sous la largeur de son contenu, donc sans
+   cette ligne le retour a la ligne du texte n'avait jamais l'occasion de
+   se produire. */
+.anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
+.anneau-c{flex-shrink:0;text-align:center}
+.anneau-c svg{display:block;width:124px;height:124px}
+.anneau-c .pill{margin-top:var(--s3)}
+text.an-n{font-family:var(--sans);font-size:30px;font-weight:600;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+text.an-m{font-family:var(--sans);font-size:9.5px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase}
+.anneau-row .gc-lg{flex-direction:column;align-items:flex-start;margin-top:0;
+  gap:var(--s4);min-width:0;flex:1 1 150px}
+.anneau-row .gc-lg span{align-items:flex-start;gap:var(--s3)}
+.anneau-row .gc-lg i{width:10px;height:10px;border-radius:3px;margin-top:5px}
+.gc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gc-t b{font-size:var(--t3);font-weight:600;color:var(--encre);
+  letter-spacing:-.01em}
+.gc-t em{font-style:normal;font-size:var(--t1);color:var(--acier);
+  font-variant-numeric:tabular-nums}
 
 /* Meme traitement pour l'icone optionnelle du titre d'un bloc depliable
    (bloc() avec un cinquieme argument). */

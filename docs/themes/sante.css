@@ -252,7 +252,7 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
 .hcard-i{font-size:var(--t3);color:var(--encre);line-height:1.42;
   margin:var(--s3) 0 0;max-width:60ch;text-wrap:pretty}
 .hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
-.hcard .cb,.hcard .anneau,.hcard .gc{margin-top:var(--s3)}
+.hcard .cb,.hcard .anneau-row,.hcard .gc{margin-top:var(--s3)}
 
 /* Meme traitement pour l'icone optionnelle des cartes depliables (bloc()
    avec un cinquieme argument) : le titre porte l'icone et sa couleur au
@@ -274,17 +274,22 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
 .tend-cap b{font-weight:700}
 
 /* ---------- anneau de preparation ---------- */
-.anneau{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
-.anneau-c{text-align:center;flex-shrink:0}
-.anneau svg{display:block;width:124px;height:124px}
+.anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
+.anneau-c{flex-shrink:0;text-align:center}
+.anneau-c svg{display:block;width:124px;height:124px}
+.anneau-c .pill{margin-top:var(--s3)}
 text.an-n{font-family:var(--sans);font-size:30px;font-weight:800;
   font-variant-numeric:tabular-nums}
 text.an-m{font-family:var(--sans);font-size:9.5px;font-weight:700;
   letter-spacing:.07em;text-transform:uppercase}
-.anneau-mot{font-size:var(--t2);font-weight:700;margin-top:var(--s2)}
-.anneau .gc-lg{margin-top:0;gap:var(--s2);font-size:var(--t3);color:var(--encre)}
-.anneau .gc-lg i{width:10px;height:10px;border-radius:3px}
-.anneau .gc-lg b{font-variant-numeric:tabular-nums}
+.anneau-row .gc-lg{flex-direction:column;align-items:flex-start;margin-top:0;
+  gap:var(--s4);min-width:0;flex:1 1 150px}
+.anneau-row .gc-lg span{align-items:flex-start;gap:var(--s3)}
+.anneau-row .gc-lg i{width:10px;height:10px;border-radius:3px;margin-top:5px}
+.gc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gc-t b{font-size:var(--t3);font-weight:700;color:var(--encre)}
+.gc-t em{font-style:normal;font-size:var(--t1);color:var(--sourd);
+  font-variant-numeric:tabular-nums}
 
 /* ---------- alertes ---------- */
 .alert{display:flex;gap:var(--s4);align-items:flex-start}
@@ -791,8 +796,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
   .wk.now{grid-template-columns:1fr;padding:var(--s4)}
   .li{min-height:50px}
-  .anneau{gap:var(--s4)}
-  .anneau svg{width:104px;height:104px}
+  .anneau-row{gap:var(--s4)}
+  .anneau-c svg{width:104px;height:104px}
   text.an-n{font-size:25px}
   .tb{padding:var(--s2) 2px var(--s1)}
   .tb svg{width:27px;height:27px}

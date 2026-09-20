@@ -6,7 +6,7 @@ Contraintes reelles d'Alex :
   - sortie longue le samedi
   - depart : 12 km/sem, plus longue sortie 6 km, 10 km de reference en 48 min
 
-Courses : 10 km le samedi 26/09/2026 (S3), semi le 25/10/2026 (S7),
+Courses : 10 km le samedi 26/09/2026 (S3), semi le 05/12/2026 (S13),
 Zurich Marato de Barcelona le 14/03/2027 (S27).
 """
 
@@ -29,8 +29,8 @@ COURSES = [
      "date": "2026-09-26", "jour": "samedi", "semaine": 3, "distance_km": 10,
      "cible": "46 à 48 min", "allure": "4:36 à 4:48 /km",
      "role": "Première calibration réelle, un samedi matin. Negative split : c'est un test, pas un record."},
-    {"cle": "semi", "nom": "Semi-marathon", "lieu": "Paris",
-     "date": "2026-10-25", "jour": "dimanche", "semaine": 7, "distance_km": 21.0975,
+    {"cle": "semi", "nom": "Semi-marathon", "lieu": "Bois de Vincennes, Paris",
+     "date": "2026-12-05", "jour": "samedi", "semaine": 13, "distance_km": 21.0975,
      "cible": "1h45 à 1h52", "allure": "5:00 à 5:19 /km",
      "role": "Jalon de décision : c'est lui qui fixe l'allure marathon."},
     {"cle": "marathon", "nom": "Marathon de Barcelone", "lieu": "Barcelone",
@@ -48,21 +48,21 @@ WEEKS = [
     (2,  10,  40, 40, "base",      "Première sortie à 10 km. Aucune accélération."),
     (3,  10,  30, 30, "COURSE",    "10 KM samedi 26/09. La course tient lieu de sortie longue."),
     (4,  12,  40, 40, "base",      "Reprise après la course. Zones recalibrées sur le chrono."),
-    (5,  15,  45, 45, "specifique","Séance 2 : 3 × 6 min à allure semi, 2 min de trot entre."),
-    (6,  18,  45, 40, "specifique","Plus longue sortie avant le semi, dont 5 km a allure semi."),
-    (7,  21.1, 30, 25, "COURSE",   "SEMI-MARATHON dimanche 25/10."),
-    (8,  10,  30, 35, "recup",     "Récupération. Rien au-dessus de l'endurance fondamentale."),
-    (9,  14,  40, 40, "base",      "Reprise du volume avec les nouvelles zones."),
-    (10, 16,  45, 45, "base",      ""),
-    (11, 18,  45, 45, "base",      "Première sortie longue à 18 km du bloc marathon."),
-    (12, 14,  35, 35, "decharge",  ""),
-    (13, 20,  45, 45, "specifique","Séance 2 : 2 × 15 min à allure marathon."),
-    (14, 22,  45, 45, "specifique","Derniers 5 km de la sortie longue à allure marathon."),
-    (15, 24,  45, 45, "specifique","Cap des 24 km. Tester le ravitaillement en course."),
-    (16, 16,  35, 40, "decharge",  ""),
-    (17, 25,  45, 45, "specifique","Séance 2 : 3 × 8 min au seuil."),
-    (18, 27,  45, 45, "specifique","Derniers 8 km à allure marathon."),
-    (19, 29,  45, 45, "specifique","Sortie la plus longue avant le test 30K."),
+    (5,  14,  40, 40, "base",      "Le semi est repoussé au 5 décembre : la base se prolonge."),
+    (6,  16,  45, 45, "base",      ""),
+    (7,  18,  45, 45, "base",      "Première sortie longue à 18 km."),
+    (8,  14,  35, 35, "decharge",  ""),
+    (9,  18,  45, 45, "specifique","Séance 2 : 3 × 6 min à allure semi, 2 min de trot entre."),
+    (10, 20,  45, 45, "specifique","5 km à allure semi dans la sortie longue."),
+    (11, 21,  45, 45, "specifique","Sortie proche de la distance de course, allure semi en fin de sortie."),
+    (12, 14,  35, 35, "decharge",  "Réduction avant le semi. Rien au-dessus de l'endurance fondamentale."),
+    (13, 21.1, 30, 25, "COURSE",   "SEMI-MARATHON samedi 05/12, Bois de Vincennes."),
+    (14, 10,  30, 35, "recup",     "Récupération après le semi. Rien au-dessus de l'endurance fondamentale."),
+    (15, 14,  40, 40, "base",      "Reprise du volume avec les zones recalibrées sur le semi."),
+    (16, 17,  45, 45, "base",      "Dernière semaine de volume pur avant le travail spécifique."),
+    (17, 20,  45, 45, "specifique","Séance 2 : 2 × 15 min à allure marathon."),
+    (18, 23,  45, 45, "specifique","Derniers 5 km de la sortie longue à allure marathon."),
+    (19, 25,  45, 45, "specifique","Séance 2 : 3 × 8 min au seuil."),
     (20, 18,  35, 40, "decharge",  ""),
     (21, 26,  45, 45, "specifique","Répétition générale : chaussures et ravitaillement de course."),
     (22, 30,  45, 45, "pic",       "Cap des 30 km. Pic de volume de la préparation."),
@@ -74,9 +74,9 @@ WEEKS = [
 ]
 
 BLOCS = [
-    (1, 7,   "Bloc 1", "Base aérobie, 10 km et semi"),
-    (8, 12,  "Bloc 2", "Récupération et fondation marathon"),
-    (13, 20, "Bloc 3", "Construction spécifique"),
+    (1, 13,  "Bloc 1", "Base aérobie, 10 km et semi"),
+    (14, 16, "Bloc 2", "Récupération et fondation marathon"),
+    (17, 20, "Bloc 3", "Construction spécifique"),
     (21, 24, "Bloc 4", "Pic de volume et test 30K"),
     (25, 27, "Bloc 5", "Affûtage"),
 ]

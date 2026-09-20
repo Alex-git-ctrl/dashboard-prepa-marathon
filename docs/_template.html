@@ -371,6 +371,46 @@ function arcPath(cx, cy, r, a0, a1) {
     + `${x1.toFixed(2)},${y1.toFixed(2)}`;
 }
 
+/* ---------- anneau, la forme partagee ----------
+   Un anneau segmente par composante (chacune sa part d'angle proportionnelle
+   a son poids max, son propre arc rempli selon points/max) plus la legende
+   a cote, dans le meme patron que le Sleep Score d'Apple Sante : Duration/
+   Bedtime/Interruptions a gauche, l'anneau et son mot qualitatif a droite.
+   `titre` sert seulement au aria-label, `motCol` colore le mot qualitatif
+   (vert si ca va, rouge si ca coute cher, gris sinon). */
+function anneau(box, titre, total, mot, cls, COMP) {
+  const maxTot = COMP.reduce((t, c) => t + c.max, 0);
+  const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
+  // Largeur et hauteur fixees en attribut, pas seulement en CSS : un theme
+  // qui ne connait pas .anneau svg ne doit pas heriter de la taille par
+  // defaut d'un SVG sans dimension, qui est enorme (300 x 150 CSS, ici
+  // carre donc 300 x 300).
+  let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
+    aria-label="${titre}, ${total} sur 100, ${mot.toLowerCase()}">`;
+  COMP.forEach(c => {
+    const span = c.max / maxTot * 360;
+    const a0 = a + gap / 2, a1 = a + span - gap / 2;
+    svg += `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none"
+      stroke="var(--creux)" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const frac = Math.max(0, Math.min(1, c.points / c.max));
+    const rempli = a0 + (a1 - a0) * frac;
+    if (frac > 0) svg += `<path d="${arcPath(cx, cy, r, a0, rempli)}" fill="none"
+      stroke="${c.col}" stroke-width="${rw}" stroke-linecap="round"/>`;
+    a += span;
+  });
+  svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
+    fill="var(--encre)">${total}</text>
+    <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
+    fill="var(--acier)">sur 100</text></svg>`;
+
+  box.innerHTML = `<div class="anneau-row">
+    <div class="anneau-c">${svg}<span class="pill ${cls}">${mot}</span></div>
+    <div class="gc-lg">${COMP.map(c => `<span><i style="background:${c.col}"></i>`
+      + `<span class="gc-t"><b>${c.nom}</b><em>${c.valeur} · ${c.points}/${c.max}`
+      + '</em></span></span>').join('')}</div></div>`;
+  return {total, mot};
+}
+
 function anneauPreparation(box) {
   const S = M.sante || {};
   const J = (S.jours || []);
@@ -414,37 +454,36 @@ function anneauPreparation(box) {
   const total = Math.round(COMP.reduce((t, c) => t + c.points, 0) / maxTot * 100);
   const mot = total >= 80 ? 'Excellente' : total >= 60 ? 'Bonne'
     : total >= 40 ? 'Correcte' : 'Faible';
+  const cls = total >= 60 ? 'ok' : total >= 40 ? 'no' : 'al';
+  return anneau(box, 'Préparation du jour', total, mot, cls, COMP);
+}
 
-  const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
-  // Largeur et hauteur fixees en attribut, pas seulement en CSS : un theme
-  // qui ne connait pas .anneau svg ne doit pas heriter de la taille par
-  // defaut d'un SVG sans dimension, qui est enorme (300 x 150 CSS, ici
-  // carre donc 300 x 300).
-  let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
-    aria-label="Préparation du jour, ${total} sur 100, ${mot.toLowerCase()}">`;
-  COMP.forEach(c => {
-    const span = c.max / maxTot * 360;
-    const a0 = a + gap / 2, a1 = a + span - gap / 2;
-    svg += `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none"
-      stroke="var(--creux)" stroke-width="${rw}" stroke-linecap="round"/>`;
-    const frac = Math.max(0, Math.min(1, c.points / c.max));
-    const rempli = a0 + (a1 - a0) * frac;
-    if (frac > 0) svg += `<path d="${arcPath(cx, cy, r, a0, rempli)}" fill="none"
-      stroke="${c.col}" stroke-width="${rw}" stroke-linecap="round"/>`;
-    a += span;
-  });
-  svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
-    fill="var(--encre)">${total}</text>
-    <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
-    fill="var(--acier)">sur 100</text></svg>`;
-
-  box.innerHTML = `<div class="anneau"><div class="anneau-c">${svg}
-    <div class="anneau-mot" style="color:${COL_SCORE}">${mot}</div></div>
-    <div class="gc-lg" style="flex-direction:column;align-items:flex-start">
-    ${COMP.map(c => `<span><i style="background:${c.col}"></i>${c.nom} · `
-      + `${c.valeur} · <b style="color:var(--encre)">${c.points}/${c.max}`
-      + '</b></span>').join('')}</div></div>`;
-  return {total, mot};
+/* ---------- anneau de cout d'entrainement ----------
+   Meme rendu que la preparation du jour, pour les quatre composantes deja
+   calculees par adaptation.cout (derive cardiaque, effort percu, temps en
+   endurance, dette de sommeil) : avant cette carte, ces quatre signaux
+   s'affichaient en liste de barres toujours rouges, y compris a 0 point, ce
+   qui les faisait passer pour vides plutot que pour "dans la norme". */
+const COL_COUT = {
+  'Dérive cardiaque': COL_COEUR,
+  'Effort perçu': COL_ACTIVITE,
+  'Temps en endurance': COL_SCORE,
+  'Dette de sommeil': COL_SOMMEIL,
+};
+function anneauCharge(box) {
+  const C = (M.adaptation || {}).cout;
+  if (!C || C.indice == null || !C.composantes || !C.composantes.length) {
+    box.innerHTML = '<div class="wait">Aucun signal exploitable pour l’instant. '
+      + 'L’indice a besoin de dérive cardiaque, d’effort perçu, de temps par '
+      + 'zone, ou de 14 nuits pour comparer ta variabilité à sa référence.</div>';
+    return null;
+  }
+  const COMP = C.composantes.map(c =>
+    Object.assign({col: COL_COUT[c.nom] || COL_SCORE}, c));
+  const mot = C.niveau === 'faible' ? 'Passé facilement'
+    : C.niveau === 'eleve' ? 'Coûteux' : 'Coût normal';
+  const cls = C.niveau === 'faible' ? 'ok' : C.niveau === 'eleve' ? 'al' : 'no';
+  return anneau(box, 'Charge d’entraînement', C.indice, mot, cls, COMP);
 }
 
 (function () {
@@ -1658,29 +1697,13 @@ const ACTIONS = {
   }
   h += '</div>';
 
-  // Axe 2 : ce que ca a coute.
-  h += '<div><div class="sc-h" style="margin-top:0">Ce que ça t’a coûté</div>';
-  if (C.indice == null) {
-    h += '<div class="sp-l">Aucun signal exploitable pour l’instant. L’indice '
-      + 'a besoin de dérive cardiaque, d’effort perçu, de temps par zone, ou '
-      + 'de 14 nuits pour comparer ta variabilité à sa référence.</div>';
-  } else {
-    h += '<div class="cout-v"><b>' + C.indice + '</b><em>sur 100</em>'
-      + '<span class="pill ' + (C.niveau === 'faible' ? 'ok'
-        : C.niveau === 'eleve' ? 'al' : 'no') + '">'
-      + (C.niveau === 'faible' ? 'passé facilement'
-         : C.niveau === 'eleve' ? 'coûteux' : 'coût normal') + '</span></div>'
-      + '<div class="cmp">' + C.composantes.map(c =>
-        '<div><span class="cn">' + c.nom + '</span>'
-        + '<span class="cv">' + c.valeur + '</span>'
-        + '<span class="cb"><i style="width:'
-        + (c.points / c.max * 100).toFixed(0) + '%"></i></span>'
-        + '<span class="cp">' + c.points + '</span></div>').join('') + '</div>'
-      + '<div class="sp-l">Chaque signal rend des points selon son écart à la '
-      + 'normale. Un signal absent ne compte pas pour zéro : il ne participe '
-      + 'pas au calcul.</div>';
-  }
-  h += '</div></div>';
+  // Axe 2 : ce que ca a coute, en anneau : meme forme que la preparation du
+  // jour, plutot que la liste de barres d'avant. Une barre a 0 point (un
+  // signal dans la norme) se lisait comme une barre vide, donc comme un
+  // signal cassé ; l'arc gris de fond de l'anneau porte ce cas sans
+  // ambiguïté, exactement comme les segments non remplis de la preparation.
+  h += '<div><div class="sc-h" style="margin-top:0">Ce que ça t’a coûté</div>'
+    + '<div id="cout-anneau"></div></div>';
 
   // Ce qui a bouge.
   if (A.semaines_ajustees.length) {
@@ -1704,6 +1727,7 @@ const ACTIONS = {
     + 'Une semaine manquée n’est pas rattrapée : la suivante repart de ce que '
     + 'tu as réellement couru.</div></div>';
   $('adapt').innerHTML = h;
+  anneauCharge($('cout-anneau'));
 })();
 
 /* ================= plan ================= */
