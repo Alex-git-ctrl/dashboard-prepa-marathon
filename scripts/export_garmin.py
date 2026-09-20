@@ -1,12 +1,23 @@
-"""Envoie les seances du plan vers la montre, via le calendrier Intervals.icu.
+"""Importe les seances du plan dans la bibliotheque de la montre, sans date.
 
-La chaine : ce script cree des evenements WORKOUT sur le calendrier
-Intervals.icu, et Intervals les pousse vers Garmin Connect, qui les
-synchronise sur la Forerunner. Rien a saisir sur la montre.
+La chaine : ce script cree des seances dans la bibliotheque Intervals.icu
+(`POST .../workouts`, sans jour), Intervals les pousse vers Garmin Connect,
+qui les synchronise sur la Forerunner comme des entrainements "type" :
+demarrables a tout moment depuis le menu Entrainement > Mes entrainements de
+la montre, pas rattaches a une date du calendrier.
 
-Une condition cote compte, et une seule : `icu_garmin_upload_workouts` doit
-etre active dans Intervals.icu. Le script la verifie et refuse d'envoyer si
-elle est fausse, plutot que de creer des evenements qui n'arriveront jamais.
+Deux autres pistes ont ete essayees avant celle-ci, et rejetees :
+
+  - un evenement calendrier par seance (`POST .../events`, avec une date) :
+    ca marche, mais colle chaque seance a un jour fixe. Inutilisable pour
+    Alex, qui change regulierement son planning de semaine.
+  - la meme seance postee sur plusieurs jours de la semaine pour simuler de
+    la souplesse : rejete avant meme d'etre envoye, ca remplit le calendrier
+    de doublons a ignorer.
+
+La bibliotheque sans date est la bonne reponse : postee une seule fois,
+verifiee reçue sur la Forerunner 265 d'Alex le 20/09/2026 (elle y arrive
+comme un entrainement "type" ordinaire, demarrable n'importe quel jour).
 
 Format des seances : `workout_doc` est poste SEUL, avec une allure cible en
 m/s par etape et un libelle. Deux constats verifies contre l'API :
@@ -16,13 +27,33 @@ m/s par etape et un libelle. Deux constats verifies contre l'API :
     veulent rien dire pour un coureur ;
   - envoyer `description` ET `workout_doc` ensemble fait recompiler la seance
     depuis le texte, ce qui EFFACE toutes les etapes. Le premier envoi reel
-    est reparti avec zero etape a cause de ca.
+    (calendrier, avant ce changement) est reparti avec zero etape a cause
+    de ca. La regle vaut aussi pour la bibliotheque, meme mecanisme.
 
-Le contenu redactionnel de la seance reste donc sur le dashboard, et la montre
-recoit ce qu'elle sait afficher : un nom, des etapes, des cibles d'allure.
+Le contenu redactionnel de la seance (pourquoi, consignes) reste donc sur le
+dashboard, et la montre recoit ce qu'elle sait afficher : un nom, des etapes,
+des cibles d'allure. L'ordre et l'espacement conseille entre les seances
+restent la responsabilite du dashboard (section "Le programme", qui affiche
+la souplesse de chaque seance) : rien de tout ca ne peut se coder dans une
+seance de bibliotheque sans date.
+
+Les seances sont rangees dans un dossier dedie ("Plan marathon"), cree s'il
+n'existe pas, pour ne jamais toucher aux dossiers qu'Alex gere lui-meme dans
+Intervals.icu.
+
+Seules les seances structurees (deux etapes ou plus) sont envoyees : une
+seance a une seule etape n'est qu'"endurance pendant X minutes", ca n'a rien
+a faire dans une bibliotheque de seances "type" a lancer sur la montre. Voir
+`seances()`. Et comme le dossier est entierement remplace a chaque envoi
+(les anciennes seances supprimees avant que les nouvelles soient postees),
+rien ne s'y accumule d'un envoi a l'autre.
+
+Une condition cote compte, et une seule : `icu_garmin_upload_workouts` doit
+etre active dans Intervals.icu. Le script la verifie et signale si elle est
+fausse, plutot que de laisser croire a un envoi qui n'arrivera jamais.
 
 Par defaut le script n'envoie RIEN : il affiche ce qu'il ferait. Il faut
---envoyer pour ecrire sur le calendrier.
+--envoyer pour ecrire dans la bibliotheque.
 
   python scripts/export_garmin.py                 # simulation
   python scripts/export_garmin.py --envoyer       # envoi reel
@@ -33,7 +64,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
@@ -41,15 +72,14 @@ from dotenv import load_dotenv
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = "https://intervals.icu/api/v1"
 
-# Les evenements crees sont notes ici, par identifiant. C'est ce qui permet de
-# les remplacer au prochain envoi sans jamais toucher a un evenement cree a la
-# main : on ne supprime que ce qu'on a soi-meme pose.
+# Les seances de bibliotheque creees sont notees ici, par identifiant. C'est
+# ce qui permet de les remplacer au prochain envoi sans jamais toucher a une
+# seance creee a la main : on ne supprime que ce qu'on a soi-meme pose.
 SUIVI = "docs/export_garmin.json"
 
-JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-# Heures de depart : le creneau du midi en semaine, le samedi matin.
-HEURES = {"mardi": "12:15", "jeudi": "12:15", "samedi": "09:00",
-          "dimanche": "09:00", "mercredi": "12:15", "vendredi": "12:15"}
+# Dossier bibliotheque dedie a ce depot, pour ne jamais se meler aux dossiers
+# qu'Alex gere lui-meme dans Intervals.icu.
+DOSSIER = "Plan marathon"
 
 
 def connect():
@@ -61,6 +91,19 @@ def connect():
     s = requests.Session()
     s.auth = ("API_KEY", cle)
     return s, ath
+
+
+def dossier_id(s, ath):
+    """L'id du dossier bibliotheque dedie, cree s'il n'existe pas encore."""
+    r = s.get(f"{BASE}/athlete/{ath}/folders", timeout=30)
+    r.raise_for_status()
+    for f in r.json():
+        if f.get("name") == DOSSIER:
+            return f["id"]
+    r = s.post(f"{BASE}/athlete/{ath}/folders", timeout=30,
+               json={"type": "FOLDER", "name": DOSSIER})
+    r.raise_for_status()
+    return r.json()["id"]
 
 
 def _ms(s_km):
@@ -76,7 +119,7 @@ def workout_doc(seance):
 
     Poster workout_doc court-circuite le compilateur d'Intervals, donc la duree
     et la distance totales ne sont pas calculees pour nous : on les calcule ici,
-    sinon le calendrier affiche une seance de zero minute.
+    sinon la bibliotheque affiche une seance de zero minute.
     """
     steps, duree, dist = [], 0, 0
     for e in seance["etapes"]:
@@ -95,30 +138,28 @@ def workout_doc(seance):
     return {"steps": steps, "duration": duree, "distance": dist}
 
 
-def evenements(programme, semaines):
-    """Un evenement par seance de course a venir, sur les N premieres semaines.
+def seances(programme, semaines, folder_id):
+    """Les seances de course des N prochaines semaines, pretes pour la
+    bibliotheque : pas de jour, pas de date, juste un nom et des etapes.
 
-    La semaine en cours est presque toujours entamee : sans le filtre sur la
-    date, l envoi posait sur le calendrier les seances de lundi et mardi qui
-    sont deja courues, et la montre proposait de refaire hier.
+    Seules les seances structurees (deux etapes ou plus : echauffement puis
+    effort, ou endurance puis lignes droites, ou sortie longue avec finale)
+    sont retenues. Une seance a une seule etape n'est qu'"endurance pendant
+    X minutes" : ca ne vaut pas la peine d'occuper de la place dans la
+    bibliotheque de la montre, ca se court sans consigne de structure.
     """
     out = []
-    today = date.today()
     for w in programme[:semaines]:
-        lundi = date.fromisoformat(w["lundi"])
         for s in w["seances"]:
             if s["type"] != "course" or s.get("course") or not s.get("etapes"):
                 continue
-            jour = lundi + timedelta(days=JOURS.index(s["jour_suggere"]))
-            if jour < today:
+            if len(s["etapes"]) < 2:
                 continue
             doc = workout_doc(s)
             # Pas de `description` : elle ferait recompiler la seance depuis le
             # texte et effacerait toutes les etapes.
             out.append({
-                "start_date_local": "%sT%s:00" % (jour.isoformat(),
-                                                  HEURES[s["jour_suggere"]]),
-                "category": "WORKOUT",
+                "folder_id": folder_id,
                 "type": "Run",
                 "name": "S%d · %s" % (w["semaine"], s["nom"]),
                 "moving_time": doc["duration"],
@@ -130,15 +171,19 @@ def evenements(programme, semaines):
 def lis_suivi():
     try:
         with open(os.path.join(ROOT, SUIVI), encoding="utf-8") as fh:
-            return json.load(fh)
+            d = json.load(fh)
     except (OSError, json.JSONDecodeError):
-        return {"evenements": []}
+        return []
+    # "evenements" est l'ancienne cle (mecanisme calendrier, abandonne) : un
+    # fichier de suivi laisse par l'ancienne version du script ne doit pas
+    # faire planter celle-ci, juste ne rien avoir a remplacer.
+    return d.get("seances", [])
 
 
 def ecris_suivi(ids):
     with open(os.path.join(ROOT, SUIVI), "w", encoding="utf-8") as fh:
         json.dump({"maj": datetime.now().isoformat(timespec="seconds"),
-                   "evenements": ids}, fh, indent=2, ensure_ascii=False)
+                   "seances": ids}, fh, indent=2, ensure_ascii=False)
 
 
 def main():
@@ -146,7 +191,7 @@ def main():
     ap.add_argument("--semaines", type=int, default=3,
                     help="nombre de semaines a envoyer (defaut 3)")
     ap.add_argument("--envoyer", action="store_true",
-                    help="ecrire vraiment sur le calendrier")
+                    help="ecrire vraiment dans la bibliotheque")
     args = ap.parse_args()
 
     with open(os.path.join(ROOT, "docs", "metrics.json"), encoding="utf-8") as fh:
@@ -157,24 +202,24 @@ def main():
     s, ath = connect()
     prof = s.get(f"{BASE}/athlete/{ath}", timeout=60).json()
     actif = bool(prof.get("icu_garmin_upload_workouts"))
+    dossier = dossier_id(s, ath)
 
-    evs = evenements(prog, args.semaines)
+    sems = seances(prog, args.semaines, dossier)
     print("%d séance(s) à envoyer, semaines %s"
-          % (len(evs), ", ".join("S%d" % w["semaine"] for w in prog[:args.semaines])))
-    for e in evs:
+          % (len(sems), ", ".join("S%d" % w["semaine"] for w in prog[:args.semaines])))
+    for e in sems:
         d = e["workout_doc"]
         total = sum(x.get("duration", 0) for x in d["steps"])
         dist = sum(x.get("distance", 0) for x in d["steps"])
-        print("  %s  %-46s %s" % (
-            e["start_date_local"][:16], e["name"],
-            "%d min" % (total // 60) if total else "%.1f km" % (dist / 1000)))
+        print("  %-50s %s" % (
+            e["name"], "%d min" % (total // 60) if total else "%.1f km" % (dist / 1000)))
 
     print()
     print("Envoi vers Garmin : %s"
           % ("actif" if actif else
              "DESACTIVE (icu_garmin_upload_workouts est faux)"))
     if not actif:
-        print("  Les séances seront visibles dans le calendrier Intervals.icu")
+        print("  Les séances seront visibles dans la bibliothèque Intervals.icu")
         print("  mais n'atteindront pas la montre. Pour activer :")
         print("  intervals.icu, Settings, section Garmin, coche")
         print("  \"Upload planned workouts to Garmin Connect\".")
@@ -184,25 +229,24 @@ def main():
         print("SIMULATION. Rien n'a été écrit. Relance avec --envoyer.")
         return
 
-    vieux = lis_suivi()["evenements"]
+    vieux = lis_suivi()
     retires = 0
     for i in vieux:
-        if s.delete(f"{BASE}/athlete/{ath}/events/{i}", timeout=30).ok:
+        if s.delete(f"{BASE}/athlete/{ath}/workouts/{i}", timeout=30).ok:
             retires += 1
     if vieux:
         print("%d ancienne(s) séance(s) remplacée(s) sur %d."
               % (retires, len(vieux)))
 
     poses = []
-    for e in evs:
-        r = s.post(f"{BASE}/athlete/{ath}/events", json=e, timeout=60)
+    for e in sems:
+        r = s.post(f"{BASE}/athlete/{ath}/workouts", json=e, timeout=60)
         if r.ok:
-            d = r.json()
-            poses.append((d[0] if isinstance(d, list) else d)["id"])
+            poses.append(r.json()["id"])
         else:
             print("  echec %s : HTTP %s %s" % (e["name"], r.status_code, r.text[:120]))
     ecris_suivi(poses)
-    print("%d séance(s) posée(s) sur le calendrier." % len(poses))
+    print("%d séance(s) posée(s) dans la bibliothèque." % len(poses))
     if actif:
         print("Elles seront sur la montre à la prochaine synchronisation Garmin.")
 
