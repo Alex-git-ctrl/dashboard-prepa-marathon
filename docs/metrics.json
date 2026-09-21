@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-20T21:33:18",
+  "maj": "2026-09-21T10:41:02",
   "nb_activites": 6,
   "semaines": {
     "1": {
@@ -7704,13 +7704,36 @@
       "ctl": 4.8470845,
       "atl": 17.058992,
       "ramp_rate": 1.6429074,
-      "pas": 26176,
+      "pas": 26311,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": 5.3
+    },
+    {
+      "date": "2026-09-21",
+      "hrv": 96.0,
+      "fc_repos": 43,
+      "poids": null,
+      "vo2max": null,
+      "readiness": null,
+      "sommeil_score": 91.0,
+      "fc_sommeil": null,
+      "spo2": null,
+      "respiration": null,
+      "masse_grasse": null,
+      "ctl": 4.733041,
+      "atl": 14.788063,
+      "ramp_rate": 1.6042526,
+      "pas": 2425,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
+      "sommeil_h": 7.7
     }
   ],
   "derives": [
@@ -7824,52 +7847,52 @@
     "vertical_ratio": 8.8
   },
   "actuel": {
-    "hrv": 40.0,
-    "fc_repos": 54,
+    "hrv": 96.0,
+    "fc_repos": 43,
     "poids": 82.0,
     "vo2max": 52.0,
     "readiness": null,
-    "sommeil_score": 48.0,
+    "sommeil_score": 91.0,
     "fc_sommeil": null,
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 4.8470845,
-    "atl": 17.058992,
-    "ramp_rate": 1.6429074,
-    "pas": 26176,
+    "ctl": 4.733041,
+    "atl": 14.788063,
+    "ramp_rate": 1.6042526,
+    "pas": 2425,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": 5.3,
+    "sommeil_h": 7.7,
     "derive_pct": 2.1,
     "efficacite": 1.93,
     "cadence": 79.1
   },
   "couverture": {
-    "hrv": 17,
-    "fc_repos": 19,
+    "hrv": 18,
+    "fc_repos": 20,
     "poids": 1,
     "vo2max": 6,
     "readiness": 0,
-    "sommeil_score": 16,
+    "sommeil_score": 17,
     "fc_sommeil": 0,
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 19,
-    "atl": 19,
-    "ramp_rate": 12,
-    "pas": 19,
+    "ctl": 20,
+    "atl": 20,
+    "ramp_rate": 13,
+    "pas": 20,
     "courbatures": 0,
     "fatigue": 0,
     "moral": 0,
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 19,
+  "jours_wellness": 20,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -7880,32 +7903,32 @@
     "Anaerobic"
   ],
   "dates": {
-    "hrv": "2026-09-20",
-    "fc_repos": "2026-09-20",
+    "hrv": "2026-09-21",
+    "fc_repos": "2026-09-21",
     "poids": "2026-09-02",
     "vo2max": "2026-09-20",
     "readiness": null,
-    "sommeil_score": "2026-09-20",
+    "sommeil_score": "2026-09-21",
     "fc_sommeil": null,
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-09-20",
-    "atl": "2026-09-20",
-    "ramp_rate": "2026-09-20",
-    "pas": "2026-09-20",
+    "ctl": "2026-09-21",
+    "atl": "2026-09-21",
+    "ramp_rate": "2026-09-21",
+    "pas": "2026-09-21",
     "courbatures": null,
     "fatigue": null,
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": "2026-09-20",
+    "sommeil_h": "2026-09-21",
     "derive_pct": "2026-09-20",
     "efficacite": "2026-09-20",
     "cadence": "2026-09-20",
     "volume": "2026-09-20"
   },
-  "derniere_donnee": "2026-09-20",
+  "derniere_donnee": "2026-09-21",
   "derniere_seance": "2026-09-20",
   "journal": [
     {
@@ -8256,7 +8279,7 @@
         "fatigue_indice": 71
       },
       {
-        "pas": 26176,
+        "pas": 26311,
         "sommeil_h": 5.3,
         "sommeil_score": 48.0,
         "fc_repos": 54,
@@ -8265,21 +8288,32 @@
         "spo2": null,
         "date": "2026-09-20",
         "fatigue_indice": 73
+      },
+      {
+        "pas": 2425,
+        "sommeil_h": 7.7,
+        "sommeil_score": 91.0,
+        "fc_repos": 43,
+        "hrv": 96.0,
+        "poids": null,
+        "spo2": null,
+        "date": "2026-09-21",
+        "fatigue_indice": 22
       }
     ],
     "actuel": {
-      "pas": 26176,
-      "pas_date": "2026-09-20",
-      "sommeil_h": 5.3,
-      "sommeil_h_date": "2026-09-20",
-      "sommeil_score": 48.0,
-      "sommeil_score_date": "2026-09-20",
-      "fatigue_indice": 73,
-      "fatigue_indice_date": "2026-09-20",
-      "fc_repos": 54,
-      "fc_repos_date": "2026-09-20",
-      "hrv": 40.0,
-      "hrv_date": "2026-09-20",
+      "pas": 2425,
+      "pas_date": "2026-09-21",
+      "sommeil_h": 7.7,
+      "sommeil_h_date": "2026-09-21",
+      "sommeil_score": 91.0,
+      "sommeil_score_date": "2026-09-21",
+      "fatigue_indice": 22,
+      "fatigue_indice_date": "2026-09-21",
+      "fc_repos": 43,
+      "fc_repos_date": "2026-09-21",
+      "hrv": 96.0,
+      "hrv_date": "2026-09-21",
       "poids": 82.0,
       "poids_date": "2026-09-02",
       "spo2": 98.0,
@@ -8364,7 +8398,7 @@
     "marge_marathon_s": 27
   },
   "adaptation": {
-    "semaine_courante": 2,
+    "semaine_courante": 3,
     "observance": {
       "semaines": [
         {
@@ -8376,17 +8410,28 @@
           "renfo_prevu": 2,
           "renfo_fait": 1,
           "ratio": 0.826
+        },
+        {
+          "semaine": 2,
+          "km_prevu": 23.1,
+          "km_fait": 23.6,
+          "seances_prevues": 3,
+          "seances_faites": 3,
+          "renfo_prevu": 2,
+          "renfo_fait": 2,
+          "ratio": 1.022
         }
       ],
       "fenetre": [
-        1
+        1,
+        2
       ],
-      "km_prevu": 19.5,
-      "km_fait": 16.1,
-      "seances_prevues": 3,
-      "seances_faites": 2,
-      "ratio": 0.826,
-      "base_km": 16.1
+      "km_prevu": 42.6,
+      "km_fait": 39.7,
+      "seances_prevues": 6,
+      "seances_faites": 5,
+      "ratio": 0.932,
+      "base_km": 19.9
     },
     "cout": {
       "indice": 40,
@@ -8412,7 +8457,7 @@
         },
         {
           "nom": "Dette de sommeil",
-          "valeur": "7,8 h sur la semaine",
+          "valeur": "7,4 h sur la semaine",
           "points": 15,
           "max": 15
         }
@@ -8433,291 +8478,6 @@
     }
   },
   "programme": [
-    {
-      "semaine": 2,
-      "lundi": "2026-09-14",
-      "dimanche": "2026-09-20",
-      "bloc": "Bloc 1",
-      "note": "Première sortie à 10 km. Aucune accélération.",
-      "phase_calisthenie": "Fondations",
-      "phase_quoi": "Neuf semaines de volume propre : rien ne tient sans tractions et dips stricts.",
-      "volume_km": 23.1,
-      "adapte": false,
-      "seances": [
-        {
-          "type": "course",
-          "nom": "Endurance fondamentale",
-          "duree_min": 40,
-          "pourquoi": "Construit la base aérobie. Ne compte que si elle reste lente.",
-          "etapes": [
-            {
-              "nom": "Endurance",
-              "zone": "ef",
-              "duree_s": 2400,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Conversation entière possible. Sinon, ralentis."
-            }
-          ],
-          "jour_suggere": "mardi",
-          "souplesse": "libre",
-          "contrainte": null,
-          "ordre": 1
-        },
-        {
-          "type": "course",
-          "nom": "Endurance et 6 lignes droites",
-          "duree_min": 40,
-          "pourquoi": "Réveille la foulée sans coûter de récupération.",
-          "etapes": [
-            {
-              "nom": "Endurance",
-              "zone": "ef",
-              "duree_s": 2080,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Conversation entière possible. Sinon, ralentis."
-            },
-            {
-              "nom": "Ligne droite 1 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            },
-            {
-              "nom": "Retour au trot",
-              "zone": "ef",
-              "duree_s": 40,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Marche ou trot, la respiration doit redescendre."
-            },
-            {
-              "nom": "Ligne droite 2 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            },
-            {
-              "nom": "Retour au trot",
-              "zone": "ef",
-              "duree_s": 40,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Marche ou trot, la respiration doit redescendre."
-            },
-            {
-              "nom": "Ligne droite 3 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            },
-            {
-              "nom": "Retour au trot",
-              "zone": "ef",
-              "duree_s": 40,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Marche ou trot, la respiration doit redescendre."
-            },
-            {
-              "nom": "Ligne droite 4 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            },
-            {
-              "nom": "Retour au trot",
-              "zone": "ef",
-              "duree_s": 40,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Marche ou trot, la respiration doit redescendre."
-            },
-            {
-              "nom": "Ligne droite 5 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            },
-            {
-              "nom": "Retour au trot",
-              "zone": "ef",
-              "duree_s": 40,
-              "distance_m": null,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Marche ou trot, la respiration doit redescendre."
-            },
-            {
-              "nom": "Ligne droite 6 sur 6",
-              "zone": "vma",
-              "duree_s": 20,
-              "distance_m": null,
-              "allure_rapide_s_km": 271,
-              "allure_lente_s_km": 279,
-              "allure_texte": "4:31 à 4:39 /km",
-              "consigne": "Vite mais relâché, jamais en force."
-            }
-          ],
-          "jour_suggere": "jeudi",
-          "souplesse": "libre",
-          "contrainte": null,
-          "ordre": 2
-        },
-        {
-          "type": "course",
-          "nom": "Sortie longue 10 km",
-          "distance_km": 10,
-          "pourquoi": "La séance qui décide d'un marathon : réserves, appuis, tolérance à l'inconfort.",
-          "etapes": [
-            {
-              "nom": "Endurance",
-              "zone": "ef",
-              "duree_s": null,
-              "distance_m": 10000,
-              "allure_rapide_s_km": 363,
-              "allure_lente_s_km": 402,
-              "allure_texte": "6:03 à 6:42 /km",
-              "consigne": "Allure constante. Bois toutes les 20 min au-delà de 1 h 30."
-            }
-          ],
-          "jour_suggere": "samedi",
-          "souplesse": "espacee",
-          "contrainte": "Au moins 48 h après la séance de qualité.",
-          "ordre": 3
-        },
-        {
-          "type": "renfo",
-          "nom": "Tirage et gainage",
-          "discipline": "calisthénie",
-          "phase": "Fondations",
-          "pourquoi": "Le dos et la ceinture tiennent la posture quand la fatigue arrive.",
-          "exos": [
-            {
-              "nom": "Tractions strictes",
-              "series": "5 séries, 2 répétitions de réserve",
-              "consigne": "Bras tendus en bas, menton au-dessus, aucun balancement.",
-              "progression": "5 × 8 propres : ajoute 5 kg."
-            },
-            {
-              "nom": "Tractions australiennes lentes",
-              "series": "3 × 10",
-              "consigne": "Trois secondes de descente, corps aligné.",
-              "progression": "3 × 12 sans à-coup : pieds surélevés."
-            },
-            {
-              "nom": "Suspension à la barre",
-              "series": "3 × 45 s",
-              "consigne": "Épaules actives, jamais pendues dans le vide.",
-              "progression": "60 s, puis un bras en alternance."
-            },
-            {
-              "nom": "Hollow body",
-              "series": "3 × 30 s",
-              "consigne": "Bas du dos plaqué. S'il décolle, remonte les jambes.",
-              "progression": "45 s : bras tendus au-dessus de la tête."
-            },
-            {
-              "nom": "Gainage latéral",
-              "series": "3 × 40 s par côté",
-              "consigne": "Bassin haut, épaule à l'aplomb du coude.",
-              "progression": null
-            }
-          ],
-          "note": null,
-          "allege": false,
-          "jour_suggere": "mercredi",
-          "souplesse": "libre",
-          "contrainte": "N'importe quel jour, sauf la veille de la sortie longue.",
-          "ordre": 4
-        },
-        {
-          "type": "renfo",
-          "nom": "Poussée et équilibre",
-          "discipline": "calisthénie",
-          "phase": "Fondations",
-          "pourquoi": "Poussée verticale. L'ATR vient de la fréquence, pas de l'intensité.",
-          "exos": [
-            {
-              "nom": "Dips aux barres parallèles",
-              "series": "4 × 8",
-              "consigne": "Descends sous l'angle droit, buste légèrement penché.",
-              "progression": "4 × 10 : lest de 5 kg."
-            },
-            {
-              "nom": "Pompes déclinées",
-              "series": "3 × 12",
-              "consigne": "Pieds surélevés d'environ 40 cm, corps en planche.",
-              "progression": "Puis pseudo-planche, mains à hauteur de hanches."
-            },
-            {
-              "nom": "ATR face au mur",
-              "series": "5 × 30 s",
-              "consigne": "Ventre au mur, mains à 15 cm. Alignement, pas banane.",
-              "progression": "Décolle un pied, puis alterne les deux."
-            },
-            {
-              "nom": "Pike push-ups",
-              "series": "3 × 8",
-              "consigne": "Bassin haut, tête entre les bras, front vers le sol.",
-              "progression": "Pieds surélevés, puis pompes ATR au mur."
-            },
-            {
-              "nom": "L-sit",
-              "series": "4 × 20 s",
-              "consigne": "Genoux groupés si le dos s'arrondit.",
-              "progression": "30 s groupé, puis jambes tendues."
-            },
-            {
-              "nom": "Mollets debout",
-              "series": "3 × 15",
-              "consigne": "Le seul travail de jambes : il protège le tendon d'Achille.",
-              "progression": null
-            }
-          ],
-          "note": null,
-          "allege": false,
-          "jour_suggere": "vendredi",
-          "souplesse": "libre",
-          "contrainte": "N'importe quel jour, sauf la veille de la sortie longue.",
-          "ordre": 5
-        }
-      ]
-    },
     {
       "semaine": 3,
       "lundi": "2026-09-21",
@@ -14961,12 +14721,5 @@
     "empreinte": "0ed92eea9d4c17b2",
     "source": "claude_conversation"
   },
-  "alertes": [
-    {
-      "niveau": "attention",
-      "titre": "Variabilité cardiaque en baisse",
-      "detail": "Moyenne sur 7 jours à 58 ms, contre 66 ms de référence.",
-      "quoi_faire": "Surveille le sommeil et allège la prochaine séance de qualité si la baisse se poursuit."
-    }
-  ]
+  "alertes": []
 }
