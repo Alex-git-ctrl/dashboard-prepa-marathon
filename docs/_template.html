@@ -242,6 +242,12 @@ function show(id) {
   $('topt').textContent = TABS.find(t => t[0] === id)[2];
   window.scrollTo(0, 0);
   try { localStorage.setItem('onglet', id); } catch (e) {}
+  // .tab/.tab.on (CSS) posent deja l'etat final, avec ou sans Motion.dev :
+  // ceci n'est qu'un fondu par-dessus, jamais ce qui rend la page visible.
+  if (window.__motionAnimate) {
+    window.__motionAnimate($('t-' + id), {opacity: [0, 1], y: [10, 0]},
+      {duration: .3, easing: [.22, 1, .36, 1]});
+  }
 }
 TABS.forEach(([id]) => $('b-' + id).addEventListener('click', () => show(id)));
 try { const s = localStorage.getItem('onglet');
@@ -1220,12 +1226,12 @@ function courbesSeance(box, s) {
     let j = 0, d = Infinity;
     C.t.forEach((x, i) => { const y2 = Math.abs(x - t); if (y2 < d) { d = y2; j = i; } });
     const li = PAN.filter(p => C[p.cle][j] != null)
-      .map(p => p.nom + ' ' + p.fmt(C[p.cle][j]));
+      .map(p => ligneTip(p.col, p.nom, p.fmt(C[p.cle][j])));
     if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0; return; }
     const x = X(C.t[j]);
     cur.setAttribute('x1', x.toFixed(1)); cur.setAttribute('x2', x.toFixed(1));
     cur.style.opacity = 1;
-    tip.innerHTML = duree(C.t[j] - t0) + '<br>' + li.join('<br>');
+    tip.innerHTML = titreTip(duree(C.t[j] - t0)) + li.join('');
     tip.style.left = Math.round(Math.min(Math.max(r.left + x / W * r.width, 76),
       document.documentElement.clientWidth - 76)) + 'px';
     tip.style.top = Math.round(r.top + r.height * .5) + 'px';
@@ -1601,9 +1607,13 @@ function detailSeance(s) {
     bande.addEventListener('pointerup', lache);
     bande.addEventListener('pointercancel', lache);
     // Un glisse de plus de quelques pixels n'est pas un clic : sans ca,
-    // attraper la bande changerait de semaine en la lachant.
+    // attraper la bande changerait de semaine en la lachant. Le seuil etait
+    // a 4 px : un simple clic au trackpad bouge facilement de plus que ca
+    // sans intention de glisser, ce qui rendait les semaines impossibles a
+    // choisir au clic. 10 px laisse passer un clic tremblant tout en
+    // bloquant un vrai glisser (qui parcourt des dizaines de pixels).
     bande.addEventListener('click', e => {
-      if (bouge > 4) { e.stopPropagation(); e.preventDefault(); }
+      if (bouge > 10) { e.stopPropagation(); e.preventDefault(); }
     }, true);
     // La molette verticale fait defiler la bande plutot que la page.
     bande.addEventListener('wheel', e => {
@@ -1815,6 +1825,16 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
 const tip = document.createElement('div');
 tip.className = 'tip'; document.body.appendChild(tip);
 
+/** Une ligne d'infobulle : pastille de la couleur de la serie, libelle en
+    sourdine, valeur en avant. Meme hierarchie que TooltipContent chez
+    BKLIT UI ("values lead, labels follow") : c'est le chiffre qu'on vient
+    chercher au survol, le nom de la serie n'est qu'un repere. */
+function ligneTip(col, nom, val) {
+  return '<div class="tip-r"><span class="tip-k" style="background:' + (col || 'var(--acier)')
+    + '"></span><span class="tip-l">' + nom + '</span><span class="tip-v">' + val + '</span></div>';
+}
+function titreTip(txt) { return '<div class="tip-t">' + txt + '</div>'; }
+
 let _uidGraph = 0;
 
 /** Courbe lisse passant exactement par chaque point (Hermite cubique
@@ -1909,10 +1929,27 @@ function lineChart(box, series, opt) {
   let fmt = FMT[ifmt];
 
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.alt || ''}">`;
+  // Le quadrillage s'estompe aux deux bords plutot que de s'arreter net,
+  // comme le Grid de BKLIT UI (fadeHorizontal) : un masque en degrade, pas
+  // une propriete CSS, parce que ca doit s'appliquer aux traits seuls, pas
+  // aux chiffres d'axe qui vivent hors de cette zone (a gauche de L).
+  const gfId = `grille-fondu-${uid}`;
+  s += `<defs><linearGradient id="${gfId}-d" x1="0%" x2="100%" y1="0%" y2="0%">
+    <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="10%" stop-color="#fff" stop-opacity="1"/>
+    <stop offset="90%" stop-color="#fff" stop-opacity="1"/>
+    <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient><mask id="${gfId}"><rect x="${L}" y="0" width="${(W - L - R).toFixed(1)}"
+    height="${H}" fill="url(#${gfId}-d)"/></mask></defs><g mask="url(#${gfId})">`;
   for (let g = 0; g <= 3; g++) {
     const v = mn + (mx - mn) * g / 3, y = Y(v);
     s += `<line class="grille" x1="${L}" y1="${y.toFixed(1)}" x2="${W - R}"
-      y2="${y.toFixed(1)}"/><text class="ax" x="${L - 7}"
+      y2="${y.toFixed(1)}"/>`;
+  }
+  s += '</g>';
+  for (let g = 0; g <= 3; g++) {
+    const v = mn + (mx - mn) * g / 3, y = Y(v);
+    s += `<text class="ax" x="${L - 7}"
       y="${(y + 3.4).toFixed(1)}" text-anchor="end">${v.toFixed(dec)}</text>`;
   }
   if (opt.target != null && opt.target > mn && opt.target < mx)
@@ -2001,12 +2038,18 @@ function lineChart(box, series, opt) {
     const coo = se.data.map(p => [X(ms(p.d)), Y(p.v)]);
     s += `<path class="trait" d="${courbeMonotone(coo)}" fill="none" stroke="${se.color}"
       stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  s += '</g>';
+  // Le point de fin (.bout) est hors du cadre de revelation, expres : son
+  // centre tombe exactement sur le bord droit du cadre (dernier point de
+  // donnee = bord du graphique), donc le rayon du point depassait dedans et
+  // se faisait couper en deux par le clip-path.
+  pts.forEach(se => {
     const la = se.data[se.data.length - 1];
     s += `<circle class="bout" cx="${X(ms(la.d)).toFixed(1)}"
       cy="${Y(la.v).toFixed(1)}" r="4.2" fill="${se.color}"
       stroke="var(--craie)" stroke-width="2.2"/>`;
   });
-  s += '</g>';
   // Un point par serie qui suit le curseur au survol (voir plus bas) : sans
   // lui, seul le dernier point (.bout, fixe) reagissait, jamais celui sous
   // le doigt ou la souris. Cache par defaut, positionne au premier survol.
@@ -2040,7 +2083,7 @@ function lineChart(box, series, opt) {
     // Une serie n'apparait que si elle a bien une valeur ce jour-la.
     const li = pts.map(se => {
       const p = se.data.find(q => q.d === d);
-      return p ? se.name + ' ' + p.v.toFixed(dec) + (opt.unit || '') : null;
+      return p ? ligneTip(se.color, se.name, p.v.toFixed(dec) + (opt.unit || '')) : null;
     }).filter(Boolean);
     if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0;
       hovs.forEach(h => h.style.opacity = 0); return; }
@@ -2057,9 +2100,8 @@ function lineChart(box, series, opt) {
     });
     // L'infobulle nomme toujours le jour, meme quand l'axe ne montre
     // que des annees : c'est la valeur d'un point qu'on lit, pas une periode.
-    tip.innerHTML = (jours > 400 ? dshort(d) + ' '
-      + new Date(d + 'T12:00:00').getFullYear() : dshort(d))
-      + '<br>' + li.join('<br>');
+    tip.innerHTML = titreTip(jours > 400 ? dshort(d) + ' '
+      + new Date(d + 'T12:00:00').getFullYear() : dshort(d)) + li.join('');
     // Coordonnees d'ecran : l'infobulle est en position fixed, donc rien a
     // ajouter pour le defilement, et rien a corriger dans un conteneur qui defile.
     const px = r.left + (x / W) * r.width;
@@ -2345,15 +2387,17 @@ function nuits(box) {
       Math.floor(((e.clientX - r.left) / r.width * W - L) / pas)));
     const j = J[i];
     const li = PAN.filter(p => j[p.cle] != null)
-      .map(p => p.nom.split(' ')[0] + ' ' + p.fmt(j[p.cle]));
-    if (j.sommeil_score != null) li.push('Score ' + Math.round(j.sommeil_score));
-    // Un jour vide se survole comme les autres : il doit dire pourquoi il est
-    // vide plutot que d'afficher une date toute seule.
-    if (!li.length) li.push('Nuit non mesurée');
+      .map(p => ligneTip(p.col, p.nom.split(' ')[0], p.fmt(j[p.cle])));
+    if (j.sommeil_score != null)
+      li.push(ligneTip(COL_SOMMEIL, 'Score', Math.round(j.sommeil_score)));
     cur.setAttribute('x1', cx(i).toFixed(1));
     cur.setAttribute('x2', cx(i).toFixed(1));
     cur.style.opacity = 1;
-    tip.innerHTML = dlong(j.date) + '<br>' + li.join('<br>');
+    // Un jour vide se survole comme les autres : il doit dire pourquoi il est
+    // vide plutot que d'afficher une date toute seule.
+    tip.innerHTML = titreTip(dlong(j.date))
+      + (li.length ? li.join('') : '<div class="tip-r"><span class="tip-l">'
+         + 'Nuit non mesurée</span></div>');
     tip.style.left = Math.round(Math.min(Math.max(
       r.left + cx(i) / W * r.width, 82),
       document.documentElement.clientWidth - 82)) + 'px';
@@ -2954,6 +2998,41 @@ try {
     // graphique deja dessine au moment ou l'import se termine ne rejoue pas
     // l'animation retroactivement : ce n'est qu'un bonus, pas une garantie.
     window.__motionAnimate = animate;
+
+    /* ---------- ouverture/fermeture des blocs (<details class="bl">) ----------
+       Sans ca, <details> bascule instantanement : le contenu apparait ou
+       disparait d'un coup, jamais ce que "plus fluide a l'ouverture, a la
+       fermeture" demande. Delegue sur document, parce que bloc() est appele
+       a des dizaines d'endroits du fichier, certains bien apres ce script :
+       un seul ecouteur les couvre tous, presents et a venir. */
+    document.addEventListener('click', e => {
+      const summary = e.target.closest('.bl > summary');
+      if (!summary) return;
+      const det = summary.parentElement;
+      const d = det.querySelector(':scope > .bl-d');
+      if (!d || det.dataset.anim === '1') return;
+      e.preventDefault();
+      det.dataset.anim = '1';
+      const fini = () => { delete det.dataset.anim; };
+      if (det.open) {
+        const h = d.getBoundingClientRect().height;
+        d.style.height = h + 'px'; d.style.overflow = 'hidden';
+        d.getBoundingClientRect();  // force le reflow avant l'animation
+        animate(d, {height: 0, opacity: 0},
+          {duration: .26, easing: [.4, 0, .2, 1]}).finished.then(() => {
+          det.open = false; d.style.cssText = ''; fini();
+        }).catch(fini);
+      } else {
+        det.open = true;
+        const h = d.getBoundingClientRect().height;
+        d.style.height = '0px'; d.style.overflow = 'hidden'; d.style.opacity = '0';
+        d.getBoundingClientRect();
+        animate(d, {height: h, opacity: 1},
+          {duration: .3, easing: [.22, 1, .36, 1]}).finished.then(() => {
+          d.style.cssText = ''; fini();
+        }).catch(fini);
+      }
+    });
   }
 } catch (e) { /* CDN indisponible : les cartes restent visibles, sans animation. */ }
 </script>
