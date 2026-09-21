@@ -1815,8 +1815,46 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
 const tip = document.createElement('div');
 tip.className = 'tip'; document.body.appendChild(tip);
 
+let _uidGraph = 0;
+
+/** Courbe lisse passant exactement par chaque point (Hermite cubique
+    monotone, meme principe que curveMonotoneX chez BKLIT UI/d3) : contrairement
+    a un Catmull-Rom classique, elle ne depasse jamais localement un point vers
+    le haut ou le bas entre deux voisins. Une courbe qui "deborderait" pour
+    paraitre plus douce afficherait une valeur qui n'a jamais ete mesuree,
+    ce que ce projet refuse ailleurs (§ honnetete, CLAUDE.md) : la lisser
+    sans jamais mentir vaut ce calcul en plus. `pts` : [[x,y], ...] triees
+    par x croissant. Renvoie la partie `d` d'un <path> a partir du premier
+    point (pas de "M" initial marque separement par l'appelant si besoin). */
+function courbeMonotone(pts) {
+  const n = pts.length;
+  if (n < 2) return '';
+  if (n === 2) return `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}
+    L${pts[1][0].toFixed(1)},${pts[1][1].toFixed(1)}`;
+  const dx = [], pente = [];
+  for (let i = 0; i < n - 1; i++) {
+    const d = pts[i + 1][0] - pts[i][0];
+    dx.push(d);
+    pente.push(d === 0 ? 0 : (pts[i + 1][1] - pts[i][1]) / d);
+  }
+  const m = [pente[0]];
+  for (let i = 1; i < n - 1; i++) {
+    m.push(pente[i - 1] * pente[i] <= 0 ? 0 : (pente[i - 1] + pente[i]) / 2);
+  }
+  m.push(pente[pente.length - 1]);
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], t = dx[i] / 3;
+    d += ` C${(x0 + t).toFixed(1)},${(y0 + m[i] * t).toFixed(1)} `
+       + `${(x1 - t).toFixed(1)},${(y1 - m[i + 1] * t).toFixed(1)} `
+       + `${x1.toFixed(1)},${y1.toFixed(1)}`;
+  }
+  return d;
+}
+
 function lineChart(box, series, opt) {
   opt = opt || {};
+  const uid = ++_uidGraph;
   const ms = s => Date.parse(s + 'T12:00:00');
   // Series triees par date. L'ordre du tableau d'entree ne fait plus foi.
   const pts = series.filter(s => s.data && s.data.length).map(s => ({
@@ -1931,16 +1969,28 @@ function lineChart(box, series, opt) {
       text-anchor="${anc}">${fmt(d)}</text>`;
   });
 
+  // Cadre de revelation : la serie se dessine de gauche a droite au premier
+  // affichage (voir la fin du fichier, script Motion.dev), meme principe que
+  // le ChartRevealClip de BKLIT UI. Largeur pleine par defaut : si Motion.dev
+  // n'a pas encore charge (ou jamais), le graphique reste entier tout de
+  // suite, jamais cache en attendant une animation qui n'arrivera pas.
+  const clipId = `graphe-clip-${uid}`;
+  s += `<defs><clipPath id="${clipId}"><rect data-reveal="1" x="${L}"
+    y="${TP}" width="${(W - L - R).toFixed(1)}" height="${(H - TP - B).toFixed(1)}"/>
+    </clipPath></defs>`;
+  s += `<g clip-path="url(#${clipId})">`;
+
   // Un aplat sous la courbe, mais seulement a une seule serie : a deux
   // (Realise/Planifie, Forme/Fatigue...) deux aplats se chevaucheraient sans
   // rien dire de plus. Meme classe .aire, meme opacite, que le graphique
-  // d'allure d'une seance : deja regle la, pas reinvente ici.
+  // d'allure d'une seance : deja regle la, pas reinvente ici. Courbe lisse
+  // (courbeMonotone) plutot que des segments droits, comme les graphiques
+  // BKLIT UI (curveMonotoneX) : plus organique, sans jamais depasser un point.
   if (pts.length === 1) {
     const se = pts[0];
-    const path = se.data.map(p => `${X(ms(p.d)).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' L');
-    const x0 = X(ms(se.data[0].d)).toFixed(1);
-    const xN = X(ms(se.data[se.data.length - 1].d)).toFixed(1);
-    s += `<path d="M${x0},${Y(bas).toFixed(1)} L${path} L${xN},${Y(bas).toFixed(1)} Z"
+    const coo = se.data.map(p => [X(ms(p.d)), Y(p.v)]);
+    const xN = coo[coo.length - 1][0].toFixed(1), yb = Y(bas).toFixed(1);
+    s += `<path d="${courbeMonotone(coo)} L${xN},${yb} L${coo[0][0].toFixed(1)},${yb} Z"
       class="aire" fill="${se.color}" stroke="none"/>`;
   }
 
@@ -1948,14 +1998,15 @@ function lineChart(box, series, opt) {
     y2="${Y(mn).toFixed(1)}" style="opacity:0"/>`;
 
   pts.forEach(se => {
-    const d = se.data.map(p => `${X(ms(p.d)).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
-    s += `<polyline class="trait" points="${d}" fill="none" stroke="${se.color}"
+    const coo = se.data.map(p => [X(ms(p.d)), Y(p.v)]);
+    s += `<path class="trait" d="${courbeMonotone(coo)}" fill="none" stroke="${se.color}"
       stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
     const la = se.data[se.data.length - 1];
     s += `<circle class="bout" cx="${X(ms(la.d)).toFixed(1)}"
       cy="${Y(la.v).toFixed(1)}" r="4.2" fill="${se.color}"
       stroke="var(--craie)" stroke-width="2.2"/>`;
   });
+  s += '</g>';
   // Un point par serie qui suit le curseur au survol (voir plus bas) : sans
   // lui, seul le dernier point (.bout, fixe) reagissait, jamais celui sous
   // le doigt ou la souris. Cache par defaut, positionne au premier survol.
@@ -1965,6 +2016,18 @@ function lineChart(box, series, opt) {
   });
   s += '</svg>';
   box.innerHTML = s;
+
+  // Revelation gauche->droite si Motion.dev est deja charge (voir la fin du
+  // fichier) : sinon window.__motionAnimate n'existe simplement pas encore,
+  // et le rectangle de recadrage reste a sa largeur pleine posee ci-dessus,
+  // donc le graphique reste visible tel quel, sans animation.
+  if (window.__motionAnimate) {
+    const rect = box.querySelector('[data-reveal]');
+    const pleine = parseFloat(rect.getAttribute('width'));
+    rect.setAttribute('width', 0);
+    window.__motionAnimate(rect, {width: pleine},
+      {duration: .8, easing: [.22, 1, .36, 1]});
+  }
 
   // ---- survol : on cherche la date la plus proche, pas le rang ----
   const svg = box.querySelector('svg');
@@ -2885,6 +2948,12 @@ try {
       animate(target, { opacity: [0, 1], y: [14, 0] },
         { duration: .45, delay: delai, easing: [.22, 1, .36, 1] });
     }, { amount: .15 });
+    // lineChart() (script classique, plus haut dans la page) s'en sert pour
+    // reveler une courbe de gauche a droite : expose en global, parce que ce
+    // bloc est un module et l'autre non, ils ne partagent aucun scope. Un
+    // graphique deja dessine au moment ou l'import se termine ne rejoue pas
+    // l'animation retroactivement : ce n'est qu'un bonus, pas une garantie.
+    window.__motionAnimate = animate;
   }
 } catch (e) { /* CDN indisponible : les cartes restent visibles, sans animation. */ }
 </script>
