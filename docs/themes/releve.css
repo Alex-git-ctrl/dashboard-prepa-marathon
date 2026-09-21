@@ -262,7 +262,7 @@ text.an-m{font-family:var(--num);font-size:9px;font-weight:600;
 .anneau-row .gc-lg{flex-direction:column;align-items:flex-start;margin-top:0;
   gap:var(--s4);min-width:0;flex:1 1 150px}
 .anneau-row .gc-lg span{align-items:flex-start;gap:var(--s3)}
-.anneau-row .gc-lg i{width:10px;height:10px;border-radius:2px;margin-top:5px}
+.anneau-row .gc-lg i{width:10px;height:10px;border-radius:50%;margin-top:5px}
 .gc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
 .gc-t b{font-size:var(--t3);font-weight:500;color:var(--encre)}
 .gc-t em{font-style:normal;font-family:var(--num);font-size:var(--t1);
@@ -590,7 +590,7 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .gc-lg{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s3);
   font-size:var(--t1);color:var(--sourd);font-family:var(--num)}
 .gc-lg span{display:flex;align-items:center;gap:var(--s2)}
-.gc-lg i{width:10px;height:10px;border-radius:2px;display:block;flex-shrink:0}
+.gc-lg i{width:10px;height:10px;border-radius:50%;display:block;flex-shrink:0}
 .wait{color:var(--acier);font-size:var(--t2);line-height:1.55;
   padding:var(--s5) var(--s3);margin-top:var(--s3);background:var(--creux);
   border-radius:var(--r1);text-align:center;text-wrap:pretty}
@@ -600,7 +600,15 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   background:var(--surface);color:var(--encre);border:1px solid var(--encre);
   font-size:var(--t1);padding:var(--s2) var(--s3);border-radius:var(--r1);
   white-space:nowrap;transform:translate(-50%,-125%);z-index:30;
-  font-family:var(--num);line-height:1.45}
+  font-family:var(--num);line-height:1.45;
+  box-shadow:0 6px 20px rgba(0,0,0,.14)}
+.tip-t{font-weight:700;color:var(--acier);font-size:10px;margin-bottom:var(--s1);
+  text-transform:uppercase;letter-spacing:.02em}
+.tip-r{display:flex;align-items:center;gap:var(--s2);justify-content:space-between}
+.tip-r+.tip-r{margin-top:2px}
+.tip-k{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tip-l{color:var(--acier);margin-right:var(--s4)}
+.tip-v{font-weight:700;color:var(--encre)}
 
 .note{font-size:var(--t2);color:var(--sourd);margin-top:var(--s3);line-height:1.5;
   max-width:62ch;text-wrap:pretty}
