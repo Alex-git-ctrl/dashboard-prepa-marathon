@@ -2855,6 +2855,19 @@ function lineChart(box, series, opt) {
       text-anchor="${anc}">${fmt(d)}</text>`;
   });
 
+  // Un aplat sous la courbe, mais seulement a une seule serie : a deux
+  // (Realise/Planifie, Forme/Fatigue...) deux aplats se chevaucheraient sans
+  // rien dire de plus. Meme classe .aire, meme opacite, que le graphique
+  // d'allure d'une seance : deja regle la, pas reinvente ici.
+  if (pts.length === 1) {
+    const se = pts[0];
+    const path = se.data.map(p => `${X(ms(p.d)).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' L');
+    const x0 = X(ms(se.data[0].d)).toFixed(1);
+    const xN = X(ms(se.data[se.data.length - 1].d)).toFixed(1);
+    s += `<path d="M${x0},${Y(bas).toFixed(1)} L${path} L${xN},${Y(bas).toFixed(1)} Z"
+      class="aire" fill="${se.color}" stroke="none"/>`;
+  }
+
   s += `<line class="curseur" data-cur="1" x1="0" y1="${TP}" x2="0"
     y2="${Y(mn).toFixed(1)}" style="opacity:0"/>`;
 
@@ -2867,12 +2880,20 @@ function lineChart(box, series, opt) {
       cy="${Y(la.v).toFixed(1)}" r="4.2" fill="${se.color}"
       stroke="var(--craie)" stroke-width="2.2"/>`;
   });
+  // Un point par serie qui suit le curseur au survol (voir plus bas) : sans
+  // lui, seul le dernier point (.bout, fixe) reagissait, jamais celui sous
+  // le doigt ou la souris. Cache par defaut, positionne au premier survol.
+  pts.forEach((se, i) => {
+    s += `<circle class="bout" data-hov="${i}" r="4.2" fill="${se.color}"
+      stroke="var(--craie)" stroke-width="2.2" style="opacity:0"/>`;
+  });
   s += '</svg>';
   box.innerHTML = s;
 
   // ---- survol : on cherche la date la plus proche, pas le rang ----
   const svg = box.querySelector('svg');
   const cur = svg.querySelector('[data-cur]');
+  const hovs = pts.map((se, i) => svg.querySelector(`[data-hov="${i}"]`));
   svg.addEventListener('pointermove', e => {
     const r = svg.getBoundingClientRect(); if (!r.width) return;
     const vx = (e.clientX - r.left) / r.width * W;
@@ -2882,10 +2903,19 @@ function lineChart(box, series, opt) {
       const p = se.data.find(q => q.d === d);
       return p ? se.name + ' ' + p.v.toFixed(dec) + (opt.unit || '') : null;
     }).filter(Boolean);
-    if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0; return; }
+    if (!li.length) { tip.style.opacity = 0; cur.style.opacity = 0;
+      hovs.forEach(h => h.style.opacity = 0); return; }
     const x = X(ms(d));
     cur.setAttribute('x1', x.toFixed(1)); cur.setAttribute('x2', x.toFixed(1));
     cur.style.opacity = 1;
+    // Le point de chaque serie suit le curseur, pas seulement le dernier
+    // point fixe : c'est la valeur sous le doigt qu'on regarde au survol.
+    pts.forEach((se, i) => {
+      const p = se.data.find(q => q.d === d);
+      if (p) { hovs[i].setAttribute('cx', x.toFixed(1));
+        hovs[i].setAttribute('cy', Y(p.v).toFixed(1)); hovs[i].style.opacity = 1; }
+      else hovs[i].style.opacity = 0;
+    });
     // L'infobulle nomme toujours le jour, meme quand l'axe ne montre
     // que des annees : c'est la valeur d'un point qu'on lit, pas une periode.
     tip.innerHTML = (jours > 400 ? dshort(d) + ' '
@@ -2901,6 +2931,7 @@ function lineChart(box, series, opt) {
   });
   svg.addEventListener('pointerleave', () => {
     tip.style.opacity = 0; cur.style.opacity = 0;
+    hovs.forEach(h => h.style.opacity = 0);
   });
   return true;
 }
@@ -3756,6 +3787,30 @@ const BILAN_C = {
 
   dessine();
 })();
+</script>
+
+<script type="module">
+/* ---------- apparition des cartes, Motion.dev ----------
+   Pur bonus visuel : si le CDN est bloque ou hors ligne, l'import echoue,
+   ce bloc entier ne s'execute jamais, et les cartes restent dans leur etat
+   normal (opacite 1, deja pose par le CSS). Aucune carte n'est donc jamais
+   posee invisible en attendant un script qui pourrait ne pas arriver : le
+   depart de l'animation EST l'etat final, jamais l'inverse.
+   prefers-reduced-motion coupe l'animation pour la meme raison que la regle
+   CSS globale sur les transitions (voir .tend-cap et la fin des feuilles de
+   theme) : ce n'est pas cosmetique pour tout le monde. */
+try {
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const { animate, inView } = await import(
+      'https://cdn.jsdelivr.net/npm/motion@13/+esm');
+    let n = 0;
+    inView('.hcard', ({ target }) => {
+      const delai = Math.min(n++ * .04, .3);
+      animate(target, { opacity: [0, 1], y: [14, 0] },
+        { duration: .45, delay: delai, easing: [.22, 1, .36, 1] });
+    }, { amount: .15 });
+  }
+} catch (e) { /* CDN indisponible : les cartes restent visibles, sans animation. */ }
 </script>
 </body>
 </html>
