@@ -103,6 +103,13 @@
   --m-allure:#1B6AC9;
   --m-fc:#D9432F;
   --m-puissance:#7A4FBF;
+
+  /* Les trois signaux de la nuit. Sans eux, la variabilite et la FC de repos
+     retombent toutes les deux sur --m-fc et deviennent indiscernables.
+     Verifies au validateur sur la surface blanche. */
+  --sante-sommeil:#7A4FBF;
+  --sante-vfc:#0a9aa3;
+  --sante-coeur:#D9432F;
   --m-alt:#6B7378;
   --z1:#B9BFC2; --z2:#6FAAE4; --z3:#40A360; --z4:#976B1B;
   --z5:#9E352A; --z6:#7C261D; --z7:#591B17;
@@ -160,6 +167,11 @@
     --m-allure:#4A93DC;
     --m-fc:#E4593F;
     --m-puissance:#9E7ED8;
+    /* Cyan plus sombre qu'en clair : sur la surface #242829 le validateur
+       refuse tout ce qui depasse la bande de clarte du mode sombre. */
+    --sante-sommeil:#9E7ED8;
+    --sante-vfc:#28A6B5;
+    --sante-coeur:#E4593F;
     --m-alt:#8B9498;
     --z1:#4D5458; --z2:#2E68A5; --z3:#2A9055; --z4:#B9892A;
     --z5:#F08C73; --z6:#F4AD9D; --z7:#F5CDC2;
@@ -188,6 +200,9 @@
   --m-fc:#E4593F;
   --m-puissance:#9E7ED8;
   --m-alt:#8B9498;
+  --sante-sommeil:#9E7ED8;
+  --sante-vfc:#28A6B5;
+  --sante-coeur:#E4593F;
   --z1:#4D5458; --z2:#2E68A5; --z3:#2A9055; --z4:#B9892A;
   --z5:#F08C73; --z6:#F4AD9D; --z7:#F5CDC2;
 }
@@ -306,6 +321,9 @@ h2{font-size:var(--t2);font-weight:600;letter-spacing:.02em;color:var(--sourd);
 .anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
 .anneau-c{flex-shrink:0;text-align:center}
 .anneau-c svg{display:block;width:124px;height:124px}
+.an-seg{transition:opacity .2s}
+.an-seg.off{opacity:.25}
+.anneau-row .gc-lg span[data-vise]{cursor:default}
 .anneau-c .pill{margin-top:var(--s3)}
 text.an-n{font-family:var(--num);font-size:28px;font-weight:600;
   letter-spacing:-.03em;font-variant-numeric:tabular-nums}

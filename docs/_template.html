@@ -384,36 +384,80 @@ function arcPath(cx, cy, r, a0, a1) {
    Bedtime/Interruptions a gauche, l'anneau et son mot qualitatif a droite.
    `titre` sert seulement au aria-label, `motCol` colore le mot qualitatif
    (vert si ca va, rouge si ca coute cher, gris sinon). */
+let _uidAnneau = 0;
+
 function anneau(box, titre, total, mot, cls, COMP) {
   const maxTot = COMP.reduce((t, c) => t + c.max, 0);
   const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
-  // Largeur et hauteur fixees en attribut, pas seulement en CSS : un theme
-  // qui ne connait pas .anneau svg ne doit pas heriter de la taille par
-  // defaut d'un SVG sans dimension, qui est enorme (300 x 150 CSS, ici
-  // carre donc 300 x 300).
+  const uid = ++_uidAnneau;
+  // LES BOUTS RONDS MENTAIENT. Un stroke-linecap rond deborde de la moitie de
+  // l'epaisseur A CHAQUE BOUT, soit ici 5,5 px, c'est a dire 6,3 degres d'arc.
+  // Deux consequences, toutes les deux fausses. La piste debordait de 12,6
+  // degres alors que l'ecart voulu entre segments n'est que de 6 : les
+  // segments se chevauchaient au lieu d'etre separes, ce qui explique
+  // l'anneau d'un seul tenant. Et l'arc de couleur, trace de a0 a la fraction
+  // voulue, se peignait 12,6 degres plus long qu'il n'aurait du : une
+  // composante a 80 % s'affichait a 89 %. Un graphique ne doit jamais peindre
+  // une valeur qui n'a pas ete mesuree.
+  // On rentre donc le trace de capDeg a chaque bout : les bouts ronds
+  // retombent alors exactement sur l'etendue voulue.
+  const capDeg = (rw / 2) / r * 180 / Math.PI;
+  const trait = (a0, a1, col, cap, extra) =>
+    `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none" stroke="${col}"
+      stroke-width="${rw}" stroke-linecap="${cap}" ${extra || ''}/>`;
+
   let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
     aria-label="${titre}, ${total} sur 100, ${mot.toLowerCase()}">`;
-  COMP.forEach(c => {
+  COMP.forEach((c, i) => {
     const span = c.max / maxTot * 360;
-    const a0 = a + gap / 2, a1 = a + span - gap / 2;
-    svg += `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none"
-      stroke="var(--creux)" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const v0 = a + gap / 2, v1 = a + span - gap / 2;   // l'etendue VOULUE
+    svg += trait(v0 + capDeg, v1 - capDeg, 'var(--creux)', 'round');
     const frac = Math.max(0, Math.min(1, c.points / c.max));
-    const rempli = a0 + (a1 - a0) * frac;
-    if (frac > 0) svg += `<path d="${arcPath(cx, cy, r, a0, rempli)}" fill="none"
-      stroke="${c.col}" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const fin = v0 + (v1 - v0) * frac;
+    if (fin - v0 > 2 * capDeg) {
+      svg += trait(v0 + capDeg, fin - capDeg, c.col, 'round',
+        `class="an-seg" data-seg="${i}"`);
+    } else if (frac > 0) {
+      // Trop court pour loger deux bouts ronds : a plat, a la vraie longueur.
+      // Mieux vaut un eclat carre juste qu'une pastille ronde qui surestime.
+      svg += trait(v0, fin, c.col, 'butt', `class="an-seg" data-seg="${i}"`);
+    }
+    // Cible de pointage plus large que le trait, invisible : on vise un
+    // anneau de 11 px, la main n'est pas si precise.
+    svg += `<path d="${arcPath(cx, cy, r, v0, v1)}" fill="none"
+      stroke="transparent" stroke-width="20" data-vise="${i}"/>`;
     a += span;
   });
   svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
-    fill="var(--encre)">${total}</text>
+    fill="var(--encre)" id="an-n-${uid}">${total}</text>
     <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
-    fill="var(--acier)">sur 100</text></svg>`;
+    fill="var(--acier)" id="an-m-${uid}">sur 100</text></svg>`;
 
   box.innerHTML = `<div class="anneau-row">
     <div class="anneau-c">${svg}<span class="pill ${cls}">${mot}</span></div>
-    <div class="gc-lg">${COMP.map(c => `<span><i style="background:${c.col}"></i>`
+    <div class="gc-lg">${COMP.map((c, i) => `<span data-vise="${i}">`
+      + `<i style="background:${c.col}"></i>`
       + `<span class="gc-t"><b>${c.nom}</b><em>${c.valeur} · ${c.points}/${c.max}`
       + '</em></span></span>').join('')}</div></div>`;
+
+  // Le centre repond au survol, comme le PieCenter de BKLIT : il porte le
+  // total au repos, et la composante visee quand on la survole. Survoler la
+  // legende fait la meme chose que survoler l'arc, parce que le nom est plus
+  // facile a viser qu'un segment de 11 px.
+  const gn = $('an-n-' + uid), gm = $('an-m-' + uid);
+  const segs = box.querySelectorAll('.an-seg');
+  const montre = i => {
+    const c = i == null ? null : COMP[i];
+    gn.textContent = c ? c.points : total;
+    gm.textContent = c ? 'sur ' + c.max : 'sur 100';
+    segs.forEach(s => s.classList.toggle('off',
+      c != null && s.dataset.seg != String(i)));
+  };
+  box.querySelectorAll('[data-vise]').forEach(el => {
+    const i = +el.dataset.vise;
+    el.addEventListener('mouseenter', () => montre(i));
+    el.addEventListener('mouseleave', () => montre(null));
+  });
   return {total, mot};
 }
 

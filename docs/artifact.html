@@ -145,6 +145,18 @@
   --m-puissance:#8944ab;
   --m-alt:#515154;
 
+  /* --- les trois signaux de la nuit ---
+     Sommeil, variabilite cardiaque et FC de repos. Sans ces trois tokens, le
+     JavaScript retombe sur var(--m-fc) POUR DEUX D'ENTRE EUX : la variabilite
+     et la FC de repos sortaient rigoureusement de la meme couleur, dans un
+     graphique ou la couleur est le seul porteur d'identite. Seul sante.css
+     les definissait. Verifies au validateur : pire paire voisine a 13,0 de dE
+     OKLab en vision deuteranope (cible 8) et 25,0 en vision normale, chroma
+     au-dessus du plancher, contraste sur la carte blanche au-dessus de 3. */
+  --sante-sommeil:#8944ab;
+  --sante-vfc:#0a9aa3;
+  --sante-coeur:#d30f45;
+
   /* --- zones de frequence cardiaque ---
      Inchangees, et c'est voulu : ce sont les couleurs de la Forerunner, et
      l'interet est justement de retrouver la meme lecture. Revalidees sur la
@@ -256,14 +268,15 @@ body::after{
    arete claire en haut et une ombre portee tres basse suffisent a faire lire
    une vitre posee plutot qu'un aplat colle.
 
-   L'OPACITE DESCEND A 68 %, ET C'EST CE QUI FAIT LE VERRE. A 88 % il ne
-   passait que 12 % du fond : la vitre etait techniquement translucide et
-   visuellement opaque. Le calcul montre que le plafond ne venait que d'un
-   seul texte, .fresh, laisse en --acier. Passe en --sourd (comme sante.css le
-   fait deja), il tient 6,85 meme a 68 %, et .tb tenait deja 4,54 des 60 %
-   parce qu'il se pose sur du blanc et non sur le sol. La saturation monte a
-   200 % et le flou a 24 px : c'est la sur-saturation qui fait lire un verre
-   plutot qu'un calque gris.
+   LES DEUX VITRES N'ONT PAS LA MEME OPACITE, ET C'EST VOULU. Elles ne portent
+   pas le meme texte, donc elles n'ont pas le meme plancher.
+   Celle du haut descend a 45 % : elle ne porte que le titre en --encre, qui a
+   du contraste a revendre, et .fresh en --sourd, qui tient encore 6,51 a ce
+   niveau. Celle du bas s'arrete a 60 % : ses six libelles font 10 px en
+   --acier, et le calcul les donne a 4,54 a 60 % contre 4,49 a 55 %. C'est
+   exactement la ou le plancher de 4,5 tombe, donc on ne descend pas plus bas.
+   La saturation a 200 % et le flou a 24 px comptent autant que l'opacite :
+   c'est la sur-saturation qui fait lire un verre plutot qu'un calque gris.
 
    PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
    feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
@@ -271,8 +284,8 @@ body::after{
    invisible tout en coutant du GPU a chaque image. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 72%, transparent),
-    color-mix(in srgb, var(--sol) 68%, transparent));
+    color-mix(in srgb, var(--craie) 50%, transparent),
+    color-mix(in srgb, var(--sol) 45%, transparent));
   -webkit-backdrop-filter:saturate(200%) blur(24px);
   backdrop-filter:saturate(200%) blur(24px);
   border-bottom:1px solid var(--filet);
@@ -403,6 +416,11 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
 .anneau-c{flex-shrink:0;text-align:center}
 .anneau-c svg{display:block;width:124px;height:124px}
+/* Survol d'une composante : les autres s'effacent au lieu de disparaitre, pour
+   qu'on garde la forme complete de l'anneau en tete. */
+.an-seg{transition:opacity .2s}
+.an-seg.off{opacity:.25}
+.anneau-row .gc-lg span[data-vise]{cursor:default}
 .anneau-c .pill{margin-top:var(--s3)}
 text.an-n{font-family:var(--sans);font-size:30px;font-weight:600;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -909,8 +927,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    HAUT qu'on voit, donc c'est elle qui porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 72%, transparent),
-    color-mix(in srgb, var(--surface) 68%, transparent));
+    color-mix(in srgb, var(--craie) 64%, transparent),
+    color-mix(in srgb, var(--surface) 60%, transparent));
   -webkit-backdrop-filter:saturate(200%) blur(24px);
   backdrop-filter:saturate(200%) blur(24px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
@@ -1431,36 +1449,80 @@ function arcPath(cx, cy, r, a0, a1) {
    Bedtime/Interruptions a gauche, l'anneau et son mot qualitatif a droite.
    `titre` sert seulement au aria-label, `motCol` colore le mot qualitatif
    (vert si ca va, rouge si ca coute cher, gris sinon). */
+let _uidAnneau = 0;
+
 function anneau(box, titre, total, mot, cls, COMP) {
   const maxTot = COMP.reduce((t, c) => t + c.max, 0);
   const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
-  // Largeur et hauteur fixees en attribut, pas seulement en CSS : un theme
-  // qui ne connait pas .anneau svg ne doit pas heriter de la taille par
-  // defaut d'un SVG sans dimension, qui est enorme (300 x 150 CSS, ici
-  // carre donc 300 x 300).
+  const uid = ++_uidAnneau;
+  // LES BOUTS RONDS MENTAIENT. Un stroke-linecap rond deborde de la moitie de
+  // l'epaisseur A CHAQUE BOUT, soit ici 5,5 px, c'est a dire 6,3 degres d'arc.
+  // Deux consequences, toutes les deux fausses. La piste debordait de 12,6
+  // degres alors que l'ecart voulu entre segments n'est que de 6 : les
+  // segments se chevauchaient au lieu d'etre separes, ce qui explique
+  // l'anneau d'un seul tenant. Et l'arc de couleur, trace de a0 a la fraction
+  // voulue, se peignait 12,6 degres plus long qu'il n'aurait du : une
+  // composante a 80 % s'affichait a 89 %. Un graphique ne doit jamais peindre
+  // une valeur qui n'a pas ete mesuree.
+  // On rentre donc le trace de capDeg a chaque bout : les bouts ronds
+  // retombent alors exactement sur l'etendue voulue.
+  const capDeg = (rw / 2) / r * 180 / Math.PI;
+  const trait = (a0, a1, col, cap, extra) =>
+    `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none" stroke="${col}"
+      stroke-width="${rw}" stroke-linecap="${cap}" ${extra || ''}/>`;
+
   let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
     aria-label="${titre}, ${total} sur 100, ${mot.toLowerCase()}">`;
-  COMP.forEach(c => {
+  COMP.forEach((c, i) => {
     const span = c.max / maxTot * 360;
-    const a0 = a + gap / 2, a1 = a + span - gap / 2;
-    svg += `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none"
-      stroke="var(--creux)" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const v0 = a + gap / 2, v1 = a + span - gap / 2;   // l'etendue VOULUE
+    svg += trait(v0 + capDeg, v1 - capDeg, 'var(--creux)', 'round');
     const frac = Math.max(0, Math.min(1, c.points / c.max));
-    const rempli = a0 + (a1 - a0) * frac;
-    if (frac > 0) svg += `<path d="${arcPath(cx, cy, r, a0, rempli)}" fill="none"
-      stroke="${c.col}" stroke-width="${rw}" stroke-linecap="round"/>`;
+    const fin = v0 + (v1 - v0) * frac;
+    if (fin - v0 > 2 * capDeg) {
+      svg += trait(v0 + capDeg, fin - capDeg, c.col, 'round',
+        `class="an-seg" data-seg="${i}"`);
+    } else if (frac > 0) {
+      // Trop court pour loger deux bouts ronds : a plat, a la vraie longueur.
+      // Mieux vaut un eclat carre juste qu'une pastille ronde qui surestime.
+      svg += trait(v0, fin, c.col, 'butt', `class="an-seg" data-seg="${i}"`);
+    }
+    // Cible de pointage plus large que le trait, invisible : on vise un
+    // anneau de 11 px, la main n'est pas si precise.
+    svg += `<path d="${arcPath(cx, cy, r, v0, v1)}" fill="none"
+      stroke="transparent" stroke-width="20" data-vise="${i}"/>`;
     a += span;
   });
   svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
-    fill="var(--encre)">${total}</text>
+    fill="var(--encre)" id="an-n-${uid}">${total}</text>
     <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
-    fill="var(--acier)">sur 100</text></svg>`;
+    fill="var(--acier)" id="an-m-${uid}">sur 100</text></svg>`;
 
   box.innerHTML = `<div class="anneau-row">
     <div class="anneau-c">${svg}<span class="pill ${cls}">${mot}</span></div>
-    <div class="gc-lg">${COMP.map(c => `<span><i style="background:${c.col}"></i>`
+    <div class="gc-lg">${COMP.map((c, i) => `<span data-vise="${i}">`
+      + `<i style="background:${c.col}"></i>`
       + `<span class="gc-t"><b>${c.nom}</b><em>${c.valeur} · ${c.points}/${c.max}`
       + '</em></span></span>').join('')}</div></div>`;
+
+  // Le centre repond au survol, comme le PieCenter de BKLIT : il porte le
+  // total au repos, et la composante visee quand on la survole. Survoler la
+  // legende fait la meme chose que survoler l'arc, parce que le nom est plus
+  // facile a viser qu'un segment de 11 px.
+  const gn = $('an-n-' + uid), gm = $('an-m-' + uid);
+  const segs = box.querySelectorAll('.an-seg');
+  const montre = i => {
+    const c = i == null ? null : COMP[i];
+    gn.textContent = c ? c.points : total;
+    gm.textContent = c ? 'sur ' + c.max : 'sur 100';
+    segs.forEach(s => s.classList.toggle('off',
+      c != null && s.dataset.seg != String(i)));
+  };
+  box.querySelectorAll('[data-vise]').forEach(el => {
+    const i = +el.dataset.vise;
+    el.addEventListener('mouseenter', () => montre(i));
+    el.addEventListener('mouseleave', () => montre(null));
+  });
   return {total, mot};
 }
 

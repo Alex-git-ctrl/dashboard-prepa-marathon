@@ -139,6 +139,18 @@
   --m-puissance:#8944ab;
   --m-alt:#515154;
 
+  /* --- les trois signaux de la nuit ---
+     Sommeil, variabilite cardiaque et FC de repos. Sans ces trois tokens, le
+     JavaScript retombe sur var(--m-fc) POUR DEUX D'ENTRE EUX : la variabilite
+     et la FC de repos sortaient rigoureusement de la meme couleur, dans un
+     graphique ou la couleur est le seul porteur d'identite. Seul sante.css
+     les definissait. Verifies au validateur : pire paire voisine a 13,0 de dE
+     OKLab en vision deuteranope (cible 8) et 25,0 en vision normale, chroma
+     au-dessus du plancher, contraste sur la carte blanche au-dessus de 3. */
+  --sante-sommeil:#8944ab;
+  --sante-vfc:#0a9aa3;
+  --sante-coeur:#d30f45;
+
   /* --- zones de frequence cardiaque ---
      Inchangees, et c'est voulu : ce sont les couleurs de la Forerunner, et
      l'interet est justement de retrouver la meme lecture. Revalidees sur la
@@ -250,14 +262,15 @@ body::after{
    arete claire en haut et une ombre portee tres basse suffisent a faire lire
    une vitre posee plutot qu'un aplat colle.
 
-   L'OPACITE DESCEND A 68 %, ET C'EST CE QUI FAIT LE VERRE. A 88 % il ne
-   passait que 12 % du fond : la vitre etait techniquement translucide et
-   visuellement opaque. Le calcul montre que le plafond ne venait que d'un
-   seul texte, .fresh, laisse en --acier. Passe en --sourd (comme sante.css le
-   fait deja), il tient 6,85 meme a 68 %, et .tb tenait deja 4,54 des 60 %
-   parce qu'il se pose sur du blanc et non sur le sol. La saturation monte a
-   200 % et le flou a 24 px : c'est la sur-saturation qui fait lire un verre
-   plutot qu'un calque gris.
+   LES DEUX VITRES N'ONT PAS LA MEME OPACITE, ET C'EST VOULU. Elles ne portent
+   pas le meme texte, donc elles n'ont pas le meme plancher.
+   Celle du haut descend a 45 % : elle ne porte que le titre en --encre, qui a
+   du contraste a revendre, et .fresh en --sourd, qui tient encore 6,51 a ce
+   niveau. Celle du bas s'arrete a 60 % : ses six libelles font 10 px en
+   --acier, et le calcul les donne a 4,54 a 60 % contre 4,49 a 55 %. C'est
+   exactement la ou le plancher de 4,5 tombe, donc on ne descend pas plus bas.
+   La saturation a 200 % et le flou a 24 px comptent autant que l'opacite :
+   c'est la sur-saturation qui fait lire un verre plutot qu'un calque gris.
 
    PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
    feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
@@ -265,8 +278,8 @@ body::after{
    invisible tout en coutant du GPU a chaque image. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 72%, transparent),
-    color-mix(in srgb, var(--sol) 68%, transparent));
+    color-mix(in srgb, var(--craie) 50%, transparent),
+    color-mix(in srgb, var(--sol) 45%, transparent));
   -webkit-backdrop-filter:saturate(200%) blur(24px);
   backdrop-filter:saturate(200%) blur(24px);
   border-bottom:1px solid var(--filet);
@@ -397,6 +410,11 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
 .anneau-c{flex-shrink:0;text-align:center}
 .anneau-c svg{display:block;width:124px;height:124px}
+/* Survol d'une composante : les autres s'effacent au lieu de disparaitre, pour
+   qu'on garde la forme complete de l'anneau en tete. */
+.an-seg{transition:opacity .2s}
+.an-seg.off{opacity:.25}
+.anneau-row .gc-lg span[data-vise]{cursor:default}
 .anneau-c .pill{margin-top:var(--s3)}
 text.an-n{font-family:var(--sans);font-size:30px;font-weight:600;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -903,8 +921,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    HAUT qu'on voit, donc c'est elle qui porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 72%, transparent),
-    color-mix(in srgb, var(--surface) 68%, transparent));
+    color-mix(in srgb, var(--craie) 64%, transparent),
+    color-mix(in srgb, var(--surface) 60%, transparent));
   -webkit-backdrop-filter:saturate(200%) blur(24px);
   backdrop-filter:saturate(200%) blur(24px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);

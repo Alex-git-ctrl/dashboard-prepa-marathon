@@ -218,8 +218,8 @@ body::after{
    perdrait du contraste quand une nappe du voile passe dessous. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--creux) 70%, transparent),
-    color-mix(in srgb, var(--fond) 74%, transparent));
+    color-mix(in srgb, var(--creux) 48%, transparent),
+    color-mix(in srgb, var(--fond) 52%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(24px);
   backdrop-filter:saturate(180%) blur(24px);
   border-bottom:1px solid var(--filet);
@@ -330,6 +330,9 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
 .anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
 .anneau-c{flex-shrink:0;text-align:center}
 .anneau-c svg{display:block;width:124px;height:124px}
+.an-seg{transition:opacity .2s}
+.an-seg.off{opacity:.25}
+.anneau-row .gc-lg span[data-vise]{cursor:default}
 .anneau-c .pill{margin-top:var(--s3)}
 text.an-n{font-family:var(--sans);font-size:30px;font-weight:800;
   font-variant-numeric:tabular-nums}
@@ -754,8 +757,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--creux) 76%, transparent),
-    color-mix(in srgb, var(--surface) 72%, transparent));
+    color-mix(in srgb, var(--creux) 64%, transparent),
+    color-mix(in srgb, var(--surface) 60%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(24px);
   backdrop-filter:saturate(180%) blur(24px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
