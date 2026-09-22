@@ -17,10 +17,10 @@ automatique qui tourne deux fois par jour rebatit la page dans le dernier
 theme demande, sans avoir a toucher au workflow.
 
 LE CONTRAT. Un theme est libre de tout redessiner, a une condition : il doit
-definir les tokens que le JavaScript lit pour peindre les graphiques. Ils sont
-listes dans TOKENS_EXIGES et verifies a chaque construction, parce qu'un token
-manquant ne casse rien de visible : il donne juste une courbe invisible ou
-noire, ce qui se remarque beaucoup trop tard.
+definir les tokens dont l'absence ne se voit pas. Ils sont listes dans
+TOKENS_EXIGES et verifies a chaque construction, parce qu'un token manquant ne
+casse rien : il donne juste une courbe invisible ou noire, ou un fond de page
+qui cesse de deriver, ce qui se remarque beaucoup trop tard.
 """
 
 import argparse
@@ -34,13 +34,18 @@ D = os.path.join(ROOT, "docs")
 THEMES = os.path.join(D, "themes")
 ACTIF = os.path.join(THEMES, "actif.txt")
 
-# Les 27 tokens que le JavaScript va chercher avec var(). Un theme qui en
-# oublie un dessine un graphique sans couleur.
+# Les 29 tokens qu'un theme doit definir. Vingt-sept sont lus par le
+# JavaScript pour peindre les graphiques. Les deux --voile-* sont lus par la
+# feuille de style elle-meme, pour les nappes qui derivent en fond de page.
+# Leur point commun, et la raison d'etre de cette liste : quand l'un manque,
+# rien ne casse. On obtient une courbe invisible, ou un fond qui cesse
+# simplement de respirer, et ca se remarque beaucoup trop tard.
 TOKENS_EXIGES = [
     "--acier", "--alerte", "--b1", "--b2", "--b3", "--b4", "--b5", "--craie",
     "--creux", "--effort", "--encre", "--m-allure", "--m-alt", "--m-fc",
     "--m-puissance", "--mesure", "--ok", "--s4", "--s5", "--sur-bitume-faible",
-    "--veille", "--volt", "--z1", "--z2", "--z3", "--z4", "--z5",
+    "--veille", "--voile-a", "--voile-b", "--volt", "--z1", "--z2", "--z3",
+    "--z4", "--z5",
 ]
 
 

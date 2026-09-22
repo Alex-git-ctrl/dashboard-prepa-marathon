@@ -35,6 +35,21 @@
 :root{
   color-scheme:light dark;
 
+  /* --- le voile ---
+     Deux nappes qui derivent derriere la page. La teinte vient de --mesure,
+     sans sa saturation.
+
+     CALCULEES, PAS CHOISIES, sur le meme raisonnement que dans apple.css :
+     --acier ne dispose que de 4,60 sur la craie, et une partie du texte
+     (.note, .lede) se pose directement dessus, pas sur une carte. La nappe
+     dense a donc ete poussee vers le bleu jusqu'au plancher de 4,5 (elle y
+     tient a 4,54) puis reeclaircie, pour gagner en teinte sans gagner en
+     densite ; la nappe claire eclaircit (4,89). 7,3 % d'amplitude de
+     luminance, et aucun texte sous 4,5 a aucun instant de l'animation.
+     Ne pas assombrir sans refaire le calcul. */
+  --voile-a:#F8FAFC;
+  --voile-b:#EBF2FA;
+
   /* --- neutres --- */
   --bitume:#16191C;
   --craie:#F2F3F1;
@@ -119,6 +134,12 @@
    ------------------------------------------------------------ */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
+    /* Le voile s'inverse comme le reste : en sombre, une nappe eclaircit le
+       fond et rapproche donc le texte clair de lui. --acier tombe de 5,36 a
+       4,63 au pire, ce qui tient le plancher de 4,5 mais de peu : ces deux
+       valeurs ne peuvent pas etre eclaircies davantage. */
+    --voile-a:#1E252C;
+    --voile-b:#222B35;
     --bitume:#0A0C0E;
     --craie:#1B1F22;
     --surface:#242829;
@@ -144,6 +165,8 @@
   }
 }
 :root[data-theme="dark"]{
+  --voile-a:#1E252C;
+  --voile-b:#222B35;
   --bitume:#0A0C0E;
   --craie:#1B1F22;
   --surface:#242829;
@@ -171,6 +194,32 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--craie);color:var(--encre);font-family:var(--sans);
   font-size:var(--t4);line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ---------- le voile ----------
+   Deux nappes qui derivent derriere la page, en z-index negatif : elles se
+   peignent au-dessus du fond mais sous le fond des blocs en flux, donc elles
+   n'atteignent jamais un chiffre ni un trait. Anime par transform et non par
+   les points d'arret du degrade, pour que le GPU recompose au lieu de
+   repeindre. Periodes premieres entre elles, donc pas de boucle perceptible.
+   Le raisonnement complet est dans apple.css, ou l'effet est ne. */
+body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
+  pointer-events:none;will-change:transform}
+body::before{
+  background:
+    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+  animation:voile-un 61s ease-in-out infinite alternate}
+body::after{
+  background:
+    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+  animation:voile-deux 83s ease-in-out infinite alternate}
+@keyframes voile-un{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(4%,-3%,0) scale(1.12)}}
+@keyframes voile-deux{
+  from{transform:translate3d(0,0,0) scale(1.1)}
+  to{transform:translate3d(-5%,2%,0) scale(1)}}
 
 /* ---------- en-tete ---------- */
 .top{position:sticky;top:0;z-index:40;background:var(--craie);
@@ -844,4 +893,7 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .tb[aria-selected="true"] svg{stroke-width:2.2}
 }
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Le voile s'immobilise lui aussi, pas seulement les transitions. Ses deux
+   nappes restent peintes : on garde le fond, on retire le mouvement. */
+@media (prefers-reduced-motion:reduce){*{transition:none!important}
+  body::before,body::after{animation:none}}

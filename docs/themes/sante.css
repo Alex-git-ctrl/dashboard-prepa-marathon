@@ -70,6 +70,17 @@
      (.wk) recoivent leur propre fond de carte plus bas pour que le
      degrade vers --craie reste juste des deux cotes. */
   --fond:#000000;
+  /* Le voile, version sombre. Sur un fond noir pur la moindre lueur se voit,
+     donc deux bleus de nuit a peine au-dessus du noir suffisent : 0,3 % de
+     luminance d'ecart, ce qui est enorme en relatif quand on part de zero.
+     Contrairement aux themes clairs, le contraste n'est pas ici la
+     contrainte : un fond qui s'eclaircit sous du texte clair fait baisser
+     --acier de 6,44 a 5,85 au pire, tres au-dessus du plancher de 4,5.
+     Le vrai prix est ailleurs : un theme noir pur sert aussi a eteindre les
+     pixels d'une dalle OLED, et ces deux nappes en rallument une partie.
+     C'est assume, en echange de la profondeur. */
+  --voile-a:#05080E;
+  --voile-b:#0A1018;
   --craie:#1C1C1E;
   --surface:#1C1C1E;
   --bitume:#000000;
@@ -165,9 +176,42 @@ body{background:var(--fond);color:var(--encre);font-family:var(--sans);
   font-size:var(--t4);line-height:1.47;letter-spacing:-.021em;
   -webkit-font-smoothing:antialiased}
 
+/* ---------- le voile ----------
+   Deux nappes qui derivent derriere la page, en z-index negatif : elles se
+   peignent au-dessus du fond mais sous le fond des blocs en flux, donc elles
+   n'atteignent jamais un chiffre ni un trait. Anime par transform et non par
+   les points d'arret du degrade, pour que le GPU recompose au lieu de
+   repeindre. Periodes premieres entre elles, donc pas de boucle perceptible.
+   Le raisonnement complet est dans apple.css, ou l'effet est ne. */
+body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
+  pointer-events:none;will-change:transform}
+body::before{
+  background:
+    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+  animation:voile-un 61s ease-in-out infinite alternate}
+body::after{
+  background:
+    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+  animation:voile-deux 83s ease-in-out infinite alternate}
+@keyframes voile-un{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(4%,-3%,0) scale(1.12)}}
+@keyframes voile-deux{
+  from{transform:translate3d(0,0,0) scale(1.1)}
+  to{transform:translate3d(-5%,2%,0) scale(1)}}
+
 /* ---------- barre superieure ---------- */
+/* Le verre, version sombre. Sur fond noir une ombre portee ne se voit pas :
+   c'est le reflet du bord qui fait tout le travail, et il se prend sur
+   --encre plutot que sur du blanc, pour rester dans la palette. L'opacite ne
+   bouge pas, meme raison que dans apple.css : le petit texte de fraicheur
+   perdrait du contraste quand une nappe du voile passe dessous. */
 .top{position:sticky;top:0;z-index:40;
-  background:color-mix(in srgb, var(--fond) 82%, transparent);
+  background:linear-gradient(to bottom,
+    color-mix(in srgb, var(--creux) 80%, transparent),
+    color-mix(in srgb, var(--fond) 84%, transparent));
   -webkit-backdrop-filter:saturate(150%) blur(20px);
   backdrop-filter:saturate(150%) blur(20px);
   border-bottom:1px solid var(--filet)}
@@ -697,11 +741,16 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 
 /* ---------- barre d'onglets ----------
    Selection en bleu systeme, comme la barre d'onglets d'iOS elle-meme. */
+/* Biseau retourne : ici c'est l'arete du HAUT qu'on voit, donc c'est elle qui
+   porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:color-mix(in srgb, var(--surface) 86%, transparent);
+  background:linear-gradient(to bottom,
+    color-mix(in srgb, var(--creux) 88%, transparent),
+    color-mix(in srgb, var(--surface) 84%, transparent));
   -webkit-backdrop-filter:saturate(150%) blur(20px);
   backdrop-filter:saturate(150%) blur(20px);
-  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
+  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--encre) 10%, transparent)}
 .bar-in{max-width:620px;margin:0 auto;display:grid;
   grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;
@@ -812,4 +861,7 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .tb svg{width:27px;height:27px}
 }
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Le voile s'immobilise lui aussi, pas seulement les transitions. Ses deux
+   nappes restent peintes : on garde le fond, on retire le mouvement. */
+@media (prefers-reduced-motion:reduce){*{transition:none!important}
+  body::before,body::after{animation:none}}
