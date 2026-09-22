@@ -63,20 +63,29 @@
      courbes porte du sens et pas celui du fond : les confondre creerait une
      parente visuelle fausse entre le decor et la donnee.
 
-     CES DEUX VALEURS SONT CALCULEES, PAS CHOISIES, et c'est --acier qui les
-     fixe. La plupart du texte vit sur une carte opaque, mais pas tout :
-     .note et .lede se posent directement sur le sol. Or --acier ne dispose
-     que de 4,66 de contraste sur --sol, donc le voile ne peut pas assombrir
-     la page de plus que la marge qui separe 4,66 de 4,5. La nappe dense a
-     donc ete poussee vers le bleu jusqu'a toucher exactement ce plancher
-     (4,52), puis reeclaircie pour gagner en teinte sans gagner en densite :
-     elle est franchement bleue et a peine plus sombre. La nappe claire, elle,
-     eclaircit (4,89), ce qui elargit l'amplitude par le haut sans rien
-     couter. Resultat : 7,7 % d'ecart de luminance entre les deux, et aucun
-     texte du site ne descend sous 4,5 quel que soit l'instant de
-     l'animation. Ne pas assombrir ces valeurs sans refaire le calcul. */
-  --voile-a:#f9fbfe;
-  --voile-b:#eaf3fc;
+     CES DEUX VALEURS SONT CALCULEES, PAS CHOISIES. La plupart du texte vit
+     sur une carte opaque, mais pas tout : .note et .lede se posent
+     directement sur le sol, et ce sont elles qui fixent le budget.
+
+     Un premier jeu de valeurs a ete essaye en gardant .note en --acier, qui
+     ne dispose que de 4,66 de contraste sur le sol. Le voile ne pouvait donc
+     pas assombrir de plus que la marge entre 4,66 et 4,5, soit 3,3 % de
+     luminance. Le resultat respectait le contraste et ne se voyait pas :
+     1,7 de dE OKLab entre le sol et la nappe, c'est a dire le seuil de
+     detection. Un fond invisible n'est pas un fond discret, c'est un fond
+     absent.
+
+     .note est donc passe en --sourd, ce qui le met d'accord avec releve.css
+     et sante.css ou il l'etait deja : c'est une mise en coherence, pas une
+     invention, et elle rend le texte plus lisible, pas moins. Le budget
+     passe de 3,3 % a 36,7 % de luminance. La nappe dense a ensuite ete
+     poussee vers --mesure jusqu'a 7,4 de dE avec le sol, franchement visible,
+     en s'arretant la pour rester un fond et pas un decor. Pire contraste
+     obtenu sur l'ensemble : 5,94, bien au-dessus du plancher de 4,5.
+     Ne pas assombrir ces valeurs sans refaire le calcul, et surtout sans
+     remonter l'opacite des vitres, qui devient alors la contrainte. */
+  --voile-a:#fafafc;
+  --voile-b:#d0e1f4;
 
   /* --- encres --- */
   /* Trois niveaux, chacun verifie sur le blanc ET sur le gris du sol :
@@ -234,12 +243,14 @@ body::after{
    arete claire en haut et une ombre portee tres basse suffisent a faire lire
    une vitre posee plutot qu'un aplat colle.
 
-   L'OPACITE NE BOUGE PAS, ET C'EST UN CHOIX. Rendre la barre plus
-   transparente laisserait mieux voir le voile, mais ferait tomber --acier
-   (le petit texte de fraicheur, calcule a 4,66 sur le sol) sous 4,5 quand une
-   nappe passe dessous. Le contraste cesserait d'etre une valeur pour devenir
-   un intervalle. Le biseau donne le meme gain visuel sans rien coder de tout
-   ca.
+   L'OPACITE MONTE A 88 %, ET C'EST UN CHOIX. Une fois le voile assez fort
+   pour se voir, c'est le texte des vitres qui devient la contrainte : .fresh
+   et .tb sont en --acier, et --acier sur une vitre trop transparente tombe
+   sous 4,5 des qu'une nappe passe dessous. Le calcul donne 83 % minimum pour
+   la nappe retenue ; 88 % laisse de la marge. On voit donc moins le voile a
+   TRAVERS les barres, ce qui n'est pas une perte : le voile a pour travail le
+   fond de page, pas l'en-tete. Le biseau, lui, donne le relief sans rien
+   couter en contraste.
 
    PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
    feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
@@ -247,8 +258,8 @@ body::after{
    invisible tout en coutant du GPU a chaque image. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 80%, transparent),
-    color-mix(in srgb, var(--sol) 76%, transparent));
+    color-mix(in srgb, var(--craie) 92%, transparent),
+    color-mix(in srgb, var(--sol) 88%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
   border-bottom:1px solid var(--filet);
@@ -747,7 +758,12 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .tip-l{color:var(--acier);margin-right:var(--s4)}
 .tip-v{font-weight:600;color:var(--encre)}
 
-.note{font-size:var(--t2);color:var(--acier);margin-top:var(--s4);
+/* --sourd et non --acier : .note est le seul petit texte du site pose
+   directement sur le sol plutot que sur une carte, donc c'est lui qui
+   plafonne l'amplitude du voile. En --acier il ne laissait que 3,3 % de
+   luminance de marge, ce qui rendait le fond invisible. En --sourd il en
+   laisse 36,7 %. Les deux autres themes le mettaient deja en --sourd. */
+.note{font-size:var(--t2);color:var(--sourd);margin-top:var(--s4);
   line-height:1.5;max-width:62ch;text-wrap:pretty}
 .card{font-size:var(--t4);line-height:1.5;color:var(--sourd);
   letter-spacing:-.022em}
@@ -874,8 +890,8 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    HAUT qu'on voit, donc c'est elle qui porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 84%, transparent),
-    color-mix(in srgb, var(--surface) 80%, transparent));
+    color-mix(in srgb, var(--craie) 92%, transparent),
+    color-mix(in srgb, var(--surface) 88%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);

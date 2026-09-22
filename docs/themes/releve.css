@@ -39,16 +39,17 @@
      Deux nappes qui derivent derriere la page. La teinte vient de --mesure,
      sans sa saturation.
 
-     CALCULEES, PAS CHOISIES, sur le meme raisonnement que dans apple.css :
-     --acier ne dispose que de 4,60 sur la craie, et une partie du texte
-     (.note, .lede) se pose directement dessus, pas sur une carte. La nappe
-     dense a donc ete poussee vers le bleu jusqu'au plancher de 4,5 (elle y
-     tient a 4,54) puis reeclaircie, pour gagner en teinte sans gagner en
-     densite ; la nappe claire eclaircit (4,89). 7,3 % d'amplitude de
-     luminance, et aucun texte sous 4,5 a aucun instant de l'animation.
+     CALCULEES, PAS CHOISIES, sur le meme raisonnement que dans apple.css.
+     Le texte pose directement sur la craie plutot que sur une carte (.note,
+     .lede) est ici en --sourd, qui tient 7,9 : c'est lui qui fixe le budget,
+     et il est large. La nappe dense a donc ete poussee vers --mesure jusqu'a
+     7,3 de dE OKLab avec la craie, franchement visible, en s'arretant la pour
+     que ca reste un fond. Pire contraste obtenu sur l'ensemble : 4,74, au-
+     dessus du plancher de 4,5. Les barres de ce theme sont opaques, elles ne
+     posent donc aucune contrainte, contrairement a la halle.
      Ne pas assombrir sans refaire le calcul. */
-  --voile-a:#F8FAFC;
-  --voile-b:#EBF2FA;
+  --voile-a:#F8F9F8;
+  --voile-b:#D0DEEB;
 
   /* --- neutres --- */
   --bitume:#16191C;
@@ -134,12 +135,12 @@
    ------------------------------------------------------------ */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    /* Le voile s'inverse comme le reste : en sombre, une nappe eclaircit le
-       fond et rapproche donc le texte clair de lui. --acier tombe de 5,36 a
-       4,63 au pire, ce qui tient le plancher de 4,5 mais de peu : ces deux
-       valeurs ne peuvent pas etre eclaircies davantage. */
-    --voile-a:#1E252C;
-    --voile-b:#222B35;
+    /* Le voile s'inverse comme le reste : en sombre, une nappe creuse le fond
+       et l'autre l'eclaircit. C'est celle qui eclaircit qui coute, puisqu'elle
+       rapproche le fond du texte clair. --sourd y tient 5,62, au-dessus du
+       plancher de 4,5, pour 7,5 de dE avec la craie sombre. */
+    --voile-a:#141719;
+    --voile-b:#223140;
     --bitume:#0A0C0E;
     --craie:#1B1F22;
     --surface:#242829;
@@ -165,8 +166,8 @@
   }
 }
 :root[data-theme="dark"]{
-  --voile-a:#1E252C;
-  --voile-b:#222B35;
+  --voile-a:#141719;
+  --voile-b:#223140;
   --bitume:#0A0C0E;
   --craie:#1B1F22;
   --surface:#242829;

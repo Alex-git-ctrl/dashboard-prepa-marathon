@@ -70,17 +70,23 @@
      (.wk) recoivent leur propre fond de carte plus bas pour que le
      degrade vers --craie reste juste des deux cotes. */
   --fond:#000000;
-  /* Le voile, version sombre. Sur un fond noir pur la moindre lueur se voit,
-     donc deux bleus de nuit a peine au-dessus du noir suffisent : 0,3 % de
-     luminance d'ecart, ce qui est enorme en relatif quand on part de zero.
-     Contrairement aux themes clairs, le contraste n'est pas ici la
-     contrainte : un fond qui s'eclaircit sous du texte clair fait baisser
-     --acier de 6,44 a 5,85 au pire, tres au-dessus du plancher de 4,5.
+  /* Le voile, version sombre. Deux bleus de nuit poses sur le noir.
+
+     CE THEME NE SE REGLE PAS AU dE. Partant du noir pur, l'ecart perceptif
+     OKLab s'emballe (sa clarte est une racine cubique, donc tres raide pres
+     de zero) : des valeurs invisibles y affichent deja 7 de dE. Ces deux
+     nappes ont donc ete choisies en luminance absolue, avec une regle simple
+     et verifiable : rester plus sombres que la carte (--craie #1C1C1E),
+     sinon le fond passerait devant le contenu dans la hierarchie et la page
+     s'inverserait. Contraste au pire : --sourd a 6,33 et --acier a 5,57, tres
+     au-dessus du plancher de 4,5, car eclaircir un fond noir sous du texte
+     clair coute peu.
+
      Le vrai prix est ailleurs : un theme noir pur sert aussi a eteindre les
      pixels d'une dalle OLED, et ces deux nappes en rallument une partie.
      C'est assume, en echange de la profondeur. */
-  --voile-a:#05080E;
-  --voile-b:#0A1018;
+  --voile-a:#040A14;
+  --voile-b:#0A1626;
   --craie:#1C1C1E;
   --surface:#1C1C1E;
   --bitume:#000000;
