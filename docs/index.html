@@ -73,6 +73,28 @@
   --bitume:#1d1d1f;
   --bord-present:transparent;
 
+  /* --- le voile ---
+     Deux nappes qui derivent lentement derriere la page. Ce sont les seules
+     couleurs du theme qui ne veulent rien dire : elles decorent. La teinte
+     est prise sur --mesure mais pas sa saturation, parce que le bleu des
+     courbes porte du sens et pas celui du fond : les confondre creerait une
+     parente visuelle fausse entre le decor et la donnee.
+
+     CES DEUX VALEURS SONT CALCULEES, PAS CHOISIES, et c'est --acier qui les
+     fixe. La plupart du texte vit sur une carte opaque, mais pas tout :
+     .note et .lede se posent directement sur le sol. Or --acier ne dispose
+     que de 4,66 de contraste sur --sol, donc le voile ne peut pas assombrir
+     la page de plus que la marge qui separe 4,66 de 4,5. La nappe dense a
+     donc ete poussee vers le bleu jusqu'a toucher exactement ce plancher
+     (4,52), puis reeclaircie pour gagner en teinte sans gagner en densite :
+     elle est franchement bleue et a peine plus sombre. La nappe claire, elle,
+     eclaircit (4,89), ce qui elargit l'amplitude par le haut sans rien
+     couter. Resultat : 7,7 % d'ecart de luminance entre les deux, et aucun
+     texte du site ne descend sous 4,5 quel que soit l'instant de
+     l'animation. Ne pas assombrir ces valeurs sans refaire le calcul. */
+  --voile-a:#f9fbfe;
+  --voile-b:#eaf3fc;
+
   /* --- encres --- */
   /* Trois niveaux, chacun verifie sur le blanc ET sur le gris du sol :
      16,83 / 15,46 pour l'encre, 7,91 / 7,26 pour --sourd, 5,07 / 4,66 pour
@@ -179,14 +201,75 @@ body{background:var(--sol);color:var(--encre);font-family:var(--sans);
   font-size:var(--t4);line-height:1.47;letter-spacing:-.022em;
   -webkit-font-smoothing:antialiased}
 
+/* ---------- le voile ----------
+   Deux nappes bleutees qui derivent lentement derriere toute la page. Elles
+   ne touchent jamais une donnee : les cartes restent opaques, donc le voile
+   n'apparait que dans les marges et les grands blancs verticaux. C'est la
+   condition qui rend l'effet acceptable ici. Un fond mouvant sous un chiffre
+   transformerait le contraste en intervalle au lieu d'une valeur, ferait
+   disparaitre les filets de grille (faibles par choix, donc les premiers a
+   mourir), et ferait glisser la lecture des couleurs de zone, qui portent du
+   sens. Rien de tout ca n'arrive tant que la carte reste opaque.
+
+   POURQUOI DES TRANSFORMS ET PAS UN DEGRADE ANIME. Deplacer les points
+   d'arret d'un degrade repeint la surface a chaque image. Deplacer une
+   couche deja peinte ne fait que la recomposer, cote GPU. Sur un telephone
+   en fin de sortie longue, la difference se sent, et elle se mesure en
+   chaleur.
+
+   POURQUOI z-index:-1 ET PAS UNE BALISE DANS LE FLUX. Une couche en z-index
+   negatif se peint au-dessus du fond de page mais SOUS le fond des blocs en
+   flux : les cartes passent devant sans avoir a etre declarees. Aucune balise
+   n'est ajoutee au gabarit, le voile reste purement un fait de palette, ce
+   qui est exactement le contrat d'un theme ici.
+
+   LES DEUX PERIODES SONT PREMIERES ENTRE ELLES (61 s et 83 s) : les nappes
+   ne se resynchronisent donc jamais, et l'oeil ne retrouve pas de boucle. */
+body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
+  pointer-events:none;will-change:transform}
+body::before{
+  background:
+    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+  animation:voile-un 61s ease-in-out infinite alternate}
+body::after{
+  background:
+    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
+    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+  animation:voile-deux 83s ease-in-out infinite alternate}
+@keyframes voile-un{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(4%,-3%,0) scale(1.12)}}
+@keyframes voile-deux{
+  from{transform:translate3d(0,0,0) scale(1.1)}
+  to{transform:translate3d(-5%,2%,0) scale(1)}}
+
 /* ---------- barre superieure ----------
    Le traitement d'Apple : translucide et floutee, avec un filet en bas qui
    n'apparait que parce que le contenu passe dessous. */
+/* Le verre. Le flou etait deja la ; ce qui manquait, c'est le bord. Une
+   arete claire en haut et une ombre portee tres basse suffisent a faire lire
+   une vitre posee plutot qu'un aplat colle.
+
+   L'OPACITE NE BOUGE PAS, ET C'EST UN CHOIX. Rendre la barre plus
+   transparente laisserait mieux voir le voile, mais ferait tomber --acier
+   (le petit texte de fraicheur, calcule a 4,66 sur le sol) sous 4,5 quand une
+   nappe passe dessous. Le contraste cesserait d'etre une valeur pour devenir
+   un intervalle. Le biseau donne le meme gain visuel sans rien coder de tout
+   ca.
+
+   PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
+   feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
+   Et sur une barre de 52 px posee sur un fond presque uni, elle serait
+   invisible tout en coutant du GPU a chaque image. */
 .top{position:sticky;top:0;z-index:40;
-  background:color-mix(in srgb, var(--sol) 78%, transparent);
+  background:linear-gradient(to bottom,
+    color-mix(in srgb, var(--craie) 80%, transparent),
+    color-mix(in srgb, var(--sol) 76%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:1px solid var(--filet)}
+  border-bottom:1px solid var(--filet);
+  box-shadow:0 1px 16px color-mix(in srgb, var(--bitume) 4%, transparent)}
 .top-in{max-width:980px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;
   align-items:center;justify-content:space-between;gap:var(--s4)}
 .top-t{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
@@ -804,11 +887,17 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 /* ---------- barre d'onglets ----------
    La barre d'onglets d'iOS : translucide, sans indicateur au-dessus, et
    l'onglet actif se lit au bleu. */
+/* Meme verre que la barre superieure, biseau retourne : ici c'est l'arete du
+   HAUT qu'on voit, donc c'est elle qui porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:color-mix(in srgb, var(--surface) 82%, transparent);
+  background:linear-gradient(to bottom,
+    color-mix(in srgb, var(--craie) 84%, transparent),
+    color-mix(in srgb, var(--surface) 80%, transparent));
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   backdrop-filter:saturate(180%) blur(20px);
-  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom)}
+  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--craie) 75%, transparent),
+    0 -1px 20px color-mix(in srgb, var(--bitume) 5%, transparent)}
 .bar-in{max-width:620px;margin:0 auto;display:grid;
   grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;
@@ -936,7 +1025,10 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .tb svg{width:27px;height:27px}
 }
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Le voile s'immobilise lui aussi, pas seulement les transitions. Ses deux
+   nappes restent peintes : on garde le fond, on retire le mouvement. */
+@media (prefers-reduced-motion:reduce){*{transition:none!important}
+  body::before,body::after{animation:none}}
 </style>
 </head>
 <body>
