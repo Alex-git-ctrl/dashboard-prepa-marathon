@@ -191,15 +191,17 @@ body{background:var(--fond);color:var(--encre);font-family:var(--sans);
    Le raisonnement complet est dans apple.css, ou l'effet est ne. */
 body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
   pointer-events:none;will-change:transform}
+/* Rayons larges et centres ramenes vers l'interieur : une nappe doit balayer
+   la page, pas la border. Voir apple.css pour le detail du pourquoi. */
 body::before{
   background:
-    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+    radial-gradient(70% 55% at 28% 22%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(62% 48% at 82% 10%,var(--voile-a) 0%,transparent 62%);
   animation:voile-un 61s ease-in-out infinite alternate}
 body::after{
   background:
-    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+    radial-gradient(75% 58% at 76% 78%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(58% 46% at 14% 88%,var(--voile-a) 0%,transparent 62%);
   animation:voile-deux 83s ease-in-out infinite alternate}
 @keyframes voile-un{
   from{transform:translate3d(0,0,0) scale(1)}
@@ -216,11 +218,12 @@ body::after{
    perdrait du contraste quand une nappe du voile passe dessous. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--creux) 80%, transparent),
-    color-mix(in srgb, var(--fond) 84%, transparent));
-  -webkit-backdrop-filter:saturate(150%) blur(20px);
-  backdrop-filter:saturate(150%) blur(20px);
-  border-bottom:1px solid var(--filet)}
+    color-mix(in srgb, var(--creux) 70%, transparent),
+    color-mix(in srgb, var(--fond) 74%, transparent));
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  backdrop-filter:saturate(180%) blur(24px);
+  border-bottom:1px solid var(--filet);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--encre) 10%, transparent)}
 .top-in{max-width:980px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;
   align-items:center;justify-content:space-between;gap:var(--s4)}
 .top-t{font-size:var(--t4);font-weight:700;letter-spacing:-.021em}
@@ -751,12 +754,13 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--creux) 88%, transparent),
-    color-mix(in srgb, var(--surface) 84%, transparent));
-  -webkit-backdrop-filter:saturate(150%) blur(20px);
-  backdrop-filter:saturate(150%) blur(20px);
+    color-mix(in srgb, var(--creux) 76%, transparent),
+    color-mix(in srgb, var(--surface) 72%, transparent));
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  backdrop-filter:saturate(180%) blur(24px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--encre) 10%, transparent)}
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--encre) 14%, transparent),
+    0 -2px 24px #000}
 .bar-in{max-width:620px;margin:0 auto;display:grid;
   grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;

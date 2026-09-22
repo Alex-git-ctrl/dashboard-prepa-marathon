@@ -225,15 +225,22 @@ body{background:var(--sol);color:var(--encre);font-family:var(--sans);
    ne se resynchronisent donc jamais, et l'oeil ne retrouve pas de boucle. */
 body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
   pointer-events:none;will-change:transform}
+/* LA GEOMETRIE COMPTE AUTANT QUE LA COULEUR. Un premier jeu de nappes tenait
+   dans des rayons de 38 a 46 %, poses pres des angles. Rendu a l'ecran, tout
+   le bleu se retrouvait dans les coins et le centre de la page, la ou vit
+   justement le contenu, restait parfaitement plat : le voile existait sans se
+   voir. Les rayons sont donc passes a 58-75 %, ce qui vaut environ 90 a 110 %
+   de la largeur visible puisque le calque fait 150 %, et les centres ont ete
+   ramenes vers l'interieur. Une nappe doit balayer la page, pas la border. */
 body::before{
   background:
-    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+    radial-gradient(70% 55% at 28% 22%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(62% 48% at 82% 10%,var(--voile-a) 0%,transparent 62%);
   animation:voile-un 61s ease-in-out infinite alternate}
 body::after{
   background:
-    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+    radial-gradient(75% 58% at 76% 78%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(58% 46% at 14% 88%,var(--voile-a) 0%,transparent 62%);
   animation:voile-deux 83s ease-in-out infinite alternate}
 @keyframes voile-un{
   from{transform:translate3d(0,0,0) scale(1)}
@@ -249,14 +256,14 @@ body::after{
    arete claire en haut et une ombre portee tres basse suffisent a faire lire
    une vitre posee plutot qu'un aplat colle.
 
-   L'OPACITE MONTE A 88 %, ET C'EST UN CHOIX. Une fois le voile assez fort
-   pour se voir, c'est le texte des vitres qui devient la contrainte : .fresh
-   et .tb sont en --acier, et --acier sur une vitre trop transparente tombe
-   sous 4,5 des qu'une nappe passe dessous. Le calcul donne 83 % minimum pour
-   la nappe retenue ; 88 % laisse de la marge. On voit donc moins le voile a
-   TRAVERS les barres, ce qui n'est pas une perte : le voile a pour travail le
-   fond de page, pas l'en-tete. Le biseau, lui, donne le relief sans rien
-   couter en contraste.
+   L'OPACITE DESCEND A 68 %, ET C'EST CE QUI FAIT LE VERRE. A 88 % il ne
+   passait que 12 % du fond : la vitre etait techniquement translucide et
+   visuellement opaque. Le calcul montre que le plafond ne venait que d'un
+   seul texte, .fresh, laisse en --acier. Passe en --sourd (comme sante.css le
+   fait deja), il tient 6,85 meme a 68 %, et .tb tenait deja 4,54 des 60 %
+   parce qu'il se pose sur du blanc et non sur le sol. La saturation monte a
+   200 % et le flou a 24 px : c'est la sur-saturation qui fait lire un verre
+   plutot qu'un calque gris.
 
    PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
    feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
@@ -264,17 +271,23 @@ body::after{
    invisible tout en coutant du GPU a chaque image. */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 92%, transparent),
-    color-mix(in srgb, var(--sol) 88%, transparent));
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
+    color-mix(in srgb, var(--craie) 72%, transparent),
+    color-mix(in srgb, var(--sol) 68%, transparent));
+  -webkit-backdrop-filter:saturate(200%) blur(24px);
+  backdrop-filter:saturate(200%) blur(24px);
   border-bottom:1px solid var(--filet);
-  box-shadow:0 1px 16px color-mix(in srgb, var(--bitume) 4%, transparent)}
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--craie) 90%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--craie) 35%, transparent),
+    0 2px 20px color-mix(in srgb, var(--bitume) 6%, transparent)}
 .top-in{max-width:980px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;
   align-items:center;justify-content:space-between;gap:var(--s4)}
 .top-t{font-size:var(--t4);font-weight:600;letter-spacing:-.022em}
+/* --sourd et non --acier : .fresh est pose sur une vitre translucide, donc son
+   fond varie avec le voile qui derive dessous. En --acier il obligeait la
+   vitre a rester a 85 % d'opacite, c'est a dire a ne plus etre une vitre.
+   sante.css le mettait deja en --sourd. */
 .fresh{display:flex;align-items:center;gap:var(--s2);font-size:var(--t2);
-  color:var(--acier);font-variant-numeric:tabular-nums;text-align:right;
+  color:var(--sourd);font-variant-numeric:tabular-nums;text-align:right;
   line-height:1.3;letter-spacing:-.01em}
 .fresh i{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:block}
 .fresh i.ok{background:var(--ok)}
@@ -896,13 +909,13 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    HAUT qu'on voit, donc c'est elle qui porte le reflet. */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 92%, transparent),
-    color-mix(in srgb, var(--surface) 88%, transparent));
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
+    color-mix(in srgb, var(--craie) 72%, transparent),
+    color-mix(in srgb, var(--surface) 68%, transparent));
+  -webkit-backdrop-filter:saturate(200%) blur(24px);
+  backdrop-filter:saturate(200%) blur(24px);
   border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--craie) 75%, transparent),
-    0 -1px 20px color-mix(in srgb, var(--bitume) 5%, transparent)}
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--craie) 90%, transparent),
+    0 -2px 24px color-mix(in srgb, var(--bitume) 6%, transparent)}
 .bar-in{max-width:620px;margin:0 auto;display:grid;
   grid-template-columns:repeat(6,1fr)}
 .tb{position:relative;appearance:none;border:0;background:none;

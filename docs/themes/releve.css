@@ -205,15 +205,17 @@ body{background:var(--craie);color:var(--encre);font-family:var(--sans);
    Le raisonnement complet est dans apple.css, ou l'effet est ne. */
 body::before,body::after{content:'';position:fixed;inset:-25%;z-index:-1;
   pointer-events:none;will-change:transform}
+/* Rayons larges et centres ramenes vers l'interieur : une nappe doit balayer
+   la page, pas la border. Voir apple.css pour le detail du pourquoi. */
 body::before{
   background:
-    radial-gradient(42% 38% at 22% 18%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(38% 34% at 78% 6%,var(--voile-b) 0%,transparent 72%);
+    radial-gradient(70% 55% at 28% 22%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(62% 48% at 82% 10%,var(--voile-a) 0%,transparent 62%);
   animation:voile-un 61s ease-in-out infinite alternate}
 body::after{
   background:
-    radial-gradient(46% 40% at 82% 74%,var(--voile-a) 0%,transparent 70%),
-    radial-gradient(34% 30% at 10% 88%,var(--voile-b) 0%,transparent 74%);
+    radial-gradient(75% 58% at 76% 78%,var(--voile-b) 0%,transparent 66%),
+    radial-gradient(58% 46% at 14% 88%,var(--voile-a) 0%,transparent 62%);
   animation:voile-deux 83s ease-in-out infinite alternate}
 @keyframes voile-un{
   from{transform:translate3d(0,0,0) scale(1)}
