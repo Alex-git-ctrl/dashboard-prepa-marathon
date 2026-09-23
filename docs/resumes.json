@@ -67,11 +67,13 @@
   },
   "2026-09-23": {
     "verdict": "attention",
-    "titre": "Analyse automatique",
-    "execution": "69 % du temps en endurance. Dérive cardiaque de 24,9 %, au-delà du seuil de 5 % : la fin de séance a coûté cher. Première moitié à 6:10/km, seconde à 4:46/km. Avec 71 m de dénivelé, l'allure vaut 5:05/km sur le plat.",
-    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "69d64fe8a9140b81"
+    "titre": "Négative split brutale sur sortie libre",
+    "essentiel": "Seconde moitié à 4:46, ton allure 10 km, sur une sortie sans objectif : en semaine 3 de base, ça ne rapporte rien.",
+    "execution": "Première moitié à 6:10, seconde à 4:46 : 84 secondes d'écart, ce ne sont plus les mêmes 2,8 km. Dérive cardiaque à 24,9 % et FC max à 180 sur 29 minutes, pour un ressenti 7.",
+    "conformite": "Rien n'était prévu au plan ce mercredi, et tu es à 5,63 km sur les 19,8 visés cette semaine.",
+    "objectif": "Une sortie de semaine 3 construit l'aérobie en Z2 : avec 64 % du temps en Z3 et Z4, raté.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-24"
   }
 }

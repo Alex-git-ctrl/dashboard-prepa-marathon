@@ -46,5 +46,17 @@
   "quand": "2026-09-20T23:01:48",
   "empreinte": "0ed92eea9d4c17b2",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Physiologie en net rebond, référence toujours estimée",
+  "essentiel": "2 semaines terminées sur 27 et une référence 10 km encore estimée : trop tôt pour juger, malgré une VFC remontée à 99 ms.",
+  "ou_tu_en_es": "Tu as couvert 39,7 km sur 42,6 prévus en deux semaines, ratio 0,932, avec 5 séances sur 6. Depuis le bilan du 20/09, la VFC est passée de 40 à 99 ms et le sommeil de 5,3 à 6,7 h. La fatigue monte vite en parallèle (12,29, soit +5,23 par semaine).",
+  "viser_plus_haut": "Non, pas maintenant : la projection 3h40 sort d'un 10 km à 48:00 estimé, jamais couru. Pour trancher, il faut un 10 km chronométré et six semaines bouclées.",
+  "a_changer": "Le sommeil a remonté comme demandé (6,7 h contre 5,3 h) mais reste sous les 7 h visés. Priorité : la dérive cardiaque, 24,9 % le 23/09 à 5:13/km après 30 % le 16/09, cale tes sorties courtes sous 6:00/km.",
+  "quand": "2026-09-24T00:22:44",
+  "empreinte": "2b8074c24f66c64e",
+  "source": "claude_conversation"
  }
 ]
