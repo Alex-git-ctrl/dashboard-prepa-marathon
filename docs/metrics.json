@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-24T09:58:41",
+  "maj": "2026-09-24T22:23:50",
   "nb_activites": 7,
   "semaines": {
     "1": {
@@ -8996,10 +8996,10 @@
       "spo2": null,
       "respiration": null,
       "masse_grasse": null,
-      "ctl": 4.935177,
-      "atl": 12.287736,
-      "ramp_rate": 1.3328364,
-      "pas": 125,
+      "ctl": 5.264573,
+      "atl": 14.151445,
+      "ramp_rate": 1.6622326,
+      "pas": 2897,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -9140,10 +9140,10 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 4.935177,
-    "atl": 12.287736,
-    "ramp_rate": 1.3328364,
-    "pas": 125,
+    "ctl": 5.264573,
+    "atl": 14.151445,
+    "ramp_rate": 1.6622326,
+    "pas": 2897,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -9622,7 +9622,7 @@
         "fatigue_indice": 22
       },
       {
-        "pas": 125,
+        "pas": 2897,
         "sommeil_h": 7.1,
         "sommeil_score": 77.0,
         "fc_repos": 43,
@@ -9634,7 +9634,7 @@
       }
     ],
     "actuel": {
-      "pas": 125,
+      "pas": 2897,
       "pas_date": "2026-09-24",
       "sommeil_h": 7.1,
       "sommeil_h_date": "2026-09-24",
