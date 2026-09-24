@@ -2695,34 +2695,59 @@ function detailSeance(s) {
   // faut pouvoir l'attraper, et faire tourner la molette dessus.
   const bande = $('prog-sem').firstElementChild;
   if (bande && bande.classList.contains('seg-l')) {
-    let tire = false, x0 = 0, g0 = 0, bouge = 0;
-    bande.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return;   // le defilement natif suffit
-      tire = true; bouge = 0; x0 = e.clientX; g0 = bande.scrollLeft;
-      bande.setPointerCapture(e.pointerId);
-      bande.classList.add('seg-tire');
-    });
-    bande.addEventListener('pointermove', e => {
+    // POURQUOI CHANGER DE SEMAINE NE MARCHAIT PAS A LA SOURIS.
+    // Deux mecanismes independants volaient sa cible au clic, et tous les
+    // deux epargnaient le tactile, qui sort plus haut par pointerType.
+    //
+    // 1. setPointerCapture(). Une fois la capture posee sur la bande, le
+    //    navigateur dispatche le click sur L'ELEMENT CAPTEUR et non sur le
+    //    bouton reellement survole. Le gestionnaire plus bas fait
+    //    e.target.closest('button') ; or closest remonte les ANCETRES, et les
+    //    boutons sont des descendants de la bande. Il recevait donc null et
+    //    sortait aussitot. Mesure au protocole DevTools, avec un vrai clic :
+    //    cible reelle DIV.seg, closest('button') null, semaine inchangee.
+    //    La capture est donc supprimee : on ecoute la fenetre pendant le
+    //    glisser, ce qui suit le pointeur hors de la bande tout aussi bien
+    //    sans toucher au routage du clic.
+    //
+    // 2. La classe seg-tire, qui met les boutons a pointer-events:none pour
+    //    qu'un glisser ne les active pas, etait posee des le pointerdown. Au
+    //    pointerup les boutons etaient donc deja inertes, et le test de survol
+    //    renvoyait la bande. Elle n'arrive plus qu'une fois le glisser avere.
+    //
+    // Un clic immobile ne declenche donc plus ni l'un ni l'autre, et garde sa
+    // vraie cible.
+    const SEUIL = 10;   // en deca, c'est un clic tremblant, pas un glisser
+    let tire = false, glisse = false, x0 = 0, g0 = 0, bouge = 0;
+    const bouger = e => {
       if (!tire) return;
       const d = e.clientX - x0;
       bouge = Math.max(bouge, Math.abs(d));
-      bande.scrollLeft = g0 - d;
-    });
-    const lache = e => {
-      if (!tire) return;
-      tire = false; bande.classList.remove('seg-tire');
-      try { bande.releasePointerCapture(e.pointerId); } catch (x) {}
+      if (!glisse && bouge > SEUIL) {
+        glisse = true;
+        bande.classList.add('seg-tire');
+      }
+      if (glisse) bande.scrollLeft = g0 - d;
     };
-    bande.addEventListener('pointerup', lache);
-    bande.addEventListener('pointercancel', lache);
-    // Un glisse de plus de quelques pixels n'est pas un clic : sans ca,
-    // attraper la bande changerait de semaine en la lachant. Le seuil etait
-    // a 4 px : un simple clic au trackpad bouge facilement de plus que ca
-    // sans intention de glisser, ce qui rendait les semaines impossibles a
-    // choisir au clic. 10 px laisse passer un clic tremblant tout en
-    // bloquant un vrai glisser (qui parcourt des dizaines de pixels).
+    const lache = () => {
+      if (!tire) return;
+      tire = false;
+      bande.classList.remove('seg-tire');
+      window.removeEventListener('pointermove', bouger);
+      window.removeEventListener('pointerup', lache);
+      window.removeEventListener('pointercancel', lache);
+    };
+    bande.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') return;   // le defilement natif suffit
+      tire = true; glisse = false; bouge = 0;
+      x0 = e.clientX; g0 = bande.scrollLeft;
+      window.addEventListener('pointermove', bouger);
+      window.addEventListener('pointerup', lache);
+      window.addEventListener('pointercancel', lache);
+    });
+    // Lacher apres un vrai glisser ne doit pas changer de semaine au passage.
     bande.addEventListener('click', e => {
-      if (bouge > 10) { e.stopPropagation(); e.preventDefault(); }
+      if (bouge > SEUIL) { e.stopPropagation(); e.preventDefault(); }
     }, true);
     // La molette verticale fait defiler la bande plutot que la page.
     bande.addEventListener('wheel', e => {
