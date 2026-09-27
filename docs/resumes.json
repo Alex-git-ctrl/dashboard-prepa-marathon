@@ -78,11 +78,13 @@
   },
   "2026-09-27": {
     "verdict": "attention",
-    "titre": "Analyse automatique",
-    "execution": "3 % du temps en endurance. C'est trop rapide pour une séance qui doit construire la base aérobie. Dérive cardiaque de 2,9 %, sous le seuil de 5 %. Première moitié à 4:52/km, seconde à 4:40/km. Avec 112 m de dénivelé, l'allure vaut 4:42/km sur le plat.",
-    "conformite": "Rien n'était prévu ce jour-là dans le plan.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "e442e768f129727f"
+    "titre": "45 minutes de seuil, hors plan",
+    "essentiel": "97 % du temps en Z4 et Z5 sur une semaine de base aérobie : prochaine sortie à 6:10, sans exception.",
+    "execution": "4:45/km moyen, seconde moitié à 4:40, FC 179 pour un max de 193 et RPE 9 : c'est un 10 km, pas une sortie longue. Dérive limitée à 2,9 %, tu as tenu, mais 163 pas/min reste bas pour cette allure.",
+    "conformite": "Séance absente du plan, et ces 9,59 km pèsent la moitié de l'objectif de 19,8 km hebdo.",
+    "objectif": "Semaine 3 de bloc aérobie : ça devait être du volume facile, tu as fait du seuil.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-27"
   }
 }

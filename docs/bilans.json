@@ -58,5 +58,17 @@
   "quand": "2026-09-24T00:22:44",
   "empreinte": "2b8074c24f66c64e",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "2 semaines sur 27, référence encore estimée",
+  "essentiel": "Observance à 0,93 sur les deux semaines terminées (39,7 km sur 42,6), mais la semaine 3 s'arrête à 15,2 km et 0 renfo.",
+  "ou_tu_en_es": "Depuis le dernier bilan, la physiologie continue de monter : VFC à 81 ms (moyenne 69,75), FC de repos à 47, sommeil à 7,4 h contre 6,7 h. La dérive cardiaque est retombée à 2,9 % le 27/09, contre 24,9 % le 23/09. Mais la fatigue grimpe de 4,43 par semaine et la semaine 3 est à 15,2 km sur 19,8.",
+  "viser_plus_haut": "Non, pas maintenant : la projection 3h40 sort d'un 10 km en 48:00 marqué estimé, sans date, et 2 semaines sur 27 sont bouclées. Il faut un 10 km réellement couru et six semaines terminées avant d'ouvrir la question.",
+  "a_changer": "La consigne de caler les sorties courtes sous 6:00/km a été suivie sur la dérive (2,9 % le 27/09) mais pas sur l'allure : 4:45/km à 179 de FC et RPE 9. Priorité des deux semaines : ramener les renfos à 2 par semaine, 0 sur 2 en semaine 3.",
+  "quand": "2026-09-27T13:24:52",
+  "empreinte": "0970620f0f3e8789",
+  "source": "claude_conversation"
  }
 ]
