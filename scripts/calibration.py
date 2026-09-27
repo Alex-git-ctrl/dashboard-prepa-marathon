@@ -16,6 +16,7 @@ Les allures d'entrainement sont ensuite des fractions de la vitesse a VO2max.
 """
 
 import math
+from datetime import date
 
 # Reference de depart : 10 km en 48 min, couru sans montre avant le plan.
 SEED = {"distance_m": 10000, "temps_s": 48 * 60, "source": "10 km de référence",
@@ -89,6 +90,38 @@ def allures(v_max):
     return out
 
 
+# Une course planifiee est une FENETRE, pas une date. Le 10 km etait inscrit au
+# samedi 26/09/2026 et a ete couru le dimanche 27 : un seul jour d'ecart, et la
+# course n'etait jamais retenue. Le tableau de bord a donc continue d'afficher
+# des zones calculees sur le 10 km ESTIME a 48 min, alors qu'une vraie
+# performance existait. Une panne muette, exactement le genre que ce depot
+# cherche a eviter.
+#
+# On tolere donc un ecart de quelques jours, MAIS on exige que la distance
+# corresponde. C'est la seconde condition qui fait le travail : sans elle, la
+# sortie facile du lendemain d'une course serait prise pour la course.
+TOLERANCE_JOURS = 4
+TOLERANCE_DISTANCE = 0.20
+
+
+def _jour(iso):
+    a, m, j = (int(v) for v in iso.split("-"))
+    return date(a, m, j)
+
+
+def _temps_s(s):
+    """Le chrono le plus juste dont on dispose.
+
+    `minutes` est arrondi a la minute. Sur le 10 km, l'ecart etait de 32 s,
+    ce qui deplace le VDOT de 0,4 et toutes les zones d'allure avec lui, dans
+    le sens flatteur. `allure_s_km` garde la seconde : on s'en sert des qu'elle
+    est disponible, et on ne retombe sur les minutes qu'a defaut.
+    """
+    if s.get("allure_s_km") and s.get("km"):
+        return s["allure_s_km"] * s["km"]
+    return s["minutes"] * 60
+
+
 def trouve_reference(seances, courses):
     """La performance la plus recente qui fasse foi.
 
@@ -96,21 +129,27 @@ def trouve_reference(seances, courses):
     contexte ou l'effort est reellement maximal. On retient la plus recente,
     pas la meilleure, parce que c'est l'etat de forme actuel qui interesse.
     """
-    dates_courses = {c["date"]: c for c in courses}
     candidates = []
     for s in seances:
         if not s.get("km") or not s.get("minutes"):
             continue
-        officielle = s["date"] in dates_courses
-        if not officielle:
-            continue
-        candidates.append({
-            "distance_m": s["km"] * 1000,
-            "temps_s": s["minutes"] * 60,
-            "source": dates_courses[s["date"]]["nom"],
-            "date": s["date"],
-            "estime": False,
-        })
+        for c in courses:
+            if not c.get("date"):
+                continue
+            ecart = abs((_jour(s["date"]) - _jour(c["date"])).days)
+            if ecart > TOLERANCE_JOURS:
+                continue
+            attendue = c.get("distance_km")
+            if attendue and abs(s["km"] - attendue) / attendue > TOLERANCE_DISTANCE:
+                continue
+            candidates.append({
+                "distance_m": s["km"] * 1000,
+                "temps_s": _temps_s(s),
+                "source": c["nom"],
+                "date": s["date"],
+                "estime": False,
+            })
+            break
     if candidates:
         return sorted(candidates, key=lambda c: c["date"])[-1]
     return dict(SEED)

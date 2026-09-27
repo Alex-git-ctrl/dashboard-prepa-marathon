@@ -43,6 +43,18 @@ COURSES = [
 # (semaine, km sortie longue, min seance 1, min seance 2, type, consigne)
 # Les seances de semaine sont en minutes : le creneau du midi est la contrainte,
 # pas la distance. En EF a 6:05/km de moyenne, 40 min font environ 6,5 km.
+#
+# LA NOTE NE REDIT PLUS LA SEANCE. Plusieurs notes decrivaient le contenu du
+# jeudi en prose ("Seance 2 : 2 x 15 min a allure marathon"), alors que ce
+# contenu est defini en structure dans seances_type.QUALITE. Quand le semi a
+# ete repousse de la semaine 7 a la semaine 13, le plan a ete reetale mais pas
+# la table des seances : les deux se sont contredits sans que rien ne le
+# signale. La semaine 13, celle du semi, programmait 30 min de travail a allure
+# marathon dans un creneau de 25 min, et les semaines 17 et 19 annoncaient
+# chacune la seance de l'autre.
+# La table des seances est donc desormais la seule source, et la note ne dit
+# plus que l'INTENTION de la semaine. Deux endroits qui decrivent la meme chose
+# finissent toujours par diverger.
 WEEKS = [
     (1,  8,   35, 35, "base",      "Passage à 3 séances. Tout en endurance fondamentale."),
     (2,  10,  40, 40, "base",      "Première sortie à 10 km. Aucune accélération."),
@@ -52,24 +64,24 @@ WEEKS = [
     (6,  16,  45, 45, "base",      ""),
     (7,  18,  45, 45, "base",      "Première sortie longue à 18 km."),
     (8,  14,  35, 35, "decharge",  ""),
-    (9,  18,  45, 45, "specifique","Séance 2 : 3 × 6 min à allure semi, 2 min de trot entre."),
-    (10, 20,  45, 45, "specifique","5 km à allure semi dans la sortie longue."),
-    (11, 21,  45, 45, "specifique","Sortie proche de la distance de course, allure semi en fin de sortie."),
-    (12, 14,  35, 35, "decharge",  "Réduction avant le semi. Rien au-dessus de l'endurance fondamentale."),
+    (9,  18,  45, 45, "specifique","Le seuil entre en jeu : c'est lui qui rend l'allure marathon facile."),
+    (10, 20,  45, 45, "specifique",""),
+    (11, 21,  45, 45, "specifique","Sortie proche de la distance du semi, finale à son allure."),
+    (12, 14,  35, 35, "decharge",  "Réduction avant le semi : le volume tombe, la vivacité reste."),
     (13, 21.1, 30, 25, "COURSE",   "SEMI-MARATHON samedi 05/12, Bois de Vincennes."),
     (14, 10,  30, 35, "recup",     "Récupération après le semi. Rien au-dessus de l'endurance fondamentale."),
     (15, 14,  40, 40, "base",      "Reprise du volume avec les zones recalibrées sur le semi."),
     (16, 17,  45, 45, "base",      "Dernière semaine de volume pur avant le travail spécifique."),
-    (17, 20,  45, 45, "specifique","Séance 2 : 2 × 15 min à allure marathon."),
-    (18, 23,  45, 45, "specifique","Derniers 5 km de la sortie longue à allure marathon."),
-    (19, 25,  45, 45, "specifique","Séance 2 : 3 × 8 min au seuil."),
+    (17, 20,  45, 45, "specifique",""),
+    (18, 23,  45, 45, "specifique","Derniers 8 km de la sortie longue à allure marathon."),
+    (19, 25,  45, 45, "specifique",""),
     (20, 18,  35, 40, "decharge",  ""),
     (21, 26,  45, 45, "specifique","Répétition générale : chaussures et ravitaillement de course."),
     (22, 30,  45, 45, "pic",       "Cap des 30 km. Pic de volume de la préparation."),
     (23, 30,  45, 40, "TEST",      "TEST 30K à allure marathon. L'indicateur clé avant Barcelone."),
     (24, 16,  35, 35, "decharge",  "Assimilation du test."),
     (25, 22,  40, 40, "affutage",  "Début de l'affûtage : le volume baisse, l'intensité reste."),
-    (26, 14,  35, 30, "affutage",  "Séance 2 : 4 × 3 min à allure marathon."),
+    (26, 14,  35, 30, "affutage",  ""),
     (27, 42.195, 25, 20, "COURSE", "MARATHON DE BARCELONE dimanche 14/03, départ 8h30."),
 ]
 

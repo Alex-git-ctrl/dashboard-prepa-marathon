@@ -42,6 +42,24 @@ RETOUR_S = 600           # 10 min apres
 # l'allure marathon devient la priorite, le seuil l'entretient. Bloc 5 :
 # on rappelle l'allure aux jambes, on ne construit plus.
 #
+# CETTE TABLE A ETE RECALEE LE 27/09/2026, pour deux raisons.
+#
+# D'abord elle etait desynchronisee du plan. Elle avait ete ecrite sur la
+# numerotation d'avant le report du semi de la semaine 7 a la semaine 13 : la
+# semaine 13, devenue celle du semi, programmait 2 x 15 min a allure marathon,
+# soit 30 min de travail dans un creneau de 25 ; la semaine 14, devenue la
+# recuperation d'apres-course, gardait une finale a allure marathon ; et les
+# semaines 17 et 19 annonçaient chacune la seance de l'autre.
+#
+# Ensuite Alex a demande plus d'allure marathon. Elle passe de cinq a huit
+# seances (5, 7, 10, 16, 17, 25, 26, 27), plus cinq finales de sortie longue.
+# Le seuil n'a PAS ete sacrifie pour autant, et c'est deliberé : a ce niveau,
+# ce qui fait gagner du temps sur marathon est le volume et le plafond
+# aerobie, pas le temps passe a l'allure de course. Courir a allure marathon
+# entretient une allure, il ne la fait pas progresser. Retirer le seuil pour
+# mettre de l'allure marathon aurait donne plus de ce qu'il demande et moins
+# de ce qui le fait avancer.
+#
 #   forme "intervalles" : echauffement, reps, retour au calme
 #   forme "lignes"      : endurance, puis des accelerations breves a la fin
 QUALITE = {
@@ -52,58 +70,60 @@ QUALITE = {
          "effort_s": 60, "recup_s": 60, "zone": "vma",
          "pourquoi": "Première séance rapide : de l'économie de foulée, pas "
                      "de la fatigue."},
-    5:  {"forme": "intervalles", "nom": "3 × 6 min à allure semi", "reps": 3,
-         "effort_s": 360, "recup_s": 120, "zone": "semi",
-         "pourquoi": "Habitue la foulée au rythme du semi, sans coûter de "
-                     "récupération."},
+    5:  {"forme": "intervalles", "nom": "2 × 10 min à allure marathon",
+         "reps": 2, "effort_s": 600, "recup_s": 180, "zone": "marathon",
+         "pourquoi": "Premier contact avec l'allure marathon. Elle doit "
+                     "paraître lente : c'est le but."},
     6:  {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
          "zone": "vma",
          "pourquoi": "L'intensité est dans la sortie longue de samedi. Jeudi "
                      "reste léger."},
+    7:  {"forme": "intervalles", "nom": "3 × 8 min à allure marathon",
+         "reps": 3, "effort_s": 480, "recup_s": 150, "zone": "marathon",
+         "pourquoi": "Plus de temps passé à l'allure de course, toujours "
+                     "fractionné pour qu'il n'en coûte rien."},
     8:  {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
          "zone": "vma",
-         "pourquoi": "Semaine de récupération après le semi. Rien de dur, "
-                     "juste de quoi ne pas s'endormir."},
-    9:  {"forme": "intervalles", "nom": "5 × 3 min à allure 10 km", "reps": 5,
-         "effort_s": 180, "recup_s": 90, "zone": "dix",
-         "pourquoi": "Première séance avec les zones recalibrées sur le semi."},
-    10: {"forme": "intervalles", "nom": "2 × 10 min au seuil", "reps": 2,
-         "effort_s": 600, "recup_s": 180, "zone": "seuil",
-         "pourquoi": "Le seuil relève le plafond : l'allure marathon devient "
-                     "plus confortable."},
+         "pourquoi": "Semaine de décharge. Rien de dur, juste de quoi ne pas "
+                     "s'endormir."},
+    9:  {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
+         "effort_s": 480, "recup_s": 120, "zone": "seuil",
+         "pourquoi": "Le seuil relève le plafond. C'est lui qui rendra "
+                     "l'allure marathon plus facile, pas l'allure marathon "
+                     "elle-même."},
+    10: {"forme": "intervalles", "nom": "2 × 12 min à allure marathon",
+         "reps": 2, "effort_s": 720, "recup_s": 180, "zone": "marathon",
+         "pourquoi": "Des blocs plus longs : tenir l'allure devient une "
+                     "question de régularité, plus d'effort."},
     11: {"forme": "intervalles", "nom": "3 × 8 min à allure semi", "reps": 3,
          "effort_s": 480, "recup_s": 150, "zone": "semi",
-         "pourquoi": "Entre le seuil et l'allure marathon, le rythme qui les "
-                     "relie."},
-    12: {"forme": "intervalles", "nom": "8 × 1 min vite", "reps": 8,
-         "effort_s": 60, "recup_s": 60, "zone": "vma",
-         "pourquoi": "Semaine de décharge : du court et du vif, rien de long."},
-    13: {"forme": "intervalles", "nom": "2 × 15 min à allure marathon",
-         "reps": 2, "effort_s": 900, "recup_s": 180, "zone": "marathon",
-         "pourquoi": "Installe l'allure marathon comme un automatisme."},
-    14: {"forme": "lignes", "reps": 8, "effort_s": 20, "recup_s": 40,
+         "pourquoi": "Le semi est dans deux semaines : c'est son rythme qu'il "
+                     "faut reconnaître."},
+    12: {"forme": "lignes", "reps": 6, "effort_s": 20, "recup_s": 40,
          "zone": "vma",
-         "pourquoi": "L'intensité est dans les 5 derniers kilomètres de "
-                     "samedi. Jeudi reste léger."},
+         "pourquoi": "Réduction avant le semi. Des lignes droites gardent la "
+                     "foulée vive sans coûter de fraîcheur."},
+    # Pas de seance de qualite en semaine 13 : c'est le semi.
+    # Pas davantage en 14 : c'est la recuperation qui suit.
     15: {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
          "effort_s": 480, "recup_s": 120, "zone": "seuil",
          "pourquoi": "Le seuil entretient le plafond pendant que le volume "
                      "monte."},
-    16: {"forme": "intervalles", "nom": "6 × 2 min à allure 10 km", "reps": 6,
-         "effort_s": 120, "recup_s": 90, "zone": "dix",
-         "pourquoi": "Semaine de décharge : court, vif, et court à finir."},
-    17: {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
-         "effort_s": 480, "recup_s": 120, "zone": "seuil",
-         "pourquoi": "Le seuil relève le plafond : l'allure marathon devient "
-                     "plus confortable."},
+    16: {"forme": "intervalles", "nom": "2 × 12 min à allure marathon",
+         "reps": 2, "effort_s": 720, "recup_s": 180, "zone": "marathon",
+         "pourquoi": "Première allure marathon recalibrée sur le semi : c'est "
+                     "la bonne, maintenant."},
+    17: {"forme": "intervalles", "nom": "2 × 15 min à allure marathon",
+         "reps": 2, "effort_s": 900, "recup_s": 180, "zone": "marathon",
+         "pourquoi": "Installe l'allure marathon comme un automatisme."},
     18: {"forme": "lignes", "reps": 8, "effort_s": 20, "recup_s": 40,
          "zone": "vma",
          "pourquoi": "L'intensité est dans les 8 derniers kilomètres de "
                      "samedi. Jeudi reste léger."},
-    19: {"forme": "intervalles", "nom": "2 × 15 min à allure marathon",
-         "reps": 2, "effort_s": 900, "recup_s": 180, "zone": "marathon",
-         "pourquoi": "L'allure marathon sur des jambes déjà chargées par le "
-                     "volume."},
+    19: {"forme": "intervalles", "nom": "3 × 8 min au seuil", "reps": 3,
+         "effort_s": 480, "recup_s": 120, "zone": "seuil",
+         "pourquoi": "Dernier rappel de seuil avant le bloc de pic : on garde "
+                     "le plafond haut pendant que le volume prend le relais."},
     20: {"forme": "intervalles", "nom": "6 × 1 min vite", "reps": 6,
          "effort_s": 60, "recup_s": 60, "zone": "vma",
          "pourquoi": "Semaine de décharge avant le dernier bloc."},
@@ -134,9 +154,18 @@ MARGE = {"marathon": (8, 4), "semi": (10, 5)}
 MARGE_DEFAUT = (12, 5)
 
 # Sorties longues qui se terminent plus vite que leur debut.
+# La finale rapide d'une sortie longue : les derniers kilometres se courent
+# plus vite que le reste. C'est le travail le plus specifique du marathon,
+# parce qu'il place l'allure de course sur des jambes deja fatiguees, ce
+# qu'aucun fractionne du mardi ne sait reproduire.
+#
+# L'entree en semaine 14 a ete retiree : c'est la semaine de recuperation qui
+# suit le semi, et elle demandait 5 km a allure marathon. Elle datait de
+# l'ancienne numerotation, d'avant le report du semi.
 FINALE = {
-    6:  {"km": 5, "zone": "semi"},
-    14: {"km": 5, "zone": "marathon"},
+    6:  {"km": 4, "zone": "marathon"},
+    11: {"km": 5, "zone": "semi"},
+    16: {"km": 5, "zone": "marathon"},
     18: {"km": 8, "zone": "marathon"},
     21: {"km": 6, "zone": "marathon"},
     23: {"km": 30, "zone": "marathon"},

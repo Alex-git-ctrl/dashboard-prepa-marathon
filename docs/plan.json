@@ -204,7 +204,7 @@
       "seance2_min": 45,
       "volume_km": 32.8,
       "course": null,
-      "note": "Séance 2 : 3 × 6 min à allure semi, 2 min de trot entre."
+      "note": "Le seuil entre en jeu : c'est lui qui rend l'allure marathon facile."
     },
     {
       "semaine": 10,
@@ -218,7 +218,7 @@
       "seance2_min": 45,
       "volume_km": 34.8,
       "course": null,
-      "note": "5 km à allure semi dans la sortie longue."
+      "note": ""
     },
     {
       "semaine": 11,
@@ -232,7 +232,7 @@
       "seance2_min": 45,
       "volume_km": 35.8,
       "course": null,
-      "note": "Sortie proche de la distance de course, allure semi en fin de sortie."
+      "note": "Sortie proche de la distance du semi, finale à son allure."
     },
     {
       "semaine": 12,
@@ -246,7 +246,7 @@
       "seance2_min": 35,
       "volume_km": 25.5,
       "course": null,
-      "note": "Réduction avant le semi. Rien au-dessus de l'endurance fondamentale."
+      "note": "Réduction avant le semi : le volume tombe, la vivacité reste."
     },
     {
       "semaine": 13,
@@ -316,7 +316,7 @@
       "seance2_min": 45,
       "volume_km": 34.8,
       "course": null,
-      "note": "Séance 2 : 2 × 15 min à allure marathon."
+      "note": ""
     },
     {
       "semaine": 18,
@@ -330,7 +330,7 @@
       "seance2_min": 45,
       "volume_km": 37.8,
       "course": null,
-      "note": "Derniers 5 km de la sortie longue à allure marathon."
+      "note": "Derniers 8 km de la sortie longue à allure marathon."
     },
     {
       "semaine": 19,
@@ -344,7 +344,7 @@
       "seance2_min": 45,
       "volume_km": 39.8,
       "course": null,
-      "note": "Séance 2 : 3 × 8 min au seuil."
+      "note": ""
     },
     {
       "semaine": 20,
@@ -442,7 +442,7 @@
       "seance2_min": 30,
       "volume_km": 24.7,
       "course": null,
-      "note": "Séance 2 : 4 × 3 min à allure marathon."
+      "note": ""
     },
     {
       "semaine": 27,
