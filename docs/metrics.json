@@ -1,5 +1,5 @@
 {
-  "maj": "2026-09-28T11:40:19",
+  "maj": "2026-09-28T23:49:32",
   "nb_activites": 8,
   "semaines": {
     "1": {
@@ -28,9 +28,18 @@
       "deniv": 184,
       "renfo_seances": 0,
       "renfo_minutes": 0
+    },
+    "4": {
+      "km": 0.0,
+      "seances": 0,
+      "minutes": 0,
+      "charge": 0,
+      "deniv": 0,
+      "renfo_seances": 1,
+      "renfo_minutes": 100
     }
   },
-  "nb_renfos": 3,
+  "nb_renfos": 4,
   "seances": [
     {
       "date": "2026-09-05",
@@ -10321,9 +10330,9 @@
       "respiration": null,
       "masse_grasse": null,
       "ctl": 6.187779,
-      "atl": 15.031014,
+      "atl": 17.560335,
       "ramp_rate": 1.4547381,
-      "pas": 3107,
+      "pas": 7992,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -10476,9 +10485,9 @@
     "respiration": null,
     "masse_grasse": null,
     "ctl": 6.187779,
-    "atl": 15.031014,
+    "atl": 17.560335,
     "ramp_rate": 1.4547381,
-    "pas": 3107,
+    "pas": 7992,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -11017,7 +11026,7 @@
         "fatigue_indice": 31
       },
       {
-        "pas": 3107,
+        "pas": 7992,
         "sommeil_h": 7.1,
         "sommeil_score": 77.0,
         "fc_repos": 45,
@@ -11029,7 +11038,7 @@
       }
     ],
     "actuel": {
-      "pas": 3107,
+      "pas": 7992,
       "pas_date": "2026-09-28",
       "sommeil_h": 7.1,
       "sommeil_h_date": "2026-09-28",
