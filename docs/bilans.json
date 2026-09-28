@@ -70,5 +70,17 @@
   "quand": "2026-09-27T13:24:52",
   "empreinte": "0970620f0f3e8789",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "10 km enfin couru, 3 semaines sur 27",
+  "essentiel": "Le 10 km du 27/09 (45:33, VDOT 42,4) cale enfin la calibration, mais 3 semaines bouclées sur 27 ne permettent aucun jugement.",
+  "ou_tu_en_es": "Depuis le dernier bilan, la référence n'est plus estimée : 9,59 km en 45:33 le 27/09. L'observance reste à 0,88 sur trois semaines (54,9 km sur 62,4) et la semaine 4 est à 0 km sur 25,1. Forme de fond à 6,19 et VFC à 73 ms montent, mais la fatigue grimpe de 4,39 par semaine.",
+  "viser_plus_haut": "Non, pas sur 3 semaines : la projection 3h39 sort d'un 9,59 km à RPE 9 et 179 de FC. Il faudrait 6 semaines terminées, une observance au-dessus de 0,95 et une sortie longue tenue à 5:41/km.",
+  "a_changer": "Les renfos demandés ne sont pas revenus à 2 : 0 en semaine 3, 1 en semaine 4. Priorité unique des deux semaines : boucler les 3 séances hebdo, la semaine 4 est encore à 0 km sur 25,1.",
+  "quand": "2026-09-28T23:24:22",
+  "empreinte": "4de82aa09485ce65",
+  "source": "claude_conversation"
  }
 ]
