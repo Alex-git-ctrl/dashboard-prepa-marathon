@@ -82,5 +82,17 @@
   "quand": "2026-09-28T23:24:22",
   "empreinte": "4de82aa09485ce65",
   "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Référence calée, volume toujours absent",
+  "essentiel": "Trois semaines bouclées sur 27, observance 0,88, et la semaine 4 plafonne à 5,9 km sur les 25,1 prévus.",
+  "ou_tu_en_es": "Depuis le bilan du 28/09, une seule sortie ajoutée : 5,9 km le 29/09, efficacité 2,36, la meilleure des neuf. Le reste recule : VFC à 32 ms contre 69,2 de moyenne, sommeil à 3,7 h, dette de 6,3 h sur la semaine. Fatigue à 14,81 pour une forme de fond à 6,22.",
+  "viser_plus_haut": "Non, pas sur ces chiffres : la projection 3h39 à 5:11/km repose sur un seul 10 km et 18,3 km de base hebdo, donc confiance faible. Il faudrait six semaines terminées au-dessus de 0,95 d'observance pour en reparler.",
+  "a_changer": "La priorité des 3 séances hebdo n'est pas suivie : 1 séance et 5,9 km sur 25,1 en semaine 4, après 0 renfo en semaine 3. Deux sorties faciles sous 6:00/km d'ici dimanche, rien de plus.",
+  "quand": "2026-09-30T09:36:51",
+  "empreinte": "c103e337df443dda",
+  "source": "claude_conversation"
  }
 ]
