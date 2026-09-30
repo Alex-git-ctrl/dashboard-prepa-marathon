@@ -88,12 +88,14 @@
     "date_redaction": "2026-09-27"
   },
   "2026-09-29": {
-    "verdict": "bon",
-    "titre": "Analyse automatique",
-    "execution": "100 % du temps en endurance. Dérive cardiaque de 4,6 %, sous le seuil de 5 %. Première moitié à 6:34/km, seconde à 5:45/km. Avec 71 m de dénivelé, l'allure vaut 5:44/km sur le plat.",
-    "conformite": "Le plan prévoyait 40 min en endurance fondamentale pour ce jour, et tu as couru 5,86 km en 34 min.",
-    "objectif": "Une sortie en endurance fondamentale sert à construire la base aérobie : plus de capillaires, un cœur qui remplit mieux, une meilleure utilisation des graisses. Elle ne vaut que si elle reste lente.",
-    "source": "regles",
-    "cle": "6a0d3547c6d6507e"
+    "verdict": "correct",
+    "titre": "Facile bien tenue, séance écourtée",
+    "essentiel": "FC moyenne 120, rien au-dessus de Z2 : l'intensité est juste, mais tu coupes à 34 min sur les 40 prévues.",
+    "execution": "5:54 réel, 5:44 corrigé des 71 m de D+, un peu plus rapide que ta fourchette EF (6:00 à 6:39), mais FC max 138 et dérive 4,6 % valident l'effort. Seconde moitié à 5:45 contre 6:34 sur la première : tu pars lent et tu montes, c'est le bon sens.",
+    "conformite": "Séance au plan mais raccourcie de 6 min, à compenser sur la sortie longue pour tenir les 25,1 km de la semaine.",
+    "objectif": "Remettre du volume aérobie après les 9,59 km à 4:45 de dimanche. Rôle rempli : RPE 2, aucun temps en Z3.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-09-30"
   }
 }
