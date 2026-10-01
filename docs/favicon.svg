@@ -1,5 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0071e3"/>
-  <text x="16" y="23" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif"
-    font-size="19" font-weight="700" fill="#ffffff">4</text>
+  <!-- Le noir du bloc "present", l'anneau d'activite de l'onglet Accueil
+       presque ferme (le chemin vers Barcelone) et un 4 trace au trait,
+       comme les icones de la barre d'onglets. Aucun texte : le rendu ne
+       depend d'aucune police installee. -->
+  <rect width="32" height="32" rx="7.5" fill="#1d1d1f"/>
+  <circle cx="16" cy="16" r="11" fill="none" stroke="#3a3a3c" stroke-width="3"/>
+  <path d="M16 5a11 11 0 1 1-10.3 7.1" fill="none" stroke="#2997ff"
+    stroke-width="3" stroke-linecap="round"/>
+  <path d="M17.6 21.6V10.4l-6.4 8h8.2" fill="none" stroke="#ffffff"
+    stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

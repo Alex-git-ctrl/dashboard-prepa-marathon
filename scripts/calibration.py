@@ -23,18 +23,21 @@ SEED = {"distance_m": 10000, "temps_s": 48 * 60, "source": "10 km de référence
         "date": None, "estime": True}
 
 # Fractions de la vitesse a VO2max. Bornes basse et haute de chaque zone.
+# Les usages decrivent le plan tel qu'il est ecrit dans build_plan.py : ils
+# parlaient encore de la semaine 13 et des blocs 1 a 4 d'avant le report du
+# semi au 05/12, alors que l'allure marathon arrive des la semaine 5.
 ZONES = [
     ("ef", "Endurance fondamentale", 0.66, 0.73,
      "La majorité du volume, sorties longues comprises"),
     ("marathon", "Allure marathon", 0.79, 0.83,
-     "Fractions spécifiques à partir de la semaine 13"),
-    ("seuil", "Seuil", 0.86, 0.89, "Séances de 3 × 10 min, blocs 3 et 4"),
+     "Fractions dès la semaine 5, puis finales de sorties longues"),
+    ("seuil", "Seuil", 0.86, 0.89, "Séances de 2 ou 3 × 8 à 10 min, environ une par mois"),
     ("dix", "Allure 10 km", 0.90, 0.93, "Rythme de course sur 10 km"),
     # Le fractionne court se court au-dessus de l'allure 10 km. La borne
     # haute reste sous la vitesse a VO2max : on cherche l'economie de
     # foulee, pas un record sur 400 m.
     ("vma", "Fractionné court", 0.95, 0.98,
-     "Répétitions de 1 à 3 min, blocs 1 et 2"),
+     "Répétitions d’une minute et lignes droites, tout le plan"),
 ]
 
 

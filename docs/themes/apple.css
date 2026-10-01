@@ -147,9 +147,37 @@
      les definissait. Verifies au validateur : pire paire voisine a 13,0 de dE
      OKLab en vision deuteranope (cible 8) et 25,0 en vision normale, chroma
      au-dessus du plancher, contraste sur la carte blanche au-dessus de 3. */
-  --sante-sommeil:#8944ab;
-  --sante-vfc:#0a9aa3;
-  --sante-coeur:#d30f45;
+  /* Revus le 30/09/2026 : les teintes profondes d'avant (#8944ab, #0a9aa3,
+     #d30f45, et le repli brun #b25000 pour l'activite) rendaient la section
+     Sante terne. Ce sont maintenant les couleurs vives de Sante d'Apple,
+     une par signal, et chaque courbe porte la couleur de son icone.
+     Revalides au validateur, toutes paires confondues : ecart minimum 6,2
+     en vision protanope (la paire sommeil/score, jamais seule : legende et
+     infobulle l'accompagnent) et 16,2 en vision normale. L'orange et le
+     turquoise descendent a 2,7 et 2,8 de contraste sur la carte blanche :
+     ce sont des traces, jamais du texte, et leur valeur se lit toujours
+     dans l'infobulle ou le libelle voisin. */
+  --sante-activite:#f57c00;
+  --sante-coeur:#f5244f;
+  --sante-vfc:#12a8c2;
+  --sante-sommeil:#9f5cf0;
+  --sante-score:#1f4fe0;
+  /* Sixieme teinte, pour la derive cardiaque dans l'indice de charge,
+     voisine de l'effort percu : 16,6 d'ecart minimum entre voisins. */
+  --sante-derive:#d6259e;
+  /* Les trois courbes de Progres qui restaient sans couleur. Valides avec
+     les six autres dans l'ordre d'affichage des blocs : 9,8 d'ecart minimum
+     entre voisins en vision deuteranope, 23,3 en vision normale. VO2max et
+     SpO2 partagent l'indigo : ce sont deux mesures de l'oxygene. */
+  --sante-poids:#a8661c;
+  --sante-efficacite:#1e9e5a;
+  --sante-oxygene:#5b5bd6;
+  /* Les nuits se lisent sur une rampe du violet du sommeil, du pale (score
+     sous 50) au vif (70 et plus) : une seule teinte, luminance monotone,
+     le pas le plus clair tient 2,13 de contraste sur le blanc. */
+  --nuit-faible:#c4a2f8;
+  --nuit-moyenne:#b081f4;
+  --nuit-bonne:#9f5cf0;
 
   /* --- zones de frequence cardiaque ---
      Inchangees, et c'est voulu : ce sont les couleurs de la Forerunner, et
@@ -272,10 +300,10 @@ body::after{
    La saturation a 200 % et le flou a 24 px comptent autant que l'opacite :
    c'est la sur-saturation qui fait lire un verre plutot qu'un calque gris.
 
-   PAS DE FILTRE SVG DE DEPLACEMENT. La vraie refraction demande un
-   feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire.
-   Et sur une barre de 52 px posee sur un fond presque uni, elle serait
-   invisible tout en coutant du GPU a chaque image. */
+   PAS DE FILTRE SVG DE DEPLACEMENT ICI. La vraie refraction demande un
+   feDisplacementMap en backdrop-filter:url(), que Safari ne sait pas faire,
+   et un bandeau bord a bord n'a pas de bord a courber. La barre du bas,
+   devenue capsule le 30/09/2026, l'a sur Chromium (voir plus bas). */
 .top{position:sticky;top:0;z-index:40;
   background:linear-gradient(to bottom,
     color-mix(in srgb, var(--craie) 50%, transparent),
@@ -382,7 +410,7 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
 .hcard-i{font-size:var(--t3);color:var(--sourd);line-height:1.45;
   margin:var(--s3) 0 0;max-width:60ch;text-wrap:pretty}
 .hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
-.hcard .cb,.hcard .anneau-row,.hcard .gc{margin-top:var(--s3)}
+.hcard .cb,.hcard .fx,.hcard .gc{margin-top:var(--s3)}
 
 /* ---------- carte de tendance : legende sous le graphique ----------
    Absente ici avant cette passe : la legende retombait en bloc simple sous
@@ -393,42 +421,40 @@ h2{font-size:var(--t5);font-weight:600;letter-spacing:.007em;color:var(--encre);
   letter-spacing:-.01em}
 .tend-cap b{font-weight:600}
 
-/* ---------- anneau de preparation ----------
-   Le mot qualitatif est un badge sous le chiffre, comme les pilules de
-   verdict utilisees partout ailleurs sur la page (memes classes .pill
-   .ok/.no/.al) : un premier essai en gros titre au-dessus de la ligne
-   dupliquait le role du sc-h ou du hcard-t juste au-dessus, "Ce que ca
-   t'a coute" suivi d'un "Coût normal" deux fois plus gros et de la meme
-   encre grise. Chaque entree de legende est sur deux lignes (libelle, puis
-   valeur et points en petit gris) au lieu d'une seule ligne longue : c'est
-   ce qui evite le debordement, la ou "Sommeil · 47/100 · 19/40" sur une
-   ligne finissait par se faire couper au bord de la carte sur un ecran
-   etroit. min-width:0 est la deuxieme moitie du correctif : par defaut un
-   enfant flex ne retrecit jamais sous la largeur de son contenu, donc sans
-   cette ligne le retour a la ligne du texte n'avait jamais l'occasion de
-   se produire. */
-.anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
-.anneau-c{flex-shrink:0;text-align:center}
-.anneau-c svg{display:block;width:124px;height:124px}
-/* Survol d'une composante : les autres s'effacent au lieu de disparaitre, pour
-   qu'on garde la forme complete de l'anneau en tete. */
-.an-seg{transition:opacity .2s}
-.an-seg.off{opacity:.25}
-.anneau-row .gc-lg span[data-vise]{cursor:default}
-.anneau-c .pill{margin-top:var(--s3)}
-text.an-n{font-family:var(--sans);font-size:30px;font-weight:600;
-  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-text.an-m{font-family:var(--sans);font-size:9.5px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase}
-.anneau-row .gc-lg{flex-direction:column;align-items:flex-start;margin-top:0;
-  gap:var(--s4);min-width:0;flex:1 1 150px}
-.anneau-row .gc-lg span{align-items:flex-start;gap:var(--s3)}
-.anneau-row .gc-lg i{width:10px;height:10px;border-radius:50%;margin-top:5px}
-.gc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
-.gc-t b{font-size:var(--t3);font-weight:600;color:var(--encre);
-  letter-spacing:-.01em}
-.gc-t em{font-style:normal;font-size:var(--t1);color:var(--acier);
+/* ---------- score a facteurs (preparation du jour, cout d'entrainement) ----------
+   Remplace l'anneau segmente : le total en grand et sa pastille, une barre
+   empilee ou chaque facteur occupe sa part du total, puis une ligne par
+   facteur avec sa jauge. Les segments sont separes par un filet de la
+   couleur de la carte, pas par un vide qui laisserait voir le fond de
+   piste. Sur un ecran etroit la jauge passe sous son libelle. */
+.fx-h{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.fx-n{font-family:var(--num);font-size:var(--t6);font-weight:600;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--encre)}
+.fx-n em{font-style:normal;font-size:var(--t2);font-weight:500;
+  color:var(--acier);letter-spacing:0;margin-left:2px}
+.fx-pile{display:flex;height:12px;border-radius:6px;overflow:hidden;
+  background:var(--creux);margin-top:var(--s4)}
+.fx-pile i{display:block;height:100%;box-shadow:inset -2px 0 0 var(--surface);
+  transition:opacity .2s}
+.fx-pile i.off{opacity:.25}
+.fx-l{display:grid;gap:var(--s3);margin-top:var(--s4)}
+.fx-r{display:grid;grid-template-columns:minmax(0,11.5em) minmax(64px,1fr) auto;
+  gap:var(--s2) var(--s4);align-items:center;cursor:default}
+.fx-k{display:flex;align-items:flex-start;gap:var(--s2);min-width:0}
+.fx-k>i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.fx-k>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fx-k b{font-size:var(--t3);font-weight:600;color:var(--encre);letter-spacing:-.01em}
+.fx-k em{font-style:normal;font-size:var(--t1);color:var(--acier);
   font-variant-numeric:tabular-nums}
+.fx-m{height:6px;border-radius:3px;background:var(--creux);overflow:hidden}
+.fx-m i{display:block;height:100%;border-radius:3px}
+.fx-v{font-family:var(--num);font-size:var(--t3);font-weight:600;text-align:right;
+  white-space:nowrap;min-width:4.6em;font-variant-numeric:tabular-nums}
+.fx-v em{font-style:normal;font-size:var(--t1);font-weight:400;color:var(--acier)}
+@media (max-width:480px){
+  .fx-r{grid-template-columns:minmax(0,1fr) auto}
+  .fx-m{grid-column:1 / -1;order:3}
+}
 
 /* Meme traitement pour l'icone optionnelle du titre d'un bloc depliable
    (bloc() avec un cinquieme argument). */
@@ -869,7 +895,6 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .dm-v em{font-style:normal;font-size:var(--t2);color:var(--acier);
   margin-left:.35em;font-weight:400}
-.dm-g{width:100%;height:44px;display:block;margin-top:var(--s2)}
 .dm-w{position:relative;padding:5px 0}
 .dm-b{display:flex;height:10px;border-radius:var(--r1);overflow:hidden}
 .dm-b span{flex:1}
@@ -914,39 +939,83 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--filet);
   max-width:60ch}
 
-/* ---------- barre d'onglets ----------
-   La barre d'onglets d'iOS : translucide, sans indicateur au-dessus, et
-   l'onglet actif se lit au bleu. */
-/* Meme verre que la barre superieure, biseau retourne : ici c'est l'arete du
-   HAUT qu'on voit, donc c'est elle qui porte le reflet. */
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:linear-gradient(to bottom,
-    color-mix(in srgb, var(--craie) 64%, transparent),
-    color-mix(in srgb, var(--surface) 60%, transparent));
-  -webkit-backdrop-filter:saturate(200%) blur(24px);
-  backdrop-filter:saturate(200%) blur(24px);
-  border-top:1px solid var(--filet);padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--craie) 90%, transparent),
-    0 -2px 24px color-mix(in srgb, var(--bitume) 6%, transparent)}
-.bar-in{max-width:620px;margin:0 auto;display:grid;
-  grid-template-columns:repeat(6,1fr)}
-.tb{position:relative;appearance:none;border:0;background:none;
-  padding:var(--s2) 2px var(--s1);cursor:pointer;display:flex;
-  flex-direction:column;align-items:center;gap:2px;color:var(--acier);
-  font-family:inherit;font-size:10px;font-weight:500;transition:color .18s;
-  letter-spacing:-.01em}
-.tb svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .18s}
+/* ---------- barre d'onglets : une capsule de verre liquide ----------
+   Refaite le 30/09/2026 d'apres le Liquid Glass d'iOS 26 et la technique de
+   Liquidglass.js. La barre n'est plus un bandeau colle au bord : c'est une
+   capsule qui flotte au-dessus du contenu, et c'est ce detachement qui fait
+   lire une vitre. Quatre couches, de l'arriere vers l'avant :
+     1. le fond, pris par backdrop-filter : flou court (14 px, pour que les
+        formes restent devinables dessous), saturation forte, un peu de
+        lumiere. Sur Chromium, le gabarit ajoute la refraction des bords
+        (classe .refracte, filtre SVG a carte de deplacement) ;
+     2. une teinte de surface a 62 %, le plancher qui garde les libelles de
+        10 px au-dessus de 4,5 de contraste (le calcul de l'ancienne barre,
+        qui tombait a 4,49 sous 60 %) ;
+     3. le reflet speculaire (::before), une lumiere qui tombe du haut, et
+        les aretes eclairees en ombres internes ;
+     4. la lentille sous l'onglet actif, une seconde goutte de verre plus
+        claire qui glisse d'un onglet a l'autre en s'etirant.
+   Le conteneur .bar devient transparent aux clics : seule la capsule en
+   recoit, le contenu reste cliquable de part et d'autre. */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;pointer-events:none;
+  padding:0 var(--s3) calc(env(safe-area-inset-bottom) + 12px);
+  background:none;border:0;box-shadow:none}
+.bar-in{--verre:1;pointer-events:auto;position:relative;isolation:isolate;
+  max-width:560px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(6,1fr);padding:6px;border-radius:999px;
+  background:color-mix(in srgb, var(--surface) 62%, transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(190%) brightness(1.04);
+  backdrop-filter:blur(14px) saturate(190%) brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(255,255,255,.45),
+    inset 1px 0 0 rgba(255,255,255,.5),
+    inset -1px 0 0 rgba(255,255,255,.5),
+    0 0 0 .5px color-mix(in srgb, var(--bitume) 12%, transparent),
+    0 12px 32px -8px color-mix(in srgb, var(--bitume) 26%, transparent),
+    0 2px 6px color-mix(in srgb, var(--bitume) 8%, transparent)}
+.bar-in.refracte{
+  backdrop-filter:url(#lg-verre) blur(10px) saturate(190%) brightness(1.04)}
+.bar-in::before{content:"";position:absolute;inset:0;z-index:-1;
+  border-radius:inherit;pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 55%),
+    radial-gradient(90% 140% at 50% -30%, rgba(255,255,255,.4), transparent 60%)}
+.tb-lens{position:absolute;top:6px;bottom:6px;left:6px;z-index:0;
+  width:calc((100% - 12px) / 6);border-radius:999px;pointer-events:none;
+  translate:calc(var(--i, 0) * 100%) 0;
+  transition:translate .55s cubic-bezier(.3,1.3,.45,1);
+  background:color-mix(in srgb, var(--mesure) 9%,
+    color-mix(in srgb, var(--surface) 78%, transparent));
+  box-shadow:inset 0 1px 0 #fff,
+    inset 0 -1px 1px rgba(255,255,255,.5),
+    0 0 0 .5px color-mix(in srgb, var(--bitume) 7%, transparent),
+    0 2px 8px color-mix(in srgb, var(--bitume) 12%, transparent)}
+.tb-lens.etire{animation:lens-etire .55s cubic-bezier(.3,1,.4,1)}
+@keyframes lens-etire{
+  0%{scale:1 1} 35%{scale:1.16 .9} 70%{scale:.97 1.03} 100%{scale:1 1}}
+.tb{position:relative;z-index:1;appearance:none;border:0;background:none;
+  padding:7px 2px 5px;border-radius:999px;cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:1px;color:var(--acier);
+  font-family:inherit;font-size:10px;font-weight:500;letter-spacing:-.01em;
+  transition:color .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.tb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .2s}
 .tb::before{content:none}
 .tb:hover{color:var(--sourd)}
 .tb[aria-selected="true"]{color:var(--mesure)}
 .tb[aria-selected="true"] svg{stroke-width:2.1}
-.tb[aria-selected="true"]::before{content:none}
-.tb:active{transform:scale(.93)}
-.tb:focus-visible{outline:2px solid var(--focus);outline-offset:-3px;
-  border-radius:var(--r1)}
-.dotb{position:absolute;top:5px;right:calc(50% - 17px);width:8px;height:8px;
+.tb:active{transform:scale(.92)}
+.tb:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.dotb{position:absolute;top:5px;right:calc(50% - 16px);width:8px;height:8px;
   border-radius:50%;background:var(--effort);box-shadow:0 0 0 2px var(--surface)}
+/* Moins de transparence demandee par le systeme : la vitre devient une
+   plaque, sans flou ni refraction. */
+@media (prefers-reduced-transparency:reduce){
+  .bar-in,.bar-in.refracte{background:var(--surface);
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .bar-in::before{content:none}
+}
 
 /* ---------- commandes ----------
    Deux actions qui vivent hors de la page. Le bouton plein bleu est le seul
@@ -1051,11 +1120,96 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
   .wk.now{grid-template-columns:1fr;padding:var(--s4)}
   .li{min-height:52px}
-  .tb{padding:var(--s2) 2px var(--s1)}
-  .tb svg{width:27px;height:27px}
 }
 @media (max-width:380px){.grid{grid-template-columns:1fr}}
 /* Le voile s'immobilise lui aussi, pas seulement les transitions. Ses deux
    nappes restent peintes : on garde le fond, on retire le mouvement. */
 @media (prefers-reduced-motion:reduce){*{transition:none!important}
   body::before,body::after{animation:none}}
+
+/* ---------- harmonie des largeurs (onglet Seances) ----------
+   Les cartes d'une meme pile prennent toutes la largeur de la colonne. La
+   carte "Prevu / Couru" heritait du max-width:62ch de .verd et s'arretait a
+   mi-largeur, et les filets de .ia-s et .bilan s'interrompaient a 60ch au
+   milieu de leur carte. Le texte garde sa longueur de ligne lisible, mais
+   par un padding droit plutot que par la largeur de la boite : la carte et
+   son filet vont jusqu'au bord, les lignes s'arretent a la meme mesure.
+   Le pourcentage d'un padding se rapporte a la largeur du parent, d'ou le
+   calcul. */
+.sc-ouvert>.verd{max-width:none;
+  padding-right:max(var(--pad), calc(100% - 62ch - var(--pad)))}
+.bilan,.ia-s{max-width:none;padding-right:max(0px, calc(100% - 60ch))}
+/* Le panneau de courbes finissait sur sa marge basse PLUS celle du bloc :
+   64 px de vide sous l'axe du temps, contre 32 sous les autres blocs. */
+.bl-d>.gc:last-child{margin-bottom:0}
+
+/* ---------- dynamique de course, lisible sur ordinateur ----------
+   Une tuile par mesure, deux par ligne des qu'il y a la place, une seule sur
+   telephone. Chaque tuile dit d'abord le verdict et la cible, puis montre
+   la seance : zone "bon" en vert pale, cible en tirets verts, moyenne en
+   pointille. La reglette va du rouge au vert (couleurs posees par le
+   gabarit), et la piste d'amelioration n'apparait que si la mesure n'est
+   pas dans le vert. */
+.dm{display:grid;gap:var(--s4);
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))}
+.dm-l{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s4);
+  border-radius:var(--r1);
+  background:color-mix(in srgb, var(--creux) 45%, var(--surface))}
+.dm-h{border-bottom:0;padding-bottom:0}
+.dm-v{font-size:var(--t5)}
+.dm-vd{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.dm-ci{font-size:var(--t2);color:var(--sourd)}
+.dm-ci b{color:var(--encre);font-weight:600;font-variant-numeric:tabular-nums}
+.dm-c{display:grid;grid-template-columns:auto 1fr;gap:var(--s1) var(--s2);
+  margin-top:var(--s1)}
+.dm-ax{display:flex;flex-direction:column;justify-content:space-between;
+  font-size:var(--t1);color:var(--acier);text-align:right;
+  font-variant-numeric:tabular-nums;line-height:1}
+.dm-pl{position:relative;height:130px;cursor:crosshair;touch-action:pan-y}
+.dm-pl svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dm-zone{fill:var(--ok);opacity:.1}
+.dm-cible{stroke:var(--ok);stroke-width:1.5;stroke-dasharray:5 4}
+.dm-moy{stroke:var(--acier);stroke-width:1.2;stroke-dasharray:1 3;
+  stroke-linecap:round}
+.dm-cur{stroke:var(--encre);stroke-width:1;opacity:0;transition:opacity .15s}
+.dm-lc{position:absolute;right:4px;transform:translateY(-115%);
+  font-size:var(--t1);font-weight:600;color:var(--ok);pointer-events:none}
+.dm-lc.dessous{transform:translateY(15%)}
+.dm-tx{grid-column:2;display:flex;justify-content:space-between;
+  font-size:var(--t1);color:var(--acier);font-variant-numeric:tabular-nums}
+.dm-w{margin-top:var(--s1)}
+.dm-m{box-shadow:0 0 0 2px color-mix(in srgb, var(--creux) 45%, var(--surface))}
+.dm-a{font-size:var(--t2);line-height:1.5;margin:0;color:var(--encre);
+  padding:var(--s2) var(--s3);border-radius:var(--r1);text-wrap:pretty;
+  background:color-mix(in srgb, var(--veille) 10%, var(--surface))}
+.dm-a b{font-weight:600}
+.pill.moy{background:color-mix(in srgb, var(--veille) 14%, var(--surface));
+  color:var(--veille)}
+@media (max-width:640px){.dm-pl{height:110px}}
+
+/* ---------- programme : le deroule se replie ----------
+   Le bloc depliable vit ici DANS la carte de la seance : pas de seconde
+   carte, pas de retrait, il s'aligne sur le texte comme le detail d'une
+   analyse. L'apercu d'une ligne dit le dessin de la seance quand elle est
+   repliee. */
+.se-a{font-size:var(--t2);color:var(--sourd);line-height:1.45;
+  margin:var(--s3) 0 0;font-variant-numeric:tabular-nums;text-wrap:pretty}
+.se>.bl{background:none;border-radius:0;padding:0;margin-top:var(--s2)}
+.se>.bl>summary{padding:var(--s3) 0}
+.se>.bl .bl-t{font-size:var(--t3)}
+.se>.bl>.bl-d{padding-bottom:0;padding-top:0;border-top:0}
+
+/* ---------- changement d'onglet ----------
+   La page entre en glissant de 18 px depuis le cote d'ou l'on vient
+   (classes posees par show() dans le gabarit), et l'icone touchee pulse une
+   fois. Seulement opacity et translate : rien qui force a recalculer la mise
+   en page. Tout s'eteint si le systeme demande moins d'animations. */
+.tab.entre-d{animation:tab-d .34s cubic-bezier(.22,1,.36,1)}
+.tab.entre-g{animation:tab-g .34s cubic-bezier(.22,1,.36,1)}
+@keyframes tab-d{from{opacity:0;translate:18px 0}}
+@keyframes tab-g{from{opacity:0;translate:-18px 0}}
+.tb.pop svg{animation:tb-pop .42s cubic-bezier(.3,1.5,.5,1)}
+@keyframes tb-pop{0%{scale:1} 30%{scale:.8} 70%{scale:1.12} 100%{scale:1}}
+@media (prefers-reduced-motion:reduce){
+  .tab.entre-d,.tab.entre-g,.tb.pop svg,.tb-lens.etire{animation:none}
+}

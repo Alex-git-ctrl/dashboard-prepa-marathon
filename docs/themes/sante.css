@@ -305,7 +305,7 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
 .hcard-i{font-size:var(--t3);color:var(--encre);line-height:1.42;
   margin:var(--s3) 0 0;max-width:60ch;text-wrap:pretty}
 .hcard-div{height:1px;background:var(--filet);margin:var(--s3) 0 0}
-.hcard .cb,.hcard .anneau-row,.hcard .gc{margin-top:var(--s3)}
+.hcard .cb,.hcard .fx,.hcard .gc{margin-top:var(--s3)}
 
 /* Meme traitement pour l'icone optionnelle des cartes depliables (bloc()
    avec un cinquieme argument) : le titre porte l'icone et sa couleur au
@@ -326,26 +326,40 @@ h2{font-size:var(--t5);font-weight:700;letter-spacing:-.012em;color:var(--encre)
   letter-spacing:-.01em}
 .tend-cap b{font-weight:700}
 
-/* ---------- anneau de preparation ---------- */
-.anneau-row{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
-.anneau-c{flex-shrink:0;text-align:center}
-.anneau-c svg{display:block;width:124px;height:124px}
-.an-seg{transition:opacity .2s}
-.an-seg.off{opacity:.25}
-.anneau-row .gc-lg span[data-vise]{cursor:default}
-.anneau-c .pill{margin-top:var(--s3)}
-text.an-n{font-family:var(--sans);font-size:30px;font-weight:800;
+/* ---------- score a facteurs (preparation du jour, cout d'entrainement) ----------
+   Remplace l'anneau segmente : le total en grand et sa pastille, une barre
+   empilee ou chaque facteur occupe sa part du total, puis une ligne par
+   facteur avec sa jauge. Les segments sont separes par un filet de la
+   couleur de la carte, pas par un vide qui laisserait voir le fond de
+   piste. Sur un ecran etroit la jauge passe sous son libelle. */
+.fx-h{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.fx-n{font-family:var(--num);font-size:var(--t6);font-weight:600;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--encre)}
+.fx-n em{font-style:normal;font-size:var(--t2);font-weight:500;
+  color:var(--acier);letter-spacing:0;margin-left:2px}
+.fx-pile{display:flex;height:12px;border-radius:6px;overflow:hidden;
+  background:var(--creux);margin-top:var(--s4)}
+.fx-pile i{display:block;height:100%;box-shadow:inset -2px 0 0 var(--surface);
+  transition:opacity .2s}
+.fx-pile i.off{opacity:.25}
+.fx-l{display:grid;gap:var(--s3);margin-top:var(--s4)}
+.fx-r{display:grid;grid-template-columns:minmax(0,11.5em) minmax(64px,1fr) auto;
+  gap:var(--s2) var(--s4);align-items:center;cursor:default}
+.fx-k{display:flex;align-items:flex-start;gap:var(--s2);min-width:0}
+.fx-k>i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.fx-k>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fx-k b{font-size:var(--t3);font-weight:600;color:var(--encre);letter-spacing:-.01em}
+.fx-k em{font-style:normal;font-size:var(--t1);color:var(--acier);
   font-variant-numeric:tabular-nums}
-text.an-m{font-family:var(--sans);font-size:9.5px;font-weight:700;
-  letter-spacing:.07em;text-transform:uppercase}
-.anneau-row .gc-lg{flex-direction:column;align-items:flex-start;margin-top:0;
-  gap:var(--s4);min-width:0;flex:1 1 150px}
-.anneau-row .gc-lg span{align-items:flex-start;gap:var(--s3)}
-.anneau-row .gc-lg i{width:10px;height:10px;border-radius:50%;margin-top:5px}
-.gc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
-.gc-t b{font-size:var(--t3);font-weight:700;color:var(--encre)}
-.gc-t em{font-style:normal;font-size:var(--t1);color:var(--sourd);
-  font-variant-numeric:tabular-nums}
+.fx-m{height:6px;border-radius:3px;background:var(--creux);overflow:hidden}
+.fx-m i{display:block;height:100%;border-radius:3px}
+.fx-v{font-family:var(--num);font-size:var(--t3);font-weight:600;text-align:right;
+  white-space:nowrap;min-width:4.6em;font-variant-numeric:tabular-nums}
+.fx-v em{font-style:normal;font-size:var(--t1);font-weight:400;color:var(--acier)}
+@media (max-width:480px){
+  .fx-r{grid-template-columns:minmax(0,1fr) auto}
+  .fx-m{grid-column:1 / -1;order:3}
+}
 
 /* ---------- alertes ---------- */
 .alert{display:flex;gap:var(--s4);align-items:flex-start}
@@ -709,7 +723,6 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .dm-v em{font-style:normal;font-size:var(--t2);color:var(--acier);
   margin-left:.35em;font-weight:400}
-.dm-g{width:100%;height:44px;display:block;margin-top:var(--s2)}
 .dm-w{position:relative;padding:5px 0}
 .dm-b{display:flex;height:10px;border-radius:var(--r1);overflow:hidden}
 .dm-b span{flex:1}
@@ -867,9 +880,6 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   .wk .vo{grid-column:2;text-align:left;margin-top:var(--s1)}
   .wk.now{grid-template-columns:1fr;padding:var(--s4)}
   .li{min-height:50px}
-  .anneau-row{gap:var(--s4)}
-  .anneau-c svg{width:104px;height:104px}
-  text.an-n{font-size:25px}
   .tb{padding:var(--s2) 2px var(--s1)}
   .tb svg{width:27px;height:27px}
 }
@@ -878,3 +888,93 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
    nappes restent peintes : on garde le fond, on retire le mouvement. */
 @media (prefers-reduced-motion:reduce){*{transition:none!important}
   body::before,body::after{animation:none}}
+
+/* ---------- harmonie des largeurs (onglet Seances) ----------
+   Les cartes d'une meme pile prennent toutes la largeur de la colonne. La
+   carte "Prevu / Couru" heritait du max-width:62ch de .verd et s'arretait a
+   mi-largeur, et les filets de .ia-s et .bilan s'interrompaient a 60ch au
+   milieu de leur carte. Le texte garde sa longueur de ligne lisible, mais
+   par un padding droit plutot que par la largeur de la boite : la carte et
+   son filet vont jusqu'au bord, les lignes s'arretent a la meme mesure.
+   Le pourcentage d'un padding se rapporte a la largeur du parent, d'ou le
+   calcul. */
+.sc-ouvert>.verd{max-width:none;
+  padding-right:max(var(--pad), calc(100% - 62ch - var(--pad)))}
+.bilan,.ia-s{max-width:none;padding-right:max(0px, calc(100% - 60ch))}
+/* Le panneau de courbes finissait sur sa marge basse PLUS celle du bloc :
+   64 px de vide sous l'axe du temps, contre 32 sous les autres blocs. */
+.bl-d>.gc:last-child{margin-bottom:0}
+
+/* ---------- dynamique de course, lisible sur ordinateur ----------
+   Une tuile par mesure, deux par ligne des qu'il y a la place, une seule sur
+   telephone. Chaque tuile dit d'abord le verdict et la cible, puis montre
+   la seance : zone "bon" en vert pale, cible en tirets verts, moyenne en
+   pointille. La reglette va du rouge au vert (couleurs posees par le
+   gabarit), et la piste d'amelioration n'apparait que si la mesure n'est
+   pas dans le vert. */
+.dm{display:grid;gap:var(--s4);
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))}
+.dm-l{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s4);
+  border-radius:var(--r1);
+  background:color-mix(in srgb, var(--creux) 45%, var(--surface))}
+.dm-h{border-bottom:0;padding-bottom:0}
+.dm-v{font-size:var(--t5)}
+.dm-vd{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.dm-ci{font-size:var(--t2);color:var(--sourd)}
+.dm-ci b{color:var(--encre);font-weight:600;font-variant-numeric:tabular-nums}
+.dm-c{display:grid;grid-template-columns:auto 1fr;gap:var(--s1) var(--s2);
+  margin-top:var(--s1)}
+.dm-ax{display:flex;flex-direction:column;justify-content:space-between;
+  font-size:var(--t1);color:var(--acier);text-align:right;
+  font-variant-numeric:tabular-nums;line-height:1}
+.dm-pl{position:relative;height:130px;cursor:crosshair;touch-action:pan-y}
+.dm-pl svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dm-zone{fill:var(--ok);opacity:.1}
+.dm-cible{stroke:var(--ok);stroke-width:1.5;stroke-dasharray:5 4}
+.dm-moy{stroke:var(--acier);stroke-width:1.2;stroke-dasharray:1 3;
+  stroke-linecap:round}
+.dm-cur{stroke:var(--encre);stroke-width:1;opacity:0;transition:opacity .15s}
+.dm-lc{position:absolute;right:4px;transform:translateY(-115%);
+  font-size:var(--t1);font-weight:600;color:var(--ok);pointer-events:none}
+.dm-lc.dessous{transform:translateY(15%)}
+.dm-tx{grid-column:2;display:flex;justify-content:space-between;
+  font-size:var(--t1);color:var(--acier);font-variant-numeric:tabular-nums}
+.dm-w{margin-top:var(--s1)}
+.dm-m{box-shadow:0 0 0 2px color-mix(in srgb, var(--creux) 45%, var(--surface))}
+.dm-a{font-size:var(--t2);line-height:1.5;margin:0;color:var(--encre);
+  padding:var(--s2) var(--s3);border-radius:var(--r1);text-wrap:pretty;
+  background:color-mix(in srgb, var(--veille) 10%, var(--surface))}
+.dm-a b{font-weight:600}
+.pill.moy{background:color-mix(in srgb, var(--veille) 14%, var(--surface));
+  color:var(--veille)}
+@media (max-width:640px){.dm-pl{height:110px}}
+
+/* ---------- programme : le deroule se replie ----------
+   Le bloc depliable vit ici DANS la carte de la seance : pas de seconde
+   carte, pas de retrait, il s'aligne sur le texte comme le detail d'une
+   analyse. L'apercu d'une ligne dit le dessin de la seance quand elle est
+   repliee. */
+.se-a{font-size:var(--t2);color:var(--sourd);line-height:1.45;
+  margin:var(--s3) 0 0;font-variant-numeric:tabular-nums;text-wrap:pretty}
+.se>.bl{background:none;border-radius:0;padding:0;margin-top:var(--s2)}
+.se>.bl>summary{padding:var(--s3) 0}
+.se>.bl .bl-t{font-size:var(--t3)}
+.se>.bl>.bl-d{padding-bottom:0;padding-top:0;border-top:0}
+
+/* La lentille de verre du gabarit n'a pas de forme dans ce theme. */
+.tb-lens{display:none}
+
+/* ---------- changement d'onglet ----------
+   La page entre en glissant de 18 px depuis le cote d'ou l'on vient
+   (classes posees par show() dans le gabarit), et l'icone touchee pulse une
+   fois. Seulement opacity et translate : rien qui force a recalculer la mise
+   en page. Tout s'eteint si le systeme demande moins d'animations. */
+.tab.entre-d{animation:tab-d .34s cubic-bezier(.22,1,.36,1)}
+.tab.entre-g{animation:tab-g .34s cubic-bezier(.22,1,.36,1)}
+@keyframes tab-d{from{opacity:0;translate:18px 0}}
+@keyframes tab-g{from{opacity:0;translate:-18px 0}}
+.tb.pop svg{animation:tb-pop .42s cubic-bezier(.3,1.5,.5,1)}
+@keyframes tb-pop{0%{scale:1} 30%{scale:.8} 70%{scale:1.12} 100%{scale:1}}
+@media (prefers-reduced-motion:reduce){
+  .tab.entre-d,.tab.entre-g,.tb.pop svg,.tb-lens.etire{animation:none}
+}

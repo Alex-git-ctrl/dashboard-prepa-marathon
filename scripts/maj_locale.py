@@ -112,6 +112,30 @@ def git(*args):
                           capture_output=True, text=True)
 
 
+def rattrape():
+    """Se remet a jour sur GitHub, sans jamais laisser le depot en plan.
+
+    POURQUOI LA PUBLICATION ECHOUAIT EN SILENCE. L'ancien rattrapage etait
+    saute des qu'un fichier quelconque etait modifie ou non suivi (CLAUDE.md
+    en cours d'edition, un sous-projet pas encore commite), puis le `pull
+    --rebase` de secours refusait de tourner pour la meme raison. Le commit
+    restait en local, et la page annoncait quand meme "mise a jour OK" : du
+    28/09 au 30/09, trois mises a jour ne sont jamais parties.
+
+    --autostash met de cote les modifications locales le temps du rebase et
+    les repose apres ; les fichiers non suivis ne genent pas un rebase.
+    -X theirs tranche les conflits sur les fichiers generes (metrics.json,
+    index.html) : pendant un rebase, "theirs" designe NOS commits rejoues,
+    c'est-a-dire la collecte locale, la plus recente. Et si le rebase echoue
+    malgre tout, il est annule : un depot laisse en plein rebase bloquerait
+    toutes les mises a jour suivantes.
+    """
+    r = git("pull", "--rebase", "--autostash", "-X", "theirs", "--quiet")
+    if r.returncode != 0:
+        git("rebase", "--abort")
+    return r
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -127,15 +151,11 @@ def main():
     # La collecte automatique pousse ses propres commits. Sans ce rattrapage,
     # la publication d'en bas serait rejetee et le travail serait perdu.
     if not args.sans_git:
-        propre = not git("status", "--porcelain").stdout.strip()
-        if propre:
-            etape("Rattraper la collecte automatique",
-                  ["git", "pull", "--rebase", "--quiet"], obligatoire=False)
-        else:
-            print()
-            print("== Rattraper la collecte automatique")
-            print("   sautee : des modifications locales attendent d'etre "
-                  "validees.")
+        print()
+        print("== Rattraper la collecte automatique", flush=True)
+        r = rattrape()
+        print("   ok" if r.returncode == 0 else "   impossible, on continue : "
+              + (r.stderr or "").strip()[:200], flush=True)
 
     if not args.resumes:
         etape("Collecter les donnees Intervals.icu",
@@ -187,7 +207,7 @@ def main():
         # debut et maintenant. Un rejet n'est donc pas une erreur, c'est une
         # course : on se remet a jour et on retente une fois.
         print("   rejete, la collecte automatique est passee entre-temps.")
-        r = git("pull", "--rebase", "--quiet")
+        r = rattrape()
         if r.returncode != 0:
             print("   rattrapage impossible :")
             print("   " + (r.stderr or "").strip()[:300])
@@ -204,7 +224,11 @@ def main():
         if p.returncode != 0:
             print("   echec de la publication :")
             print("   " + (p.stderr or "").strip()[:300])
-            print("   Le commit est fait. Relance : git pull --rebase && git push")
+            print("   Le commit est fait. Il partira avec la prochaine mise a jour.")
+            # La page locale le dit, au lieu d'afficher "mise a jour OK".
+            ecris_journal("echec", "publication sur GitHub")
+            subprocess.run([PY, "scripts/build_site.py"], cwd=ROOT,
+                           capture_output=True)
             return
     print("   publie. La page sera en ligne dans une minute environ.")
 

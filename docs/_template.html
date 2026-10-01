@@ -218,12 +218,41 @@ const IC_SANTE = {
     + ' stroke-linejoin="round"/>',
   score:'<path d="M13.2 2.6 5.4 13.4h5.1l-1 8 8.1-11.3h-5.2l.8-7.5z"'
     + ' stroke-linejoin="round"/>',
+  // Un cadran et son aiguille : la forme de fond contre la fatigue.
+  forme:'<path d="M4.2 17.2a8.6 8.6 0 1 1 15.6 0" stroke-linecap="round"/>'
+    + '<path d="M12 13.6l3.6-4.2" stroke-linecap="round"/>'
+    + '<circle cx="12" cy="14" r="1.3" fill="currentColor" stroke="none"/>',
+  // Un trace d'electrocardiogramme : la derive se lit sur le coeur en course.
+  ecg:'<path d="M2.8 12.4h4.1l2.1-5.2 4 10.4 2.2-5.2h6" stroke-linecap="round"'
+    + ' stroke-linejoin="round"/>',
+  // Une feuille : l'economie, courir plus vite pour le meme cout cardiaque.
+  feuille:'<path d="M5 19.2C5 11 10 5 19.2 4.8 19.2 13.6 13.4 19.2 5 19.2z"'
+    + ' stroke-linejoin="round"/><path d="M5 19.2l7.4-7.4" stroke-linecap="round"/>',
+  // Deux poumons autour de la trachee : VO2max et saturation en oxygene.
+  poumons:'<path d="M12 3.8v6.4M12 10.2c0 1.6-1.4 2.6-2.8 3M12 10.2c0 1.6 1.4 2.6 '
+    + '2.8 3" stroke-linecap="round"/><path d="M9.2 7.4C6.4 7.9 4 11.2 4 15.8 4 '
+    + '18.4 5.1 19.8 7 19.8c2 0 2.9-1.4 2.9-3.8V8.6M14.8 7.4c2.8.5 5.2 3.8 5.2 '
+    + '8.4 0 2.6-1.1 4-3 4-2 0-2.9-1.4-2.9-3.8V8.6" stroke-linejoin="round"/>',
+  // Un pese-personne.
+  poids:'<rect x="3.6" y="3.8" width="16.8" height="16.4" rx="4.4"/>'
+    + '<path d="M8.4 10.2a4.6 4.6 0 0 1 7.2 0" stroke-linecap="round"/>'
+    + '<path d="M12 10.4l1.3-1.8" stroke-linecap="round"/>',
 };
 const COL_ACTIVITE = 'var(--sante-activite, var(--veille))';
 const COL_COEUR = 'var(--sante-coeur, var(--m-fc))';
 const COL_VFC = 'var(--sante-vfc, var(--m-fc))';
 const COL_SOMMEIL = 'var(--sante-sommeil, var(--m-puissance))';
 const COL_SCORE = 'var(--sante-score, var(--mesure))';
+// Les courbes de Progres qui n'avaient ni icone ni couleur. Chacune a la
+// sienne, et la courbe prend la couleur de l'icone de son titre. La derive
+// garde le magenta qu'elle a deja dans l'indice de charge ; VO2max et SpO2
+// partagent l'indigo de l'oxygene. Replis sur des tokens exiges de tous les
+// themes, comme les couleurs sante plus haut.
+const COL_FORME = 'var(--mesure)';
+const COL_DERIVE = 'var(--sante-derive, var(--m-fc))';
+const COL_EFFIC = 'var(--sante-efficacite, var(--ok))';
+const COL_OXY = 'var(--sante-oxygene, var(--m-allure))';
+const COL_POIDS = 'var(--sante-poids, var(--acier))';
 const TABS = [['today', 'Accueil', "Aujourd'hui"], ['plan', 'Plan', 'Le plan'],
   ['prog', 'Progrès', 'Progression'], ['sante', 'Santé', 'Santé'],
   ['sea', 'Séances', 'Séances'], ['data', 'Données', 'Données']];
@@ -233,25 +262,139 @@ $('tabbar').innerHTML = TABS.map(([id, court], i) => `
     aria-selected="${i === 0}">
     <svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg><span>${court}</span>
     ${id === 'today' && urgent ? '<span class="dotb"></span>' : ''}</button>`).join('');
-function show(id) {
+// La lentille : la goutte de verre posee sous l'onglet actif. Elle glisse
+// d'un onglet a l'autre par --i, un simple index, et c'est la feuille de
+// theme qui decide de sa forme. Un theme qui ne la dessine pas la masque.
+$('tabbar').insertAdjacentHTML('afterbegin',
+  '<span class="tb-lens" aria-hidden="true"></span>');
+
+/** Rejoue une animation CSS portee par une classe, meme deja posee. */
+function rejoue(el, cls) {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;   // force le reflow : sans lui, rien ne repart
+  el.classList.add(cls);
+}
+
+/* ---------- changement d'onglet ----------
+   Trois gestes, tous en CSS et tous coupes par prefers-reduced-motion dans
+   la feuille de theme : la page entre en glissant de 18 px depuis le cote
+   d'ou l'on vient (vers la droite, elle arrive de la droite), la lentille
+   s'etire en glissant comme une goutte, l'icone touchee pulse une fois.
+   Avant, un fondu passait par Motion.dev, charge depuis un CDN : il ne
+   jouait pas tant que l'import n'etait pas termine, et jamais hors ligne. */
+let ongletActif = TABS[0][0];
+function show(id, sansAnim) {
+  const i = TABS.findIndex(t => t[0] === id);
+  const avant = TABS.findIndex(t => t[0] === ongletActif);
   TABS.forEach(([t]) => {
     const on = t === id;
     $('t-' + t).classList.toggle('on', on);
     $('b-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  $('topt').textContent = TABS.find(t => t[0] === id)[2];
+  $('tabbar').style.setProperty('--i', i);
+  $('topt').textContent = TABS[i][2];
   window.scrollTo(0, 0);
   try { localStorage.setItem('onglet', id); } catch (e) {}
-  // .tab/.tab.on (CSS) posent deja l'etat final, avec ou sans Motion.dev :
-  // ceci n'est qu'un fondu par-dessus, jamais ce qui rend la page visible.
-  if (window.__motionAnimate) {
-    window.__motionAnimate($('t-' + id), {opacity: [0, 1], y: [10, 0]},
-      {duration: .3, easing: [.22, 1, .36, 1]});
+  if (!sansAnim && i !== avant) {
+    const sec = $('t-' + id);
+    sec.classList.remove('entre-d', 'entre-g');
+    rejoue(sec, i > avant ? 'entre-d' : 'entre-g');
+    rejoue(document.querySelector('.tb-lens'), 'etire');
+    rejoue($('b-' + id), 'pop');
   }
+  ongletActif = id;
 }
 TABS.forEach(([id]) => $('b-' + id).addEventListener('click', () => show(id)));
+// Au clavier, une liste d'onglets se parcourt aux fleches : Tab entre dans
+// la barre, gauche et droite passent a l'onglet voisin, Debut et Fin aux
+// extremites. Sans ca il fallait tabuler a travers les six boutons.
+$('tabbar').addEventListener('keydown', e => {
+  const i = TABS.findIndex(t => t[0] === ongletActif);
+  const j = {ArrowRight:i + 1, ArrowLeft:i - 1, Home:0, End:TABS.length - 1}[e.key];
+  if (j == null) return;
+  e.preventDefault();
+  const id = TABS[(j + TABS.length) % TABS.length][0];
+  show(id);
+  $('b-' + id).focus();
+});
+// Le retour sur l'onglet de la derniere visite ne s'anime pas : ce n'est pas
+// un geste de l'utilisateur, juste l'etat dans lequel il avait laisse la page.
 try { const s = localStorage.getItem('onglet');
-  if (s && TABS.some(t => t[0] === s)) show(s); } catch (e) {}
+  if (s && TABS.some(t => t[0] === s)) show(s, true); } catch (e) {}
+
+/* ---------- verre liquide : la refraction des bords ----------
+   La technique de Liquidglass.js : une carte de deplacement dessinee a la
+   taille exacte de la barre, lue par un feDisplacementMap, et appliquee au
+   fond par backdrop-filter:url(). Pres du bord de la capsule, le fond est
+   pris un peu plus vers l'interieur : il se courbe comme sous une lentille
+   epaisse. Au centre la carte est neutre, le verre n'y deforme rien.
+   CHROMIUM SEULEMENT, et c'est volontaire : Safari et Firefox acceptent la
+   syntaxe mais n'appliquent pas un filtre SVG en backdrop-filter, et Safari
+   efface alors tout le flou. On teste donc le moteur, pas la syntaxe. Les
+   autres gardent le verre floute de la feuille de theme, qui est deja
+   complet sans la refraction. Le theme doit aussi le demander (--verre:1) :
+   un theme sans capsule n'a pas de bord a courber. */
+(function () {
+  const bar = $('tabbar');
+  const chromium = !!(navigator.userAgentData && navigator.userAgentData.brands
+    && navigator.userAgentData.brands.some(b => /Chromium/.test(b.brand)));
+  if (!chromium || !window.ResizeObserver) return;
+  if (getComputedStyle(bar).getPropertyValue('--verre').trim() !== '1') return;
+  if (matchMedia('(prefers-reduced-transparency: reduce)').matches) return;
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.style.position = 'absolute';
+  svg.innerHTML = '<filter id="lg-verre" filterUnits="userSpaceOnUse" '
+    + 'primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">'
+    + '<feImage result="carte" preserveAspectRatio="none"/>'
+    + '<feDisplacementMap in="SourceGraphic" in2="carte" scale="36" '
+    + 'xChannelSelector="R" yChannelSelector="G"/></filter>';
+  document.body.appendChild(svg);
+  const filtre = svg.querySelector('filter'), img = svg.querySelector('feImage');
+
+  /** La carte d'une capsule w x h : rouge et vert a 128 = aucun decalage. */
+  function carte(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d'), im = ctx.createImageData(w, h);
+    const r = h / 2, biseau = Math.min(18, r);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      // Le point de l'axe central le plus proche, puis la normale sortante.
+      const cx = Math.max(r, Math.min(w - r, x + .5)), cy = r;
+      let nx = x + .5 - cx, ny = y + .5 - cy;
+      const d = Math.hypot(nx, ny) || 1;
+      nx /= d; ny /= d;
+      const t = Math.max(0, Math.min(1, 1 - (r - d) / biseau));
+      const m = t * t;   // nul au centre, fort contre le bord
+      const k = (y * w + x) * 4;
+      im.data[k] = 128 - nx * m * 127;
+      im.data[k + 1] = 128 - ny * m * 127;
+      im.data[k + 2] = 128; im.data[k + 3] = 255;
+    }
+    ctx.putImageData(im, 0, 0);
+    return c.toDataURL('image/png');
+  }
+
+  let taille = '';
+  const pose = () => {
+    const w = Math.round(bar.offsetWidth), h = Math.round(bar.offsetHeight);
+    if (!w || !h || taille === w + 'x' + h) return;
+    taille = w + 'x' + h;
+    ['width', 'height'].forEach((a, j) => {
+      const v = String(j ? h : w);
+      filtre.setAttribute(a, v); img.setAttribute(a, v);
+    });
+    filtre.setAttribute('x', '0'); filtre.setAttribute('y', '0');
+    img.setAttribute('href', carte(w, h));
+    bar.classList.add('refracte');
+  };
+  new ResizeObserver(pose).observe(bar);
+  pose();
+})();
 
 /* ================= le geste : bloc bitume + ruban ================= */
 const prochaine = PLAN.courses.find(c => jrs(c.date) >= 0)
@@ -328,18 +471,26 @@ function tendance(box, pts, opt) {
   const barW = Math.max(5, Math.min(30, step * .5));
   const cx = i => L + step * i + step / 2;
   const y = v => TOP + (1 - v / mx) * (H - TOP - BOT);
-  const nRecent = Math.min(opt.recent || 4, n);
-  const recent = pts.slice(-nRecent);
+  // Une periode en cours (`partiel`) se dessine estompee et n'entre pas dans
+  // les moyennes : un lundi, la semaine a 0 km tirait les deux lignes vers
+  // le bas et faisait croire a une chute de volume.
+  const pleins = pts.filter(p => !p.partiel);
+  const base = pleins.length ? pleins : pts;
+  const nRecent = Math.min(opt.recent || 4, base.length);
+  const recent = base.slice(-nRecent);
   const moyRecent = recent.reduce((a, p) => a + p.v, 0) / recent.length;
-  const moyBase = pts.reduce((a, p) => a + p.v, 0) / n;
+  const moyBase = base.reduce((a, p) => a + p.v, 0) / base.length;
   const col = opt.color || 'var(--mesure)';
 
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.alt || ''}">`;
   pts.forEach((p, i) => {
     const hb = Math.max(2, (H - TOP - BOT) * (p.v / mx));
+    // Arrondi de 4 px, pas de la demi-largeur : avec rx = barW / 2 les barres
+    // devenaient des pilules, et une petite valeur une ellipse posee a plat.
     s += `<rect x="${(cx(i) - barW / 2).toFixed(1)}" y="${(H - BOT - hb).toFixed(1)}"
-      width="${barW.toFixed(1)}" height="${hb.toFixed(1)}" rx="${(barW / 2).toFixed(1)}"
-      fill="var(--b3)"/>`;
+      width="${barW.toFixed(1)}" height="${hb.toFixed(1)}"
+      rx="${Math.min(4, barW / 2, hb / 2).toFixed(1)}"
+      fill="var(--b3)"${p.partiel ? ' opacity=".35"' : ''}/>`;
   });
   // La moyenne de fond en pointille gris, celle des periodes recentes en
   // trait plein de la couleur du panneau : c'est elle qui dit si ca monte.
@@ -355,10 +506,59 @@ function tendance(box, pts, opt) {
     text-anchor="end">${pts[n - 1].lbl}</text>`;
   s += '</svg>';
   box.innerHTML = s;
-  return {moyRecent, moyBase, nRecent, n};
+  return {moyRecent, moyBase, nRecent, n:base.length};
 }
 
-/* ---------- anneau de preparation ----------
+/* ---------- score a facteurs, la forme partagee ----------
+   Remplace l'anneau segmente du 30/09/2026. L'anneau demandait de comparer
+   des longueurs d'arc, ce que l'oeil fait mal, et devenait illisible a six
+   composantes (l'indice de charge) : six arcs de 11 px, dont trois vides.
+   La nouvelle forme est celle des scores de Garmin Connect (Training
+   Readiness, Sleep Score) :
+     - le total en grand, sur 100, avec son mot qualitatif en pastille ;
+     - une barre empilee qui montre CE QUE CHAQUE FACTEUR APPORTE AU TOTAL :
+       chaque segment vaut points / somme des maxima, donc la barre remplie
+       mesure exactement le total ;
+     - une ligne par facteur, sa jauge remplie a points / max, sa mesure du
+       jour et ses points. Une jauge vide reste lisible comme "dans la
+       norme" grace au libelle et au "0 sur 30" en toutes lettres.
+   Survoler une ligne met son segment en avant dans la barre empilee.
+   `titre` sert au aria-label, `cls` colore la pastille (.ok, .no, .al). */
+function scoreFacteurs(box, titre, total, mot, cls, COMP) {
+  const maxTot = COMP.reduce((t, c) => t + c.max, 0);
+  const pct = v => (Math.max(0, v) * 100).toFixed(2) + '%';
+  const pile = COMP.map((c, i) => c.points > 0
+    ? '<i data-seg="' + i + '" style="width:' + pct(c.points / maxTot)
+      + ';background:' + c.col + '"></i>' : '').join('');
+  const lignes = COMP.map((c, i) => {
+    const frac = Math.max(0, Math.min(1, c.points / c.max));
+    return '<div class="fx-r" data-vise="' + i + '">'
+      + '<span class="fx-k"><i style="background:' + c.col + '"></i>'
+      + '<span><b>' + c.nom + '</b><em>' + c.valeur + '</em></span></span>'
+      + '<span class="fx-m" aria-hidden="true"><i style="width:' + pct(frac)
+      + ';background:' + c.col + '"></i></span>'
+      + '<span class="fx-v">' + c.points + '<em> sur ' + c.max + '</em></span>'
+      + '</div>';
+  }).join('');
+  box.innerHTML = '<div class="fx" role="group" aria-label="' + titre + ', '
+    + total + ' sur 100, ' + mot.toLowerCase() + '">'
+    + '<div class="fx-h"><span class="fx-n">' + total + '<em>/100</em></span>'
+    + '<span class="pill ' + cls + '">' + mot + '</span></div>'
+    + '<div class="fx-pile" aria-hidden="true">' + pile + '</div>'
+    + '<div class="fx-l">' + lignes + '</div></div>';
+
+  const segs = box.querySelectorAll('.fx-pile i');
+  box.querySelectorAll('.fx-r').forEach(el => {
+    const i = el.dataset.vise;
+    el.addEventListener('mouseenter', () => segs.forEach(s =>
+      s.classList.toggle('off', s.dataset.seg !== i)));
+    el.addEventListener('mouseleave', () => segs.forEach(s =>
+      s.classList.remove('off')));
+  });
+  return {total, mot};
+}
+
+/* ---------- score de preparation du jour ----------
    Garmin ne remonte ni Body Battery ni un score de recuperation tout fait.
    On en construit un a partir de trois signaux deja mesures chaque nuit : le
    score de sommeil, qui se lit deja sur 100 et compte donc pour 40 points ;
@@ -368,100 +568,7 @@ function tendance(box, pts, opt) {
    Un signal absent ne fait pas chuter le score : il ne participe pas au
    calcul, et son poids ne va a personne d'autre, exactement comme l'indice
    de cout de l'adaptation du plan (§ plus haut, meme logique). */
-function arcPath(cx, cy, r, a0, a1) {
-  const rad = d => (d - 90) * Math.PI / 180;
-  const x0 = cx + r * Math.cos(rad(a0)), y0 = cy + r * Math.sin(rad(a0));
-  const x1 = cx + r * Math.cos(rad(a1)), y1 = cy + r * Math.sin(rad(a1));
-  const large = (a1 - a0) > 180 ? 1 : 0;
-  return `M${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large} 1 `
-    + `${x1.toFixed(2)},${y1.toFixed(2)}`;
-}
-
-/* ---------- anneau, la forme partagee ----------
-   Un anneau segmente par composante (chacune sa part d'angle proportionnelle
-   a son poids max, son propre arc rempli selon points/max) plus la legende
-   a cote, dans le meme patron que le Sleep Score d'Apple Sante : Duration/
-   Bedtime/Interruptions a gauche, l'anneau et son mot qualitatif a droite.
-   `titre` sert seulement au aria-label, `motCol` colore le mot qualitatif
-   (vert si ca va, rouge si ca coute cher, gris sinon). */
-let _uidAnneau = 0;
-
-function anneau(box, titre, total, mot, cls, COMP) {
-  const maxTot = COMP.reduce((t, c) => t + c.max, 0);
-  const cx = 62, cy = 62, r = 50, rw = 11, gap = 6;
-  const uid = ++_uidAnneau;
-  // LES BOUTS RONDS MENTAIENT. Un stroke-linecap rond deborde de la moitie de
-  // l'epaisseur A CHAQUE BOUT, soit ici 5,5 px, c'est a dire 6,3 degres d'arc.
-  // Deux consequences, toutes les deux fausses. La piste debordait de 12,6
-  // degres alors que l'ecart voulu entre segments n'est que de 6 : les
-  // segments se chevauchaient au lieu d'etre separes, ce qui explique
-  // l'anneau d'un seul tenant. Et l'arc de couleur, trace de a0 a la fraction
-  // voulue, se peignait 12,6 degres plus long qu'il n'aurait du : une
-  // composante a 80 % s'affichait a 89 %. Un graphique ne doit jamais peindre
-  // une valeur qui n'a pas ete mesuree.
-  // On rentre donc le trace de capDeg a chaque bout : les bouts ronds
-  // retombent alors exactement sur l'etendue voulue.
-  const capDeg = (rw / 2) / r * 180 / Math.PI;
-  const trait = (a0, a1, col, cap, extra) =>
-    `<path d="${arcPath(cx, cy, r, a0, a1)}" fill="none" stroke="${col}"
-      stroke-width="${rw}" stroke-linecap="${cap}" ${extra || ''}/>`;
-
-  let a = 0, svg = `<svg viewBox="0 0 124 124" width="124" height="124" role="img"
-    aria-label="${titre}, ${total} sur 100, ${mot.toLowerCase()}">`;
-  COMP.forEach((c, i) => {
-    const span = c.max / maxTot * 360;
-    const v0 = a + gap / 2, v1 = a + span - gap / 2;   // l'etendue VOULUE
-    svg += trait(v0 + capDeg, v1 - capDeg, 'var(--creux)', 'round');
-    const frac = Math.max(0, Math.min(1, c.points / c.max));
-    const fin = v0 + (v1 - v0) * frac;
-    if (fin - v0 > 2 * capDeg) {
-      svg += trait(v0 + capDeg, fin - capDeg, c.col, 'round',
-        `class="an-seg" data-seg="${i}"`);
-    } else if (frac > 0) {
-      // Trop court pour loger deux bouts ronds : a plat, a la vraie longueur.
-      // Mieux vaut un eclat carre juste qu'une pastille ronde qui surestime.
-      svg += trait(v0, fin, c.col, 'butt', `class="an-seg" data-seg="${i}"`);
-    }
-    // Cible de pointage plus large que le trait, invisible : on vise un
-    // anneau de 11 px, la main n'est pas si precise.
-    svg += `<path d="${arcPath(cx, cy, r, v0, v1)}" fill="none"
-      stroke="transparent" stroke-width="20" data-vise="${i}"/>`;
-    a += span;
-  });
-  svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" class="an-n"
-    fill="var(--encre)" id="an-n-${uid}">${total}</text>
-    <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="an-m"
-    fill="var(--acier)" id="an-m-${uid}">sur 100</text></svg>`;
-
-  box.innerHTML = `<div class="anneau-row">
-    <div class="anneau-c">${svg}<span class="pill ${cls}">${mot}</span></div>
-    <div class="gc-lg">${COMP.map((c, i) => `<span data-vise="${i}">`
-      + `<i style="background:${c.col}"></i>`
-      + `<span class="gc-t"><b>${c.nom}</b><em>${c.valeur} · ${c.points}/${c.max}`
-      + '</em></span></span>').join('')}</div></div>`;
-
-  // Le centre repond au survol, comme le PieCenter de BKLIT : il porte le
-  // total au repos, et la composante visee quand on la survole. Survoler la
-  // legende fait la meme chose que survoler l'arc, parce que le nom est plus
-  // facile a viser qu'un segment de 11 px.
-  const gn = $('an-n-' + uid), gm = $('an-m-' + uid);
-  const segs = box.querySelectorAll('.an-seg');
-  const montre = i => {
-    const c = i == null ? null : COMP[i];
-    gn.textContent = c ? c.points : total;
-    gm.textContent = c ? 'sur ' + c.max : 'sur 100';
-    segs.forEach(s => s.classList.toggle('off',
-      c != null && s.dataset.seg != String(i)));
-  };
-  box.querySelectorAll('[data-vise]').forEach(el => {
-    const i = +el.dataset.vise;
-    el.addEventListener('mouseenter', () => montre(i));
-    el.addEventListener('mouseleave', () => montre(null));
-  });
-  return {total, mot};
-}
-
-function anneauPreparation(box) {
+function scorePreparation(box) {
   const S = M.sante || {};
   const J = (S.jours || []);
   const jour = J[J.length - 1];
@@ -505,22 +612,26 @@ function anneauPreparation(box) {
   const mot = total >= 80 ? 'Excellente' : total >= 60 ? 'Bonne'
     : total >= 40 ? 'Correcte' : 'Faible';
   const cls = total >= 60 ? 'ok' : total >= 40 ? 'no' : 'al';
-  return anneau(box, 'Préparation du jour', total, mot, cls, COMP);
+  return scoreFacteurs(box, 'Préparation du jour', total, mot, cls, COMP);
 }
 
-/* ---------- anneau de cout d'entrainement ----------
-   Meme rendu que la preparation du jour, pour les quatre composantes deja
+/* ---------- score de cout d'entrainement ----------
+   Meme rendu que la preparation du jour, pour les composantes deja
    calculees par adaptation.cout (derive cardiaque, effort percu, temps en
-   endurance, dette de sommeil) : avant cette carte, ces quatre signaux
+   endurance, VFC, FC de repos, dette de sommeil) : avant cette carte, ces signaux
    s'affichaient en liste de barres toujours rouges, y compris a 0 point, ce
    qui les faisait passer pour vides plutot que pour "dans la norme". */
 const COL_COUT = {
-  'Dérive cardiaque': COL_COEUR,
+  // Pas le rouge du coeur : la FC de repos est dans la meme barre, et deux
+  // rouges voisins ne se distinguent pas. Un magenta, valide a cote.
+  'Dérive cardiaque': COL_DERIVE,
   'Effort perçu': COL_ACTIVITE,
   'Temps en endurance': COL_SCORE,
+  'Variabilité cardiaque': COL_VFC,
+  'FC de repos': COL_COEUR,
   'Dette de sommeil': COL_SOMMEIL,
 };
-function anneauCharge(box) {
+function scoreCharge(box) {
   const C = (M.adaptation || {}).cout;
   if (!C || C.indice == null || !C.composantes || !C.composantes.length) {
     box.innerHTML = '<div class="wait">Aucun signal exploitable pour l’instant. '
@@ -533,7 +644,7 @@ function anneauCharge(box) {
   const mot = C.niveau === 'faible' ? 'Passé facilement'
     : C.niveau === 'eleve' ? 'Coûteux' : 'Coût normal';
   const cls = C.niveau === 'faible' ? 'ok' : C.niveau === 'eleve' ? 'al' : 'no';
-  return anneau(box, 'Charge d’entraînement', C.indice, mot, cls, COMP);
+  return scoreFacteurs(box, 'Charge d’entraînement', C.indice, mot, cls, COMP);
 }
 
 (function () {
@@ -543,7 +654,8 @@ function anneauCharge(box) {
 
   /* --- volume hebdomadaire couru, en tendance --- */
   const sems = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
-  const ptsVol = sems.map(k => ({v:M.semaines[k].km, lbl:'S' + k}));
+  const ptsVol = sems.map(k => ({v:M.semaines[k].km, lbl:'S' + k,
+    partiel:k === cur}));
   if (ptsVol.length) {
     html += '<div class="hcard"><div class="hcard-h">'
       + '<i class="hcard-ic" style="color:' + COL_ACTIVITE + '">'
@@ -562,7 +674,7 @@ function anneauCharge(box) {
       + '<div class="tend-cap" id="tv-vol-cap"></div></div>';
   }
 
-  /* --- anneau de preparation du jour --- */
+  /* --- score de preparation du jour --- */
   html += '<div class="hcard"><div class="hcard-h">'
     + '<i class="hcard-ic" style="color:' + COL_SCORE + '">'
     + '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">'
@@ -570,7 +682,7 @@ function anneauCharge(box) {
     + '<span class="hcard-t" style="color:' + COL_SCORE + '">Préparation du jour</span>'
     + '</div><p class="hcard-i">Sommeil, variabilité cardiaque et FC de repos, '
     + 'comparés à tes propres moyennes récentes.</p>'
-    + '<div class="hcard-div"></div><div id="tv-anneau"></div></div>';
+    + '<div class="hcard-div"></div><div id="tv-score"></div></div>';
 
   box.innerHTML = html;
   box.hidden = false;
@@ -579,13 +691,16 @@ function anneauCharge(box) {
   if (ptsVol.length) {
     const r = tendance($('tv-vol'), ptsVol, {color:COL_ACTIVITE, recent:4,
       alt:'Kilomètres courus par semaine'});
+    // Tant que l'historique ne depasse pas la fenetre recente, les deux
+    // moyennes sont la meme : on n'en affiche qu'une.
     if (r) $('tv-vol-cap').innerHTML = '<span>moyenne sur ' + r.n
-      + (r.n > 1 ? ' semaines' : ' semaine') + ' · ' + nf(Math.round(r.moyBase))
-      + ' km</span><span style="color:' + COL_ACTIVITE + '">' + r.nRecent
-      + (r.nRecent > 1 ? ' dernières · ' : ' dernière · ')
-      + nf(Math.round(r.moyRecent)) + ' km</span>';
+      + (r.n > 1 ? ' semaines terminées' : ' semaine terminée') + ' · '
+      + nf(Math.round(r.moyBase)) + ' km</span>'
+      + (r.n > r.nRecent ? '<span style="color:' + COL_ACTIVITE + '">'
+         + r.nRecent + ' dernières · ' + nf(Math.round(r.moyRecent))
+         + ' km</span>' : '<span>semaine en cours estompée</span>');
   }
-  anneauPreparation($('tv-anneau'));
+  scorePreparation($('tv-score'));
 })();
 
 /* ================= seances : le detail d'apres-course ================= */
@@ -760,8 +875,12 @@ const GLOSSAIRE = {
     + 'beaucoup.',
   'vdot-calcule':
     'Une note de moteur aérobie déduite d’un chrono, qui sert à calculer '
-    + 'toutes tes allures d’entraînement. La tienne vient d’un 10 km estimé '
-    + 'et non couru : elle se recalculera sur ton chrono du 26 septembre.',
+    + 'toutes tes allures d’entraînement. '
+    + (CAL.reference.estime
+       ? 'La tienne vient d’un chrono estimé et non couru : elle se '
+         + 'recalculera sur ta prochaine course.'
+       : 'La tienne vient de ton ' + CAL.reference.source + ' du '
+         + dshort(CAL.reference.date) + ', et se recalcule à chaque course.'),
   'cadence':
     'Le nombre de pas par minute, les deux pieds comptés. Monter la cadence '
     + 'raccourcit la foulée et réduit le freinage à chaque appui. Autour de '
@@ -793,6 +912,15 @@ const GLOSSAIRE = {
   'poids':
     'Utile par sa tendance sur un mois, pas par sa valeur du jour : une '
     + 'variation de un à deux kilos entre deux pesées n’est que de l’eau.',
+  'contact-au-sol':
+    'Le temps passé au sol à chaque appui. Plus il est court, moins l’appui '
+    + 'coûte. Il se raccourcit surtout quand la cadence monte.',
+  'oscillation-verticale':
+    'De combien le bassin monte et descend à chaque foulée. Ce rebond ne '
+    + 'fait pas avancer : c’est de l’énergie perdue.',
+  'ratio-vertical':
+    'L’oscillation rapportée à la longueur de la foulée : le mouvement '
+    + 'vertical payé pour chaque mètre gagné. Il ne dépend pas de ta taille.',
 };
 
 const A_ACCENTS = 'àâäãéèêëïîìôöòõùûüçñ';
@@ -963,44 +1091,55 @@ function moities(s) {
 
    Unites relevees sur une activite reelle : la foulee et l'oscillation
    arrivent en millimetres, le contact au sol en millisecondes, la cadence par
-   jambe. */
+   jambe. MAIS PAS LES SERIES (courbes.dyn) : elles arrivent deja en pas par
+   minute et en centimetres. D'ou `serie` a cote de `val` dans chaque mesure,
+   et surtout pas ppm() sur un point : un passage en marche a 111 pas par
+   minute serait pris pour une cadence par jambe et double a 222. */
 
 const DYN_BANDES = [
-  ['Faible', 'derniers 5 %'],
-  ['Sous la moyenne', 'entre 5 et 30 %'],
-  ['Moyen', 'entre 30 et 70 %'],
-  ['Bon', 'entre 70 et 95 %'],
+  ['Faible', '5 % du bas'],
+  ['Sous la moyenne', '5 à 30 %'],
+  ['Moyen', '30 à 70 %'],
+  ['Bon', '70 à 95 %'],
   ['Très bon', '5 % de tête'],
 ];
-// Cinq gris ordonnes, du moins bon au meilleur. La reglette reste neutre :
-// c'est le curseur bitume qui porte la valeur du jour.
-const DYN_GRIS = [12, 26, 40, 54, 68].map(x =>
-  'color-mix(in srgb, var(--acier) ' + x + '%, var(--creux))');
+// La reglette etait en cinq gris : elle situait la valeur sans dire si
+// c'etait bien. Elle va maintenant du rouge (a travailler) au vert (bon), en
+// passant par l'orange de la bande du milieu, sur les etats deja definis par
+// chaque theme. Le verdict ecrit a cote porte le meme sens en toutes
+// lettres : la couleur n'est jamais seule.
+// Melangees a la surface et non au gris --creux : avec le gris, l'orange de
+// la bande du milieu virait au brun.
+const DYN_COUL = [
+  'color-mix(in srgb, var(--alerte) 85%, var(--surface))',
+  'color-mix(in srgb, var(--alerte) 45%, var(--surface))',
+  // L'orange vif de la palette sante quand le theme le definit : le
+  // --veille d'etat, fait pour du texte, est un orange brule trop sombre.
+  'color-mix(in srgb, var(--sante-activite, var(--veille)) 70%, var(--surface))',
+  'color-mix(in srgb, var(--ok) 50%, var(--surface))',
+  'color-mix(in srgb, var(--ok) 90%, var(--surface))',
+];
+/** Le verdict d'une bande : deux bandes vertes, une orange, deux rouges. */
+const dynVerdict = q => q >= 3 ? [q === 4 ? 'Très bon' : 'Bon', 'ok']
+  : q === 2 ? ['Correct', 'moy'] : ['À travailler', 'al'];
 
 const DYN_MESURES = [
   {cle:'cadence', nom:'Cadence', unite:'ppm', dec:0, col:'var(--m-allure)',
-   val:d => ppm(d.cadence), seuils:[153, 164, 174, 184], haut:true,
-   quoi:'Le nombre de pas par minute. Monter la cadence raccourcit la foulée '
-     + 'et réduit le freinage à chaque appui, sans courir plus vite pour '
-     + 'autant. C’est le seul des quatre sur lequel tu peux agir directement, '
-     + 'en pleine séance.'},
+   val:d => ppm(d.cadence), serie:x => x, seuils:[153, 164, 174, 184], haut:true,
+   conseil:v => 'vise ' + Math.round(v * 1.05) + ' ppm en raccourcissant '
+     + 'la foulée, avec le métronome de la montre.'},
   {cle:'stance_time', nom:'Contact au sol', unite:'ms', dec:0, col:'var(--m-fc)',
-   val:d => d.stance_time, seuils:[218, 249, 278, 309], haut:false,
-   quoi:'Le temps passé au sol à chaque appui. Plus il est court, moins '
-     + 'l’appui coûte, et il se raccourcit surtout quand la cadence monte : '
-     + 'les deux mesures bougent ensemble.'},
+   val:d => d.stance_time, serie:x => x, seuils:[218, 249, 278, 309], haut:false,
+   conseil:() => 'il baisse avec la cadence, plus des gammes une fois par '
+     + 'semaine.'},
   {cle:'vertical_oscillation', nom:'Oscillation verticale', unite:'cm', dec:1,
    col:'var(--m-puissance)', val:d => d.vertical_oscillation / 10,
-   seuils:[6.4, 8.2, 9.8, 11.6], haut:false,
-   quoi:'De combien le bassin monte et descend à chaque foulée. Ce mouvement '
-     + 'vertical ne fait pas avancer : c’est de l’énergie dépensée en pure '
-     + 'perte.'},
+   serie:x => x, seuils:[6.4, 8.2, 9.8, 11.6], haut:false,
+   conseil:() => 'pousse vers l’avant, pas vers le haut.'},
   {cle:'vertical_ratio', nom:'Ratio vertical', unite:'%', dec:1,
-   col:'var(--m-alt)', val:d => d.vertical_ratio, seuils:[6.1, 7.5, 8.7, 10.2],
-   haut:false,
-   quoi:'L’oscillation rapportée à la longueur de la foulée. C’est la plus '
-     + 'honnête des quatre : elle dit combien de mouvement vertical tu paies '
-     + 'pour chaque mètre gagné, et elle ne dépend pas de ta taille.'},
+   col:'var(--m-alt)', val:d => d.vertical_ratio, serie:x => x,
+   seuils:[6.1, 7.5, 8.7, 10.2], haut:false,
+   conseil:() => 'il suit l’oscillation et la cadence.'},
 ];
 
 /** Ou tombe une valeur dans les cinq bandes, et ou poser le curseur. */
@@ -1019,22 +1158,36 @@ function dynBande(m, v) {
   return {q:q, pos:Math.min(.99, Math.max(.01, pos))};
 }
 
-/** Trace d'une mesure de foulee au fil de la seance, en pleine largeur. */
-function dynSpark(C, cle, col) {
-  const v = C && C[cle];
-  if (!v) return '';
+/** La frontiere de la bande "Bon" : c'est la cible affichee et tracee. */
+const dynCible = m => m.seuils[m.haut ? 2 : 1];
+const dynCibleTxt = m => (m.haut ? '' : 'moins de ')
+  + fx(dynCible(m), m.dec) + ' ' + m.unite + (m.haut ? ' et plus' : '');
+
+/* ---------- graphique d'une mesure de foulee ----------
+   Il faisait 44 px de haut sur toute la largeur d'une carte : sur ordinateur
+   c'etait un trait, pas un graphique. Il passe a une vraie hauteur, dans une
+   tuile par mesure, avec ce qu'il faut pour le lire sans legende :
+     - la zone "bon" en vert pale et sa frontiere en tirets, qui est la cible ;
+     - la moyenne de la seance en pointille gris ;
+     - les bornes de l'axe a gauche, le temps en minutes dessous ;
+     - une infobulle au survol, minute et valeur.
+   L'axe englobe toujours la cible, meme loin des mesures : l'ecart entre le
+   trait et la zone verte EST le message. Les extremes (arrets, marche) sont
+   ecretes aux quantiles 3 et 97 %, comme les courbes de la seance. */
+function dynGraph(C, m, moy) {
+  const brut = C && C[m.cle];
+  if (!brut || !C.t) return '';
+  const v = brut.map(x => x == null ? null : m.serie(x));
   const ok = v.filter(x => x != null);
   if (ok.length < 5) return '';
-  // Deux unites de marge de chaque cote : sans elles, le trait commence pile
-  // sur le bord du viewBox et la moitie de son epaisseur est rognee.
-  const W = 520, H = 38, PAD = 4, MX = 2;
-  let mn = Math.min.apply(null, ok), mx = Math.max.apply(null, ok);
-  if (mx - mn < 1e-6) { mn -= 1; mx += 1; }
+  const W = 520, H = 130, cible = dynCible(m);
+  let mn = quant(ok, .03), mx = quant(ok, .97);
+  mn = Math.min(mn, cible, moy); mx = Math.max(mx, cible, moy);
+  const pad = (mx - mn) * .1 || 1;
+  mn -= pad; mx += pad;
   const t0 = C.t[0], span = (C.t[C.t.length - 1] - t0) || 1;
-  const X = i => MX + (C.t[i] - t0) / span * (W - 2 * MX);
-  const Y = x => PAD + (1 - (x - mn) / (mx - mn)) * (H - 2 * PAD);
-  // Une mesure absente coupe le trait plutot que de le faire traverser le
-  // trou en ligne droite : la ceinture decroche parfois quelques secondes.
+  const X = i => (C.t[i] - t0) / span * W;
+  const Y = x => (1 - (Math.max(mn, Math.min(mx, x)) - mn) / (mx - mn)) * H;
   const segs = []; let cur = [];
   v.forEach((x, i) => {
     if (x == null) { if (cur.length > 1) segs.push(cur); cur = []; return; }
@@ -1042,12 +1195,83 @@ function dynSpark(C, cle, col) {
   });
   if (cur.length > 1) segs.push(cur);
   if (!segs.length) return '';
-  return '<svg class="dm-g" viewBox="0 0 ' + W + ' ' + H + '" '
-    + 'preserveAspectRatio="none" aria-hidden="true">'
+  const yc = Y(cible), ym = Y(moy);
+  // La zone verte va de la cible vers le bon cote : vers le haut pour la
+  // cadence, vers le bas pour les trois mesures ou moins vaut mieux.
+  const zone = m.haut ? [0, yc] : [yc, H];
+  const pct = y => (y / H * 100).toFixed(1) + '%';
+  const fmt = x => fx(x, m.dec);
+  const minutes = Math.round(span / 60);
+  const g = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" '
+    + 'aria-hidden="true">'
+    + '<rect x="0" y="' + zone[0].toFixed(1) + '" width="' + W + '" height="'
+    + (zone[1] - zone[0]).toFixed(1) + '" class="dm-zone"/>'
+    + '<line x1="0" x2="' + W + '" y1="' + yc.toFixed(1) + '" y2="' + yc.toFixed(1)
+    + '" class="dm-cible" vector-effect="non-scaling-stroke"/>'
+    + '<line x1="0" x2="' + W + '" y1="' + ym.toFixed(1) + '" y2="' + ym.toFixed(1)
+    + '" class="dm-moy" vector-effect="non-scaling-stroke"/>'
     + segs.map(sg => '<polyline points="' + sg.join(' ') + '" fill="none" '
-      + 'stroke="' + col + '" stroke-width="1.5" stroke-linejoin="round" '
-      + 'class="trait" '
-      + 'vector-effect="non-scaling-stroke"/>').join('') + '</svg>';
+      + 'stroke="' + m.col + '" stroke-width="2" stroke-linejoin="round" '
+      + 'stroke-linecap="round" class="trait" '
+      + 'vector-effect="non-scaling-stroke"/>').join('')
+    + '<line class="dm-cur" x1="0" x2="0" y1="0" y2="' + H + '" '
+    + 'vector-effect="non-scaling-stroke"/></svg>';
+  return '<div class="dm-c" data-dyn="' + m.cle + '">'
+    + '<div class="dm-ax"><span>' + fmt(mx) + '</span><span>' + fmt(mn)
+    + '</span></div>'
+    + '<div class="dm-pl">' + g
+    // L'etiquette se pose au-dessus de la ligne, sauf quand la ligne longe
+    // le haut du cadre : elle passerait dehors, on la met dessous.
+    + '<span class="dm-lc' + (yc < 22 ? ' dessous' : '') + '" style="top:'
+    + pct(yc) + '">cible</span></div>'
+    + '<div class="dm-tx"><span>0</span><span>' + Math.round(minutes / 2)
+    + '</span><span>' + minutes + ' min</span></div></div>';
+}
+
+/** Infobulle et curseur des graphiques de foulee, une fois dans la page. */
+function branchDyn(box, s) {
+  const C = (s.courbes || {}).dyn;
+  if (!C || !C.t) return;
+  box.querySelectorAll('.dm-c').forEach(el => {
+    const m = DYN_MESURES.find(x => x.cle === el.dataset.dyn);
+    const pl = el.querySelector('.dm-pl'), cur = el.querySelector('.dm-cur');
+    const t0 = C.t[0], span = (C.t[C.t.length - 1] - t0) || 1;
+    pl.addEventListener('pointermove', e => {
+      const r = pl.getBoundingClientRect(); if (!r.width) return;
+      const t = t0 + Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * span;
+      let i = -1, best = Infinity;
+      C.t.forEach((x, k) => { const d = Math.abs(x - t);
+        if (d < best && C[m.cle][k] != null) { best = d; i = k; } });
+      if (i < 0) return;
+      const x = (C.t[i] - t0) / span * 520;
+      cur.setAttribute('x1', x.toFixed(1)); cur.setAttribute('x2', x.toFixed(1));
+      cur.style.opacity = 1;
+      tip.innerHTML = titreTip('à ' + Math.round((C.t[i] - t0) / 60) + ' min')
+        + ligneTip(m.col, m.nom, fx(m.serie(C[m.cle][i]), m.dec) + ' ' + m.unite);
+      tip.style.left = Math.round(Math.min(Math.max(r.left + x / 520 * r.width, 82),
+        document.documentElement.clientWidth - 82)) + 'px';
+      tip.style.top = Math.round(r.top + r.height * .3) + 'px';
+      tip.style.opacity = 1;
+    });
+    pl.addEventListener('pointerleave', () => {
+      tip.style.opacity = 0; cur.style.opacity = 0;
+    });
+  });
+}
+
+/** Ce que dit le bloc replie : combien de points a travailler. */
+function dynResume(s) {
+  const D = s.dyn || {};
+  const q = DYN_MESURES.map(m => {
+    const v = m.val(D);
+    return v != null && isFinite(v) ? dynBande(m, v).q : null;
+  }).filter(x => x != null);
+  if (!q.length) return s.cadence ? ppm(s.cadence) + ' ppm' : '';
+  const al = q.filter(x => x <= 1).length, moy = q.filter(x => x === 2).length;
+  if (!al && !moy) return 'tout est bon';
+  return [al ? al + ' à travailler' : '',
+          moy ? moy + ' correct' + (moy > 1 ? 's' : '') : '']
+    .filter(Boolean).join(' · ');
 }
 
 function dynamique(s) {
@@ -1070,18 +1294,23 @@ function dynamique(s) {
   if (dispo.length) {
     h += '<div class="dm">' + dispo.map(m => {
       const v = m.val(D), B = dynBande(m, v);
+      const [mot, cls] = dynVerdict(B.q);
       return '<div class="dm-l">'
-        + '<div class="dm-h"><span class="dm-n">' + m.nom + '</span>'
+        + '<div class="dm-h"><span class="dm-n">' + m.nom + aide(m.nom)
+        + '</span>'
         + '<span class="dm-v">' + fx(v, m.dec) + '<em>' + m.unite
         + '</em></span></div>'
-        + dynSpark(CD, m.cle, m.col)
+        + '<div class="dm-vd"><span class="pill ' + cls + '">' + mot + '</span>'
+        + '<span class="dm-ci">Cible : <b>' + dynCibleTxt(m) + '</b></span></div>'
+        + dynGraph(CD, m, v)
         + '<div class="dm-w"><div class="dm-b">'
-        + DYN_GRIS.map(g => '<span style="background:' + g + '"></span>').join('')
+        + DYN_COUL.map(g => '<span style="background:' + g + '"></span>').join('')
         + '</div><i class="dm-m" style="left:' + (B.pos * 100).toFixed(1)
         + '%"></i></div>'
         + '<div class="dm-q"><b>' + DYN_BANDES[B.q][0] + '</b><span>'
-        + DYN_BANDES[B.q][1] + ' des coureurs Garmin</span></div>'
-        + '<p class="dm-p">' + m.quoi + '</p></div>';
+        + DYN_BANDES[B.q][1] + '</span></div>'
+        + (B.q <= 2 ? '<p class="dm-a"><b>Piste :</b> ' + m.conseil(v) + '</p>' : '')
+        + '</div>';
     }).join('') + '</div>';
   }
   if (brut.length)
@@ -1089,9 +1318,9 @@ function dynamique(s) {
       '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('')
       + '</div>';
   if (dispo.length)
-    h += '<div class="sp-l">Les cinq bandes sont la distribution de tous les '
-      + 'coureurs Garmin, pas une cible : la taille et le poids les déplacent. '
-      + 'Regarde le sens dans lequel elles bougent chez toi.</div>';
+    h += '<div class="sp-l">Bandes : répartition des coureurs Garmin. La '
+      + 'cible est l’entrée de la bande « Bon », un repère et non une norme. '
+      + 'Le « ? » de chaque titre explique la mesure.</div>';
   return h;
 }
 
@@ -1367,7 +1596,9 @@ function detailSeance(s) {
   let h = ecartPlan(s) + chiffres(s);
   // Les courbes d'abord : c'est la lecture que la montre donne, et celle qui
   // repond a la question "qu'est-ce qui s'est passe pendant cette sortie".
-  // Elles restent ouvertes, tout le reste se deplie a la demande.
+  // Elles restent ouvertes, comme les zones cardiaques, le retour le plus
+  // actionnable sur une sortie d'endurance. Le reste se deplie a la demande,
+  // et son resume sur la ligne de titre dit deja l'essentiel.
   if (s.courbes) {
     h += bloc('Au fil de la séance', '',
       '<div class="gc" data-courbes="' + s.date + '"></div>', true);
@@ -1376,7 +1607,7 @@ function detailSeance(s) {
   if (hz) {
     h += bloc('Zones de fréquence cardiaque',
               partAerobie(zones5(s)) + ' % en aérobie',
-              hz + bilanZones(s), false);
+              hz + bilanZones(s), true);
   }
   const sp = splits(s);
   if (sp) h += bloc('Kilomètre par kilomètre',
@@ -1389,9 +1620,7 @@ function detailSeance(s) {
   const c = comparaison(s);
   if (c) h += bloc('Par rapport aux précédentes', '', c, false);
   const dy = dynamique(s);
-  if (dy) h += bloc('Dynamique de course',
-                    s.cadence ? ppm(s.cadence) + ' ppm' : 'ceinture HRM-Pro Plus',
-                    dy, false);
+  if (dy) h += bloc('Dynamique de course', dynResume(s), dy, false);
   // Le relief change la lecture de l'allure : le dire une fois, en clair.
   if (s.gap_s_km && s.deniv >= 60 && Math.abs(s.gap_s_km - s.allure_s_km) >= 5)
     h += '<div class="verd">Avec <b>' + nf(s.deniv) + ' m de dénivelé</b>, '
@@ -1460,6 +1689,7 @@ function detailSeance(s) {
       const b = document.querySelector('[data-courbes]');
       if (b) courbesSeance(b, s);
     }
+    branchDyn($('sea-liste'), s);
     try { localStorage.setItem('seance', s.date); } catch (e) {}
   }
 
@@ -1564,11 +1794,37 @@ function detailSeance(s) {
     return '';
   }
 
+  /** Duree d'une etape. Sous la minute et demie on parle en secondes : les
+      lignes droites de 20 s s'affichaient "0 min". */
+  function combien(e) {
+    if (e.duree_s) return e.duree_s < 90 && e.duree_s % 60 ? e.duree_s + ' s'
+      : Math.round(e.duree_s / 60) + ' min';
+    return km1(e.distance_m / 1000) + ' km';
+  }
+
+  /** Une ligne qui resume le deroule, pour la seance repliee. Les
+      repetitions ("Effort 1 sur 8", "Ligne droite 1 sur 6") se lisent
+      "8 × 1 min" et leurs recuperations disparaissent : c'est le dessin de la
+      seance qu'on veut voir d'un coup d'oeil, pas ses dix-sept lignes. */
+  function apercu(s) {
+    if (s.exos && s.exos.length) return s.exos.map(e => e.nom).join(' · ');
+    const out = []; let rep = false;
+    (s.etapes || []).forEach(e => {
+      const m = /^(.*\S) (\d+) sur (\d+)$/.exec(e.nom);
+      if (m) {
+        if (+m[2] === 1) out.push(m[3] + ' × ' + combien(e) + ' ('
+          + e.allure_texte + ')');
+        rep = +m[2] < +m[3];
+        return;
+      }
+      if (!rep) out.push(e.nom + ' ' + combien(e));
+    });
+    return out.join(' · ');
+  }
+
   function etape(e) {
-    const combien = e.duree_s ? Math.round(e.duree_s / 60) + ' min'
-      : km1(e.distance_m / 1000) + ' km';
     return '<div><span class="en">' + e.nom + '</span>'
-      + '<span class="ed">' + combien + '</span>'
+      + '<span class="ed">' + combien(e) + '</span>'
       + '<span class="ea">' + e.allure_texte + '</span></div>'
       + (e.consigne ? '<p class="ec">' + e.consigne + '</p>' : '');
   }
@@ -1595,6 +1851,17 @@ function detailSeance(s) {
       const rang = s.type === 'renfo'
         ? 'Calisthénie' + (s.phase ? ' · ' + s.phase : '')
         : 'Séance ' + s.ordre;
+      // Le deroule complet se replie des qu'il depasse deux lignes : une
+      // semaine de fractionne en affichait dix-sept pour une seule seance.
+      // Ce qui fait choisir et placer la seance (titre, jour, duree, but,
+      // contrainte) reste visible, plus un apercu d'une ligne. La seance du
+      // jour arrive depliee : c'est celle qu'on vient lire.
+      const nE = (s.etapes || []).length, nX = (s.exos || []).length;
+      const deroule = (nE ? '<div class="et">' + s.etapes.map(etape).join('')
+          + '</div>' : '')
+        + (nX ? '<div class="ex">' + s.exos.map(exo).join('') + '</div>' : '');
+      const plie = nE > 2 || nX > 0;
+      const nb = nX ? nX + ' exercices' : nE + ' étapes';
       return '<article class="se' + (ici ? ' se-on' : '') + '">'
         + '<div class="se-j">' + rang + ' · '
         + (s.souplesse === 'ancree' ? s.jour_suggere + ' ' + dt(s.jour_suggere)
@@ -1604,10 +1871,8 @@ function detailSeance(s) {
         + (duree(s) ? '<span class="se-d">' + duree(s) + '</span>' : '') + '</div>'
         + (s.pourquoi ? '<p class="se-p">' + s.pourquoi + '</p>' : '')
         + (s.contrainte ? '<p class="se-c">' + s.contrainte + '</p>' : '')
-        + (s.etapes && s.etapes.length
-           ? '<div class="et">' + s.etapes.map(etape).join('') + '</div>' : '')
-        + (s.exos && s.exos.length
-           ? '<div class="ex">' + s.exos.map(exo).join('') + '</div>' : '')
+        + (plie ? '<p class="se-a">' + apercu(s) + '</p>'
+             + bloc('Le déroulé', nb, deroule, ici) : deroule)
         + (s.note ? '<p class="se-c">' + s.note + '</p>' : '')
         + '</article>';
     }).join('');
@@ -1715,17 +1980,24 @@ function detailSeance(s) {
 
 /* ---------- tuiles ---------- */
 const volCum = Object.values(M.semaines).reduce((s, w) => s + w.km, 0);
+/* Une decimale au plus : la forme de fond (CTL) arrive avec trois
+   decimales, et la tuile affichait "6,222". Et une duree de sommeil se dit
+   en heures et minutes, comme partout ailleurs sur la page. */
+const valTuile = (v, u) => u === 'h'
+  ? heuresMin(v).replace(' h ', '<em>h</em>') + '<em>min</em>'
+  : nf(Math.round(v * 10) / 10) + '<em>' + u + '</em>';
 const tuile = ([l, v, u, dt, att]) => {
   const has = v !== null && v !== undefined;
   return `<div class="tile"><div class="l">${l}${aide(l)}</div>
-    ${has ? `<div class="v">${nf(v)}<em>${u}</em></div>
+    ${has ? `<div class="v">${valTuile(v, u)}</div>
       <div class="d">${dt ? dshort(dt) : ''}</div>`
       : `<div class="w">${att}</div>`}</div>`;
 };
 $('quick').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
-   D.volume, 'Première séance mardi'],
-  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'Dès la sortie de samedi'],
+   D.volume, 'Pas encore de course cette semaine'],
+  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct,
+   'Dès la prochaine sortie avec cardio'],
   ['Variabilité cardiaque', A.hrv, 'ms', D.hrv,
    'Mesurée chaque nuit portée'],
   ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, 'Mesurée chaque nuit portée'],
@@ -1776,13 +2048,15 @@ const ACTIONS = {
   }
   h += '</div>';
 
-  // Axe 2 : ce que ca a coute, en anneau : meme forme que la preparation du
-  // jour, plutot que la liste de barres d'avant. Une barre a 0 point (un
-  // signal dans la norme) se lisait comme une barre vide, donc comme un
-  // signal cassé ; l'arc gris de fond de l'anneau porte ce cas sans
-  // ambiguïté, exactement comme les segments non remplis de la preparation.
+  // Axe 2 : ce que ca a coute, meme forme que la preparation du jour (voir
+  // scoreFacteurs). Chaque ligne porte sa mesure et ses points en toutes
+  // lettres : une jauge a 0 se lit "dans la norme", pas "signal cassé".
   h += '<div><div class="sc-h" style="margin-top:0">Ce que ça t’a coûté</div>'
-    + '<div id="cout-anneau"></div></div>';
+    + '<div id="cout-score"></div></div>'
+    // Fin de la grille a deux colonnes. Elle n'etait jamais fermee : la note
+    // "aucune semaine reecrite" et le rappel du bas devenaient deux cellules
+    // de plus, poussees sur une seconde ligne avec un grand vide a gauche.
+    + '</div>';
 
   // Ce qui a bouge.
   if (A.semaines_ajustees.length) {
@@ -1806,14 +2080,25 @@ const ACTIONS = {
     + 'Une semaine manquée n’est pas rattrapée : la suivante repart de ce que '
     + 'tu as réellement couru.</div></div>';
   $('adapt').innerHTML = h;
-  anneauCharge($('cout-anneau'));
+  scoreCharge($('cout-score'));
 })();
 
 /* ================= plan ================= */
+/** Le compte a rebours d'une course, ou son resultat une fois courue. Une
+    course passee affichait "J--4". Le chrono vient de la calibration quand
+    c'est cette course qui sert de reference. */
+function echeance(c) {
+  const j = jrs(c.date);
+  if (j > 0) return 'J-' + j;
+  if (j === 0) return 'Aujourd’hui';
+  const R = CAL.reference;
+  return R && !R.estime && R.date >= c.date && R.source === c.nom
+    ? R.temps : 'Courue';
+}
 $('races').innerHTML = PLAN.courses.map(c => `<div class="li">
   <div class="li-k"><div>${c.nom} · ${c.cible}</div>
     <div class="li-s">${dlong(c.date)} · ${c.allure}<br>${c.role}</div></div>
-  <div class="li-v">J-${jrs(c.date)}</div></div>`).join('');
+  <div class="li-v">${echeance(c)}</div></div>`).join('');
 
 $('paces').innerHTML = CAL.zones.map(z => '<div class="li"><div class="li-k">'
   + '<div>' + z.nom + '</div><div class="li-s">' + z.usage + '</div></div>'
@@ -1826,7 +2111,7 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
   + (CAL.reference.estime
     ? 'ta référence de <b>' + CAL.reference.temps + ' sur '
       + km1(CAL.reference.distance_km) + ' km</b>, courue sans montre. Elles se '
-      + 'recalculeront seules après le 10 km du 26 septembre.'
+      + 'recalculeront seules après ta prochaine course.'
     : 'ton <b>' + CAL.reference.source + '</b> du ' + dshort(CAL.reference.date)
       + ' en <b>' + CAL.reference.temps + '</b>. VDOT ' + nf(CAL.vdot) + '.');
 
@@ -2188,19 +2473,20 @@ function lineChart(box, series, opt) {
 
 $('kpis').innerHTML = [
   ['Volume cette semaine', M.semaines[cur] ? M.semaines[cur].km : null, 'km',
-   D.volume, 'Première séance mardi 8 septembre'],
+   D.volume, 'Pas encore de course cette semaine'],
   ['Variabilité cardiaque', A.hrv, 'ms', D.hrv,
    'Mesurée chaque nuit portée'],
   ['FC de repos', A.fc_repos, 'bpm', D.fc_repos, 'Mesurée chaque nuit portée'],
   ['Poids', A.poids, 'kg', D.poids, 'À chaque pesée'],
-  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct, 'À partir du 12 septembre'],
+  ['Dérive cardiaque', A.derive_pct, '%', D.derive_pct,
+   'Dès la prochaine sortie avec cardio'],
   ['VO2max', A.vo2max, '', D.vo2max, 'Après 2 à 3 courses'],
   ['Forme de fond', A.ctl, '', D.ctl, 'Après environ 4 semaines'],
   ['Sommeil', A.sommeil_h, 'h', D.sommeil_h, 'Dès la prochaine nuit'],
   // ppm() et pas la valeur brute : la ceinture renvoie 78 pas par jambe et
   // par minute, la tuile affichait donc "78,2 ppm" pour une foulee a 156.
   ['Cadence moyenne', ppm(A.cadence), 'ppm', D.cadence, 'À la première course'],
-  ['Kilomètres cumulés', volCum || null, 'km', D.volume, 'Le plan démarre le 7/09'],
+  ['Kilomètres cumulés', volCum || null, 'km', D.volume, 'Dès la première course'],
 ].map(tuile).join('');
 
 (function () {
@@ -2209,73 +2495,84 @@ $('kpis').innerHTML = [
   const sk = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
   const CH = [
     {t:'Volume hebdomadaire', s:'Réalisé contre planifié, en kilomètres',
-     k:[['Réalisé', 'var(--mesure)'], ['Planifié', 'var(--acier)']],
-     ic:{icon:IC_SANTE.activite, color:COL_ACTIVITE},
+     k:[['Réalisé', COL_ACTIVITE], ['Planifié', 'var(--acier)']],
+     ic:{icon:IC_SANTE.activite, color:COL_ACTIVITE}, ouvert:true,
      draw(b) {
        if (!sk.length) { b.innerHTML = '<div class="wait">Se remplit dès la première '
          + 'séance. Le plan démarre lundi 7 septembre.</div>'; return false; }
        return lineChart(b, [
-         {name:'Réalisé', color:'var(--mesure)',
+         {name:'Réalisé', color:COL_ACTIVITE,
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi, v:M.semaines[k].km}))},
          {name:'Planifié', color:'var(--acier)',
           data:sk.map(k => ({d:PLAN.semaines[k - 1].lundi,
             v:PLAN.semaines[k - 1].volume_km}))}], {unit:' km', zero:true});
      }},
     {t:'Forme et fatigue', s:'CTL la forme de fond, ATL la fatigue récente',
-     k:[['Forme', 'var(--mesure)'], ['Fatigue', 'var(--effort)']],
+     k:[['Forme', 'var(--mesure)'], ['Fatigue', 'var(--effort)']], ouvert:true,
+     ic:{icon:IC_SANTE.forme, color:COL_FORME},
      draw:b => lineChart(b, [{name:'Forme', color:'var(--mesure)', data:g('ctl')},
        {name:'Fatigue', color:'var(--effort)', data:g('atl')}],
        {wait:'Se construit sur environ 4 semaines de séances. La forme monte '
         + 'lentement, la fatigue vite : leur écart dit si la charge est tenable.'})},
     {t:'FC de repos', s:'Elle baisse quand le cœur se renforce',
      ic:{icon:IC_SANTE.coeur, color:COL_COEUR},
-     draw:b => lineChart(b, [{name:'FC repos', color:'var(--mesure)', data:g('fc_repos')}],
+     draw:b => lineChart(b, [{name:'FC repos', color:COL_COEUR, data:g('fc_repos')}],
        {unit:' bpm', wait:'Trois nuits mesurées. La courbe devient lisible vers '
         + '3 semaines de données.'})},
     {t:'Variabilité cardiaque', s:'VFC rMSSD, indicateur de récupération',
      ic:{icon:IC_SANTE.coeur, color:COL_VFC},
-     draw:b => lineChart(b, [{name:'VFC', color:'var(--mesure)', data:g('hrv')}],
+     draw:b => lineChart(b, [{name:'VFC', color:COL_VFC, data:g('hrv')}],
        {unit:' ms', wait:'Ce qui compte n’est pas la valeur brute mais sa moyenne '
         + 'glissante sur 7 jours. Encore trop peu de nuits.'})},
     {t:'Sommeil', s:'Durée par nuit, en heures',
      ic:{icon:IC_SANTE.lune, color:COL_SOMMEIL},
-     draw:b => lineChart(b, [{name:'Sommeil', color:'var(--mesure)', data:g('sommeil_h')}],
+     draw:b => lineChart(b, [{name:'Sommeil', color:COL_SOMMEIL, data:g('sommeil_h')}],
        {unit:' h', dec:1, wait:'La courbe apparaît après quelques nuits '
         + 'synchronisées.'})},
     {t:'Poids', s:'Chaque kilo vaut environ 2 à 3 minutes sur marathon',
-     draw:b => lineChart(b, [{name:'Poids', color:'var(--mesure)', data:g('poids')}],
+     ic:{icon:IC_SANTE.poids, color:COL_POIDS},
+     draw:b => lineChart(b, [{name:'Poids', color:COL_POIDS, data:g('poids')}],
        {unit:' kg', dec:1, wait:'Une seule pesée. Monte sur la balance régulièrement '
         + 'pour voir la tendance.'})},
     {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur toute séance '
        + 'd’au moins dix minutes de cardio',
-     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']],
-     draw:b => lineChart(b, [{name:'Dérive', color:'var(--mesure)',
+     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']], ouvert:true,
+     ic:{icon:IC_SANTE.ecg, color:COL_DERIVE},
+     draw:b => lineChart(b, [{name:'Dérive', color:COL_DERIVE,
        data:M.derives.map(x => ({d:x.date, v:x.derive_pct}))}],
        {unit:' %', dec:1, target:5, wait:'L’indicateur le plus parlant de la '
         + 'préparation. Il se calcule sur chaque séance qui porte au moins dix '
         + 'minutes de cardio exploitable, et la courbe apparaît à la deuxième.'})},
     {t:'Efficacité aérobie', s:'Vitesse rapportée au coût cardiaque',
-     draw:b => lineChart(b, [{name:'Indice', color:'var(--mesure)',
+     ic:{icon:IC_SANTE.feuille, color:COL_EFFIC},
+     draw:b => lineChart(b, [{name:'Indice', color:COL_EFFIC,
        data:M.efficacite.map(x => ({d:x.date, v:x.valeur}))}],
        {dec:2, wait:'Se calcule sur chaque course avec cardio. Trois à quatre '
         + 'séances suffisent pour voir une tendance.'})},
     {t:'VO2max', s:'Estimation Garmin, mise à jour à chaque course',
-     draw:b => lineChart(b, [{name:'VO2max', color:'var(--mesure)', data:g('vo2max')}],
+     ic:{icon:IC_SANTE.poumons, color:COL_OXY},
+     draw:b => lineChart(b, [{name:'VO2max', color:COL_OXY, data:g('vo2max')}],
        {wait:'Garmin a besoin de 2 à 3 courses avec cardio et GPS avant de produire '
         + 'une première estimation.'})},
   ];
-  // Le premier graphique reste ouvert, les autres attendent d'etre demandes.
+  // Ouverts : ce qui dit si l'entrainement fonctionne (volume, forme contre
+  // fatigue, derive). La FC de repos, la VFC et le sommeil sont detailles
+  // dans l'onglet Sante, le poids et la VO2max bougent trop lentement pour
+  // etre lus chaque jour : ils restent replies. Un graphique en attente de
+  // donnees ne s'ouvre jamais, meme s'il est marque ouvert : ouvrir un bloc
+  // vide, c'est faire croire qu'il y a quelque chose a lire.
   $('charts').innerHTML = CH.map((c, i) => bloc(c.t, '',
     '<p class="bl-s">' + c.s + '</p><div class="cb" id="ch' + i + '"></div>'
-    + '<div class="keys" id="k' + i + '"></div>', i === 0, c.ic)).join('');
+    + '<div class="keys" id="k' + i + '"></div>', false, c.ic)).join('');
   CH.forEach((c, i) => {
     const ok = c.draw($('ch' + i));
     if (ok && c.k) $('k' + i).innerHTML = c.k.map(([n, col]) =>
       `<span><i style="background:${col}"></i>${n}</span>`).join('');
     // Le resume dit sur la ligne de titre s'il y a quelque chose a ouvrir.
-    const r = document.querySelector('#ch' + i).closest('.bl')
-      .querySelector('.bl-r');
+    const bl = document.querySelector('#ch' + i).closest('.bl');
+    const r = bl.querySelector('.bl-r');
     if (r) r.textContent = ok ? '' : 'en attente';
+    bl.open = !!(ok && c.ouvert);
   });
 })();
 
@@ -2291,10 +2588,16 @@ $('kpis').innerHTML = [
 const CIBLE_SOMMEIL = 7;      // heures, sous lesquelles la progression ralentit
 const NUITS_VUE = 21;         // trois semaines, assez pour voir un rythme
 
-/** Couleur d'une nuit selon son score, sur les etats deja definis. */
+/** Couleur d'une nuit selon son score : une rampe du violet du sommeil, du
+    pale au vif. Le vert, l'ambre et le rouge d'etat d'avant faisaient de la
+    carte un feu tricolore terne ; la hauteur de la barre et la ligne des
+    7 h disent deja si la nuit a ete courte. Un theme sans rampe --nuit-*
+    retombe sur les anciens etats. */
+const NUIT_COL = ['var(--nuit-bonne, var(--ok))', 'var(--nuit-moyenne, var(--veille))',
+  'var(--nuit-faible, var(--alerte))'];
 function couleurNuit(score) {
   if (score == null) return 'var(--acier)';
-  return score >= 70 ? 'var(--ok)' : score >= 50 ? 'var(--veille)' : 'var(--alerte)';
+  return score >= 70 ? NUIT_COL[0] : score >= 50 ? NUIT_COL[1] : NUIT_COL[2];
 }
 
 function nuits(box) {
@@ -2328,9 +2631,9 @@ function nuits(box) {
   const PAN = [
     {cle:'sommeil_h', nom:'Durée de sommeil', barres:true, h:96,
      fmt:v => heuresMin(v), cible:CIBLE_SOMMEIL},
-    {cle:'hrv', nom:'Variabilité cardiaque au réveil', col:'var(--m-allure)',
+    {cle:'hrv', nom:'Variabilité cardiaque au réveil', col:COL_VFC,
      h:76, fmt:v => Math.round(v) + ' ms'},
-    {cle:'fc_repos', nom:'Fréquence cardiaque de repos', col:'var(--m-fc)',
+    {cle:'fc_repos', nom:'Fréquence cardiaque de repos', col:COL_COEUR,
      h:76, fmt:v => Math.round(v) + ' bpm', inv:true},
   ].filter(p => J.some(j => j[p.cle] != null));
 
@@ -2373,11 +2676,13 @@ function nuits(box) {
       // Ligne de reference a 7 h : le seuil sous lequel la recuperation
       // decroche, quelle que soit la qualite des seances.
       const yc = p.Y(p.cible);
+      // En gris : en rouge elle se confondait avec la courbe de FC juste
+      // en dessous, et une ligne de reference n'est pas une alerte.
       g += `<line x1="${L}" y1="${yc.toFixed(1)}" x2="${W - R}"
-        y2="${yc.toFixed(1)}" stroke="var(--effort)" stroke-width="1.5"
+        y2="${yc.toFixed(1)}" stroke="var(--sourd)" stroke-width="1.5"
         stroke-dasharray="5 4"/>
         <text class="gv" x="${L + 4}" y="${(yc - 4).toFixed(1)}"
-        fill="var(--effort)">${p.cible} h</text>`;
+        fill="var(--sourd)">${p.cible} h</text>`;
       const larg = Math.max(4, Math.min(22, pas - 4));
       J.forEach((j, i) => {
         const v = j[p.cle];
@@ -2478,8 +2783,8 @@ function nuits(box) {
   });
 
   box.insertAdjacentHTML('beforeend', '<div class="gc-lg">'
-    + [['Score 70 et plus', 'var(--ok)'], ['50 à 69', 'var(--veille)'],
-       ['Sous 50', 'var(--alerte)']].map(([t, c]) =>
+    + [['Score 70 et plus', NUIT_COL[0]], ['50 à 69', NUIT_COL[1]],
+       ['Sous 50', NUIT_COL[2]]].map(([t, c]) =>
       '<span><i style="background:' + c + '"></i>' + t + '</span>').join('')
     + '</div>');
   return true;
@@ -2548,6 +2853,8 @@ function lectureNuits() {
     fc_repos:{icon:IC_SANTE.coeur, color:COL_COEUR},
     hrv:{icon:IC_SANTE.coeur, color:COL_VFC},
     fatigue_indice:{icon:IC_SANTE.score, color:COL_SCORE},
+    poids:{icon:IC_SANTE.poids, color:COL_POIDS},
+    spo2:{icon:IC_SANTE.poumons, color:COL_OXY},
   };
 
   /* --- tuiles du jour --- */
@@ -2622,7 +2929,18 @@ function lectureNuits() {
       + 'la qualité des séances.',
   };
 
+  // Ouverts par defaut : l'indice de fatigue, la synthese de la
+  // recuperation, et la duree de sommeil, le signal sur lequel un plan casse
+  // le plus souvent. La VFC et la FC de repos se lisent deja nuit par nuit
+  // dans la carte au-dessus ; les pas, le score, le poids et la SpO2 sont
+  // secondaires pour la course.
+  const OUVERTS = ['fatigue_indice', 'sommeil_h'];
+
   function dessine() {
+    // Changer de periode redessine tout : on garde ce que l'utilisateur a
+    // deja ouvert ou ferme, l'etat par defaut ne vaut qu'au premier rendu.
+    const deja = [...$('sante-charts').querySelectorAll(':scope > .bl')];
+    const avant = deja.length ? deja.map(d => d.open) : null;
     $('sante-charts').innerHTML = S.champs.map((c, i) => bloc(
       c.nom,
       S.actuel[c.cle] != null
@@ -2630,16 +2948,21 @@ function lectureNuits() {
              : Math.round(S.actuel[c.cle])) + ' ' + c.unite.replace('/100', '')
         : '',
       (NOTES[c.cle] ? '<p class="bl-s">' + NOTES[c.cle] + '</p>' : '')
-      + '<div class="cb" id="sc' + i + '"></div>', i === 0, IC_CHAMP[c.cle])).join('');
+      + '<div class="cb" id="sc' + i + '"></div>', false, IC_CHAMP[c.cle])).join('');
     S.champs.forEach((c, i) => {
       const data = agrege(c.cle, mode);
       // Un champ note sur 100 n'a pas d'unite a suffixer. Le remplacement
       // laissait une espace seule, et l'infobulle affichait "42 ".
       const u = c.unite === '/100' ? '' : ' ' + c.unite;
-      lineChart($('sc' + i), [{name:c.nom, color:'var(--mesure)', data:data}],
+      // La courbe porte la couleur de l'icone de son titre : un coeur rouge
+      // au-dessus d'une courbe bleue, c'etait deux identites pour un signal.
+      const ok = lineChart($('sc' + i), [{name:c.nom,
+        color:(IC_CHAMP[c.cle] || {}).color || 'var(--mesure)', data:data}],
         {unit:u, dec:c.dec,
          target:c.cle === 'fatigue_indice' ? 50 : null,
          wait:ATTENTE[mode]});
+      $('sc' + i).closest('.bl').open = !!ok
+        && (avant ? !!avant[i] : OUVERTS.includes(c.cle));
     });
     const p = PERIODES.find(x => x[0] === mode);
     $('sante-n').textContent = mode === 'jour'
@@ -2682,8 +3005,10 @@ $('verdict').innerHTML = '<span class="pill ' + (marge > 0 ? 'ok' : 'al') + '">'
   + "construire. La contrainte n'est pas la vitesse, c'est le volume : passer de "
   + '12 à ' + km1(PLAN.pic_volume_km) + ' km par semaine est le vrai chantier.<br><br>'
   + (CAL.reference.estime
-     ? 'Deux rendez-vous tranchent la question. Le 10 km du 26 septembre vérifie '
-       + 'que la référence tient toujours. Le semi du 25 octobre décide de tout : '
+     ? 'Deux rendez-vous tranchent la question. Le 10 km vérifie '
+       + 'que la référence tient toujours. Le semi du '
+       + dlong(PLAN.courses.find(c => /semi/i.test(c.nom)).date)
+       + ' décide de tout : '
        + 'sous 1h48, une cible plus ambitieuse devient discutable ; au-delà de '
        + '1h52, on garde le sub-4h et on renforce le volume.'
      : 'Tout ce qui précède se recalcule automatiquement à chaque course. '
@@ -2746,8 +3071,11 @@ $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées
   + ' sur ' + km1(CAL.reference.distance_km) + ` km. Les zones d'allure, elles,
   viennent du modèle de Daniels appliqué à la même référence. Tout se recalcule
   à chaque course. Ces projections supposent une endurance spécifique déjà
-  construite : à lire comme une borne optimiste tant que les courses de
-  calibration n'ont pas eu lieu.<br><br>Mise à jour automatique à 7h et 21h.`;
+  construite : à lire comme une borne optimiste ` + (CAL.reference.estime
+    ? "tant que les courses de calibration n'ont pas eu lieu"
+    : 'tant que le volume spécifique reste à construire')
+  + `.<br><br>Mise à jour automatique à 7h et 21h, et à 23h depuis
+  l’ordinateur.`;
 
 
 /* ---------- le bilan general ----------
@@ -2911,7 +3239,7 @@ const BILAN_C = {
       + '<details class="bl"><summary><span class="bl-t">'
       + (armee ? 'Déclenchement direct activé' : 'Activer le déclenchement direct')
       + '</span><span class="bl-r">' + (armee ? 'jeton présent' : 'facultatif')
-      + '</span>' + CHEVRON
+      + '</span>' + CHEVRON + '</summary>'
       + '<div class="bl-d"><p class="bl-s">Sans jeton, les boutons ouvrent '
       + 'simplement la page GitHub où il reste un clic à faire. Avec un jeton, '
       + 'ils déclenchent directement.</p>'
