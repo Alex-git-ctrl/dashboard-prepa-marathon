@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-01T22:53:21",
+  "maj": "2026-10-01T23:00:06",
   "nb_activites": 9,
   "semaines": {
     "1": {
@@ -12554,7 +12554,24 @@
     "reglages": {
       "rampe_max_pct": 10,
       "fenetre_semaines": 3,
-      "horizon_semaines": 3
+      "horizon_semaines": 3,
+      "matrice": {
+        "haute": {
+          "faible": 1.1,
+          "normal": 1.07,
+          "eleve": 1.0
+        },
+        "moyenne": {
+          "faible": 1.05,
+          "normal": 1.0,
+          "eleve": 0.9
+        },
+        "basse": {
+          "faible": 1.0,
+          "normal": 0.9,
+          "eleve": 0.8
+        }
+      }
     }
   },
   "programme": [

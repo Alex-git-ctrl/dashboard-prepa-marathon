@@ -308,5 +308,12 @@ def applique(plan, metrics, aujourd_hui=None):
         "semaines_ajustees": ajustees,
         "reglages": {"rampe_max_pct": round(RAMPE_MAX * 100),
                      "fenetre_semaines": SEMAINES_REGARDEES,
-                     "horizon_semaines": SEMAINES_AJUSTEES},
+                     "horizon_semaines": SEMAINES_AJUSTEES,
+                     # La matrice entiere, pas seulement la case retenue : la
+                     # page la dessine pour montrer pourquoi c'est cette case.
+                     # Exportee plutot que recopiee en JavaScript, pour qu'un
+                     # coefficient change ici ne laisse pas la page mentir.
+                     "matrice": {o: {c: MATRICE[(o, c)][0]
+                                     for c in ("faible", "normal", "eleve")}
+                                 for o in ("haute", "moyenne", "basse")}},
     }

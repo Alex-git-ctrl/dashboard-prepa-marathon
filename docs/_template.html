@@ -14,6 +14,7 @@ __THEME__
     <h1>Aujourd'hui</h1>
     <p class="lede" id="lede"></p>
     <div id="hero"></div>
+    <div class="sec"><h2>Le point</h2><div id="point"></div></div>
     <div class="sec" id="sec-tendances" hidden><h2>Tendances</h2><div id="tendances"></div></div>
     <div class="sec"><h2>Dernière séance</h2><div id="seance"></div></div>
     <div class="sec"><h2>Surveillance</h2><div id="alerts"></div></div>
@@ -431,6 +432,14 @@ $('lede').textContent = cur < 1
     if (ici) s += `<path d="M${(x + bw / 2 - 4).toFixed(1)} ${T - 14}h8l-4 6z"
       fill="var(--volt)"/>`;
   });
+  // Une zone de survol par semaine, sur toute la hauteur et toute la largeur
+  // du pas : viser une barre de 3 px de haut a la souris est impossible, et
+  // au doigt encore moins. Posees en dernier pour passer au-dessus du reste.
+  W.forEach((w, i) => {
+    s += `<rect class="rb-hit" data-i="${i}" x="${(i * step).toFixed(1)}" y="0"
+      width="${step.toFixed(1)}" height="${VB_H}" rx="4" fill="var(--sur-bitume-faible)"
+      fill-opacity="0"/>`;
+  });
   $('hero').innerHTML = `<div class="dark">
     <div class="hd">
       <div><div class="lbl">Prochaine échéance</div>
@@ -445,9 +454,66 @@ $('lede').textContent = cur < 1
       <span><i style="background:var(--volt)"></i>Semaine ${Math.max(cur, 1)}</span>
       <span><i style="background:var(--mesure)"></i>Réalisé</span>
       <span><i style="background:var(--effort);border-radius:50%"></i>Course</span>
-      <span>Bloc 1 → 5</span></div></div>`;
+      <span>Bloc 1 → 5</span>
+      <span class="rlg-h">Survole ou touche une semaine : prévu et réalisé</span></div></div>`;
   const rb = document.querySelector('.ruban');
   if (rb) rb.scrollLeft = Math.max(0, (cur - 1) / n * rb.scrollWidth - rb.clientWidth / 2);
+
+  /* Au survol (ou au toucher) d'une semaine : ce qui etait prevu, ce qui a
+     ete couru. Le prevu est celui de l'adaptation quand la semaine a ete
+     reecrite, avec l'original a cote. `tip` et ADAPT sont declares plus bas
+     dans le script : ils existent quand le premier survol arrive. */
+  const svg = rb && rb.querySelector('svg');
+  if (!svg) return;
+  let vise = null;
+  const efface = () => {
+    if (vise) vise.setAttribute('fill-opacity', '0');
+    vise = null; tip.style.opacity = 0;
+  };
+  svg.addEventListener('pointerover', e => {
+    const h = e.target.closest('.rb-hit');
+    if (!h || h === vise) return;
+    if (vise) vise.setAttribute('fill-opacity', '0');
+    vise = h; h.setAttribute('fill-opacity', '.22');
+    const w = W[+h.dataset.i];
+    const ad = ADAPT[w.semaine];
+    const prevu = ad ? ad.volume_adapte : w.volume_km;
+    const fait = done[w.semaine];
+    const passe = w.semaine < cur, ici = w.semaine === cur;
+    const c = w.course && PLAN.courses.find(x => x.cle === w.course);
+    const bl = (PLAN.blocs || []).find(b => w.semaine >= b.debut && w.semaine <= b.fin);
+    let t = titreTip('Semaine ' + w.semaine + ' · ' + dshort(w.lundi) + ' au '
+      + dshort(w.dimanche));
+    if (passe || ici) t += ligneTip('var(--mesure)', 'Réalisé',
+      km1(fait || 0) + ' km' + (prevu ? ' · ' + Math.round((fait || 0) / prevu * 100)
+        + ' %' : ''));
+    t += ligneTip(gc[w.bloc], 'Prévu', km1(prevu) + ' km'
+      + (ad ? ' (au lieu de ' + km1(ad.volume_origine) + ')' : ''));
+    if (ici && prevu > (fait || 0)) t += ligneTip('var(--volt)', 'Reste',
+      km1(prevu - (fait || 0)) + ' km');
+    t += ligneTip(null, 'Sortie longue', km1(w.sortie_longue_km) + ' km');
+    if (c) t += ligneTip('var(--effort)', c.nom, c.cible);
+    if (bl) t += '<div class="tip-n">' + bl.nom + ' · ' + bl.desc + '</div>';
+    tip.innerHTML = t;
+    const r = h.getBoundingClientRect();
+    tip.style.left = Math.round(Math.min(Math.max(r.left + r.width / 2, 110),
+      innerWidth - 110)) + 'px';
+    // L'infobulle se pose au-dessus du ruban (le theme la decale de -125 %
+    // de sa hauteur). Trop pres du haut de l'ecran, elle passe dessous.
+    const ht = tip.offsetHeight;
+    tip.style.top = Math.round(r.top - 8 > ht * 1.25 ? r.top + 18
+      : r.bottom + 8 + ht * 1.25) + 'px';
+    tip.style.opacity = 1;
+  });
+  // Au doigt, pointerleave tombe des que le doigt se leve : l'infobulle
+  // disparaitrait avant d'etre lue. Elle reste donc jusqu'au toucher suivant
+  // ailleurs sur la page.
+  svg.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') efface(); });
+  document.addEventListener('pointerdown', e => {
+    if (vise && !svg.contains(e.target)) efface();
+  });
+  rb.addEventListener('scroll', efface, {passive:true});
+  window.addEventListener('scroll', () => { if (vise) efface(); }, {passive:true});
 })();
 
 /* ================= tendances ================= */
@@ -568,14 +634,13 @@ function scoreFacteurs(box, titre, total, mot, cls, COMP) {
    Un signal absent ne fait pas chuter le score : il ne participe pas au
    calcul, et son poids ne va a personne d'autre, exactement comme l'indice
    de cout de l'adaptation du plan (§ plus haut, meme logique). */
-function scorePreparation(box) {
+/** Le calcul seul, sans rendu : le resume de l'accueil en a besoin aussi.
+    Renvoie {COMP, total, mot, cls}, ou {attente} quand il manque des nuits. */
+function calcPreparation() {
   const S = M.sante || {};
   const J = (S.jours || []);
   const jour = J[J.length - 1];
-  if (!jour) {
-    box.innerHTML = '<div class="wait">Se calcule dès la première nuit mesurée.</div>';
-    return null;
-  }
+  if (!jour) return {attente:'Se calcule dès la première nuit mesurée.'};
   const hist = J.slice(0, -1);
   const moyenne = cle => {
     const v = hist.map(j => j[cle]).filter(x => x != null);
@@ -602,17 +667,22 @@ function scorePreparation(box) {
   if (jour.fc_repos != null && baseFc) COMP.push({nom:'FC de repos', max:25,
     points:Math.round(relatif(jour.fc_repos, baseFc, true) / 100 * 25),
     valeur:Math.round(jour.fc_repos) + ' bpm', col:COL_COEUR});
-  if (!COMP.length) {
-    box.innerHTML = '<div class="wait">Il faut au moins trois nuits mesurées avant '
-      + 'aujourd’hui pour calculer une moyenne de référence.</div>';
-    return null;
-  }
+  if (!COMP.length) return {attente:'Il faut au moins trois nuits mesurées avant '
+    + 'aujourd’hui pour calculer une moyenne de référence.'};
   const maxTot = COMP.reduce((t, c) => t + c.max, 0);
   const total = Math.round(COMP.reduce((t, c) => t + c.points, 0) / maxTot * 100);
   const mot = total >= 80 ? 'Excellente' : total >= 60 ? 'Bonne'
     : total >= 40 ? 'Correcte' : 'Faible';
   const cls = total >= 60 ? 'ok' : total >= 40 ? 'no' : 'al';
-  return scoreFacteurs(box, 'Préparation du jour', total, mot, cls, COMP);
+  return {COMP, total, mot, cls};
+}
+function scorePreparation(box) {
+  const P = calcPreparation();
+  if (P.attente) {
+    box.innerHTML = '<div class="wait">' + P.attente + '</div>';
+    return null;
+  }
+  return scoreFacteurs(box, 'Préparation du jour', P.total, P.mot, P.cls, P.COMP);
 }
 
 /* ---------- score de cout d'entrainement ----------
@@ -1596,9 +1666,8 @@ function detailSeance(s) {
   let h = ecartPlan(s) + chiffres(s);
   // Les courbes d'abord : c'est la lecture que la montre donne, et celle qui
   // repond a la question "qu'est-ce qui s'est passe pendant cette sortie".
-  // Elles restent ouvertes, comme les zones cardiaques, le retour le plus
-  // actionnable sur une sortie d'endurance. Le reste se deplie a la demande,
-  // et son resume sur la ligne de titre dit deja l'essentiel.
+  // Depuis le 01/10/2026 tous les graphiques arrivent deplies : les replier
+  // obligeait a cliquer sur chacun a chaque visite. Ils restent repliables.
   if (s.courbes) {
     h += bloc('Au fil de la séance', '',
       '<div class="gc" data-courbes="' + s.date + '"></div>', true);
@@ -1611,16 +1680,16 @@ function detailSeance(s) {
   }
   const sp = splits(s);
   if (sp) h += bloc('Kilomètre par kilomètre',
-                    (s.splits || []).length + ' km', sp, false);
+                    (s.splits || []).length + ' km', sp, true);
   const m = moities(s);
   if (m) h += bloc('Les deux moitiés',
                    s.premiere_moitie_s_km && s.seconde_moitie_s_km
                      ? allure(s.premiere_moitie_s_km) + ' puis '
-                       + allure(s.seconde_moitie_s_km) : '', m, false);
+                       + allure(s.seconde_moitie_s_km) : '', m, true);
   const c = comparaison(s);
-  if (c) h += bloc('Par rapport aux précédentes', '', c, false);
+  if (c) h += bloc('Par rapport aux précédentes', '', c, true);
   const dy = dynamique(s);
-  if (dy) h += bloc('Dynamique de course', dynResume(s), dy, false);
+  if (dy) h += bloc('Dynamique de course', dynResume(s), dy, true);
   // Le relief change la lecture de l'allure : le dire une fois, en clair.
   if (s.gap_s_km && s.deniv >= 60 && Math.abs(s.gap_s_km - s.allure_s_km) >= 5)
     h += '<div class="verd">Avec <b>' + nf(s.deniv) + ' m de dénivelé</b>, '
@@ -2019,68 +2088,298 @@ const ACTIONS = {
 };
 (((M.adaptation || {}).semaines_ajustees) || []).forEach(a => { ADAPT[a.semaine] = a; });
 
+/* La refonte du 01/10/2026 : la carte se lit en trois temps, sans paragraphe.
+   1. La decision, en une ligne et un chiffre (+7 %, =, -10 %).
+   2. Ses deux entrees cote a cote, chacune avec UN grand nombre et un dessin :
+      les semaines faites en barres prevu/realise, le cout sur une jauge a
+      trois zones. Le detail des six signaux reste disponible, replie.
+   3. La matrice qui les croise, case retenue en evidence : c'est elle qui
+      explique la decision, mieux que la phrase qui la paraphrasait.
+   Les garde-fous, qui tenaient en un paragraphe, deviennent des pastilles. */
+const FLECHE = {
+  monte:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+  egal:'<path d="M5.5 9.5h13M5.5 14.5h13"/>',
+  baisse:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  attente:'<circle cx="12" cy="12" r="8.6"/><path d="M12 7.6V12l3 2"/>',
+};
+/** Le facteur de volume en clair : "+7 %", "=", "-10 %". */
+const varVol = f => Math.abs(f - 1) < .005 ? '='
+  : (f > 1 ? '+' : '-') + Math.round(Math.abs(f - 1) * 100) + ' %';
+const sensVol = f => Math.abs(f - 1) < .005 ? 'no' : f > 1 ? 'ok' : 'al';
+const NIV_OBS = {haute:'Plan tenu', moyenne:'Quelques trous', basse:'Trop de trous'};
+const NIV_COUT = {faible:'Léger', normal:'Normal', eleve:'Élevé'};
+/** Les composantes du cout qui pesent, de la plus lourde a la plus legere. */
+const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
+  .sort((a, b) => b.points - a.points);
+
 (function () {
   const A = M.adaptation;
   if (!A) return;
-  const D = A.decision, O = A.observance, C = A.cout;
+  const D = A.decision, O = A.observance, C = A.cout, R = A.reglages;
   const [mot, cls] = ACTIONS[D.action] || ACTIONS.attendre;
+  const att = D.action === 'attendre';
+  const ic = att ? 'attente' : D.facteur > 1 ? 'monte' : D.facteur < 1 ? 'baisse' : 'egal';
+  const svg = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
 
-  let h = '<div class="adapt"><div class="adapt-h"><span class="pill ' + cls
-    + '">' + mot + '</span><span class="adapt-r">' + D.raison + '</span></div>';
+  // 1. La decision.
+  let h = '<div class="adapt ad"><div class="ad-dec ad-' + cls + '">'
+    + '<span class="ad-ic">' + svg(FLECHE[ic]) + '</span>'
+    + '<span class="ad-dt"><b>' + mot + (ic === 'egal' ? ' le volume' : '')
+      + '</b><span>' + D.raison + '</span></span>'
+    // Le chiffre seulement quand il bouge : a 1, la fleche "=" le dit deja.
+    + (att || ic === 'egal' ? '' : '<span class="ad-f"><b>' + varVol(D.facteur)
+      + '</b><em>de volume</em></span>')
+    + '</div>';
 
-  // Axe 1 : ce qui a ete fait.
-  h += '<div class="deux"><div><div class="sc-h" style="margin-top:0">'
-    + 'Ce que tu as fait</div>';
+  // 2a. Ce qui a ete fait : une barre par semaine, le prevu en creux, le
+  // realise par-dessus, et les seances en points.
+  h += '<div class="ad-cols"><div class="ad-col"><div class="ad-k">Ce que tu as fait</div>';
   if (O.ratio == null) {
-    h += '<div class="sp-l">Aucune semaine du plan n’est encore terminée. '
-      + 'La première mesure d’observance tombera dimanche soir.</div>';
+    h += '<div class="ad-vide">Première mesure dimanche soir, à la fin de la '
+      + 'première semaine.</div>';
   } else {
-    h += '<div class="dyn">'
-      + [['Kilomètres', nf(O.km_fait) + ' sur ' + nf(O.km_prevu)],
-         ['Séances de course', O.seances_faites + ' sur ' + O.seances_prevues],
-         ['Observance', Math.round(O.ratio * 100) + ' %'],
-         ['Base de progression', nf(O.base_km) + ' km par semaine']]
-        .map(r => '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join('')
-      + '</div><div class="sp-l">Mesuré sur les '
-      + A.reglages.fenetre_semaines + ' dernières semaines terminées'
-      + (O.fenetre.length ? ', S' + O.fenetre.join(', S') : '')
-      + '. La semaine en cours ne compte pas.</div>';
+    const n = O.ratio >= .95 ? 'haute' : O.ratio >= .7 ? 'moyenne' : 'basse';
+    const mx = Math.max(...O.semaines.map(w => Math.max(w.km_prevu, w.km_fait)), 1);
+    const pts = (f, p) => Array.from({length:Math.max(f, p)}, (_, i) =>
+      '<i class="' + (i < f ? 'on' : '') + '"></i>').join('');
+    h += '<div class="ad-big">' + Math.round(O.ratio * 100) + '<em> %</em>'
+      + '<span class="ad-niv ad-' + (n === 'haute' ? 'ok' : n === 'moyenne' ? 'no' : 'al')
+      + '">' + NIV_OBS[n] + '</span></div>'
+      + '<div class="ad-ws">' + O.semaines.map(w =>
+        '<div class="ad-w"><span class="ad-wn">S' + w.semaine + '</span>'
+        + '<span class="ad-wb" title="' + km1(w.km_fait) + ' km sur '
+        + km1(w.km_prevu) + ' prévus"><s style="width:'
+        + (w.km_prevu / mx * 100).toFixed(1) + '%"></s><i style="width:'
+        + (w.km_fait / mx * 100).toFixed(1) + '%"></i></span>'
+        + '<span class="ad-wv">' + km1(w.km_fait) + '<em>/' + km1(w.km_prevu)
+        + ' km</em></span>'
+        + '<span class="ad-wd" title="' + w.seances_faites + ' séances sur '
+        + w.seances_prevues + '">' + pts(w.seances_faites, w.seances_prevues)
+        + '</span></div>').join('') + '</div>'
+      + '<div class="ad-lg"><span><i class="ad-lg-f"></i>couru</span>'
+      + '<span><i class="ad-lg-p"></i>prévu</span>'
+      + '<span><i class="ad-lg-d"></i>séance</span></div>';
   }
   h += '</div>';
 
-  // Axe 2 : ce que ca a coute, meme forme que la preparation du jour (voir
-  // scoreFacteurs). Chaque ligne porte sa mesure et ses points en toutes
-  // lettres : une jauge a 0 se lit "dans la norme", pas "signal cassé".
-  h += '<div><div class="sc-h" style="margin-top:0">Ce que ça t’a coûté</div>'
-    + '<div id="cout-score"></div></div>'
-    // Fin de la grille a deux colonnes. Elle n'etait jamais fermee : la note
-    // "aucune semaine reecrite" et le rappel du bas devenaient deux cellules
-    // de plus, poussees sur une seconde ligne avec un grand vide a gauche.
-    + '</div>';
+  // 2b. Ce que ca a coute : la jauge a trois zones, les seuils de
+  // adaptation.cout (30 et 60), puis ce qui pese.
+  h += '<div class="ad-col"><div class="ad-k">Ce que ça t’a coûté</div>';
+  if (!C || C.indice == null) {
+    h += '<div class="ad-vide">Pas encore de signal exploitable : il faut de la '
+      + 'dérive cardiaque, de l’effort perçu, du temps par zone ou 14 nuits.</div>';
+  } else {
+    const p = Math.max(0, Math.min(100, C.indice));
+    const top = coutPese(C).slice(0, 3);
+    h += '<div class="ad-big">' + C.indice + '<em>/100</em>'
+      + '<span class="ad-niv ad-' + (C.niveau === 'eleve' ? 'al' : C.niveau === 'faible'
+        ? 'ok' : 'no') + '">' + NIV_COUT[C.niveau] + '</span></div>'
+      + '<div class="ad-g" role="img" aria-label="Indice ' + C.indice
+      + ' sur 100"><span class="z1" style="width:30%">Léger</span>'
+      + '<span class="z2" style="width:30%">Normal</span>'
+      + '<span class="z3" style="width:40%">Élevé</span>'
+      + '<b style="left:' + p + '%"></b></div>'
+      + (top.length ? '<div class="ad-k2">Ce qui pèse</div><div class="ad-chips">'
+        + top.map(c => '<span><i style="background:' + (COL_COUT[c.nom] || COL_SCORE)
+          + '"></i>' + c.nom + '<em>' + c.valeur + '</em></span>').join('') + '</div>'
+        : '<div class="ad-vide">Aucun signal ne pèse : tout est dans ta norme.</div>')
+      + bloc('Les ' + C.composantes.length + ' signaux', '',
+        '<div id="cout-score"></div>', true);
+  }
+  h += '</div></div>';
 
-  // Ce qui a bouge.
-  if (A.semaines_ajustees.length) {
-    h += '<div class="sc-h">Semaines réécrites</div><div class="chg">'
-      + A.semaines_ajustees.map(a =>
-        '<div><span class="cs2">S' + a.semaine + '</span>'
-        + '<span class="cq">' + nf(a.volume_origine) + ' km</span>'
-        + '<span class="cf">' + nf(a.volume_adapte) + ' km</span>'
-        + '<span class="cl">sortie longue ' + nf(a.longue_origine) + ' → '
-        + nf(a.longue_adapte) + ' km</span></div>').join('') + '</div>';
-  } else if (D.action !== 'attendre') {
-    h += '<div class="sp-l" style="margin-top:var(--s4)">Aucune semaine n’a '
-      + 'besoin d’être réécrite : le plan d’origine correspond déjà à ce que '
-      + 'la décision demande.</div>';
+  // 3. La matrice : regularite en lignes, cout en colonnes. Elle vient de
+  // adaptation.MATRICE via metrics.json ; une ancienne sortie sans elle
+  // n'affiche simplement pas la grille.
+  const MX = R.matrice;
+  if (MX) {
+    // Lue seule, la grille ne disait pas ce qu'elle montrait. La phrase de
+    // tete la lit donc en clair (ta case, et ce qu'elle produit), les deux
+    // axes sont nommes, et ta ligne et ta colonne sont mises en avant.
+    const L = [['haute', 'Plan tenu', '95 % et plus'],
+      ['moyenne', 'Quelques trous', '70 à 95 %'], ['basse', 'Trop de trous', 'moins de 70 %']];
+    const Co = [['faible', 'Léger', 'moins de 30'], ['normal', 'Normal', '30 à 60'],
+      ['eleve', 'Élevé', 'plus de 60']];
+    const effet = f => Math.abs(f - 1) < .005 ? 'kilométrage inchangé'
+      : varVol(f) + ' de kilométrage';
+    const lecture = att || !D.observance || !D.cout
+      ? 'Pas encore assez de mesures pour te placer dans la grille : le plan '
+        + 'd’origine s’applique tel quel.'
+      : 'Tes ' + O.fenetre.length + ' dernières semaines : <b>'
+        + NIV_OBS[D.observance].toLowerCase() + '</b> (' + Math.round(O.ratio * 100)
+        + ' % du plan) pour un <b>coût ' + NIV_COUT[D.cout].toLowerCase() + '</b> ('
+        + C.indice + '/100). Donc <b>' + effet(D.facteur) + '</b> sur les '
+        + R.horizon_semaines + ' semaines à venir.';
+    const cellule = (f, ici) => '<span class="ad-mc ad-' + sensVol(f)
+      + (ici ? ' on' : '') + '"' + (ici ? ' aria-current="true"' : '') + '>'
+      + (Math.abs(f - 1) < .005 ? 'inchangé' : varVol(f) + '<small>de km</small>')
+      + (ici ? '<em>ta case</em>' : '') + '</span>';
+    h += '<div class="ad-k ad-k-m">Comment on décide</div>'
+      + '<p class="ad-lec">' + lecture + '</p>'
+      + '<div class="ad-mx" role="table" aria-label="Variation du kilométrage selon '
+      + 'ce que tu as fait et ce que ça t’a coûté">'
+      + '<span></span><span class="ad-ax ad-ax-c">Ce que ça t’a coûté →</span>'
+      + '<span class="ad-ax">Ce que tu as fait ↓</span>'
+      + Co.map(c => '<span class="ad-mh' + (D.cout === c[0] && !att ? ' on' : '')
+        + '"><b>' + c[1] + '</b><em>' + c[2] + '</em></span>').join('')
+      + L.map(l => '<span class="ad-ml' + (D.observance === l[0] && !att ? ' on' : '')
+        + '"><b>' + l[1] + '</b><em>' + l[2] + '</em></span>'
+        + Co.map(c => cellule(MX[l[0]][c[0]],
+          !att && D.observance === l[0] && D.cout === c[0])).join('')).join('')
+      + '</div><p class="ad-n">Chaque case : comment évolue le kilométrage des '
+      + R.horizon_semaines + ' semaines suivantes.</p>';
   }
 
-  h += '<div class="ia-s">Le plan écrit à la main reste la référence. '
-    + 'L’adaptation ne touche que les ' + A.reglages.horizon_semaines
-    + ' semaines à venir, jamais une course ni l’affûtage, et jamais plus de '
-    + A.reglages.rampe_max_pct + ' % de hausse d’une semaine à l’autre. '
-    + 'Une semaine manquée n’est pas rattrapée : la suivante repart de ce que '
-    + 'tu as réellement couru.</div></div>';
+  // Les semaines reecrites, ou le constat qu'il n'y en a pas.
+  if (A.semaines_ajustees.length) {
+    h += '<div class="ad-k ad-k-m">Semaines réécrites</div><div class="ad-chips">'
+      + A.semaines_ajustees.map(a => '<span><b>S' + a.semaine + '</b>'
+        + km1(a.volume_origine) + ' → ' + km1(a.volume_adapte) + ' km</span>').join('')
+      + '</div>';
+  } else if (!att) {
+    h += '<p class="ad-n">Aucune semaine réécrite : le plan d’origine convient.</p>';
+  }
+
+  // Les garde-fous, en pastilles.
+  const GARDE = [
+    'Plan d’origine conservé',
+    'Les ' + R.horizon_semaines + ' semaines à venir seulement',
+    'Jamais les courses ni l’affûtage',
+    '+' + R.rampe_max_pct + ' % maximum par semaine',
+    'Pas de rattrapage',
+  ];
+  h += '<div class="ad-gf">' + GARDE.map(g => '<span>' + svg(SYM.check) + g
+    + '</span>').join('') + '</div></div>';
+
   $('adapt').innerHTML = h;
-  scoreCharge($('cout-score'));
+  if ($('cout-score')) scoreCharge($('cout-score'));
+})();
+
+/* ================= le point : un voyant par domaine =================
+   Ce qu'on vient chercher en ouvrant la page : est-ce que ca va, et sinon
+   ou ca coince. Une tuile par domaine, un mot d'etat colore, UN chiffre, une
+   ligne. Le detail vit plus bas et dans les autres onglets : chaque tuile y
+   mene. Aucune tuile n'invente un etat quand la mesure manque : elle reste
+   grise et dit ce qu'elle attend, comme l'adaptation et les alertes. */
+const IC_POINT = {
+  drapeau:'<path d="M5.5 21V3.8M5.5 4.4h11.6l-2.4 4.3 2.4 4.3H5.5"'
+    + ' stroke-linecap="round" stroke-linejoin="round"/>',
+  calendrier:ICONS.plan,
+  oeil:'<path d="M2.6 12S6 5.6 12 5.6 21.4 12 21.4 12 18 18.4 12 18.4 2.6 12 2.6 12z"'
+    + ' stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/>',
+};
+(function () {
+  const T = [];
+  const ad = M.adaptation || {};
+
+  // L'objectif : la projection du modele face a la cible decidee.
+  const mg = CAL.marge_marathon_s, pj = (CAL.projections || {}).marathon;
+  if (mg != null && pj) T.push({nom:'Objectif sub-4h', ic:IC_POINT.drapeau,
+    col:'var(--mesure)', etat:mg > 0 ? 'ok' : 'al', mot:mg > 0 ? 'Crédible' : 'Tendu',
+    val:pj.texte, unit:'projeté',
+    sous:mg > 0 ? mg + ' s/km de marge sur ' + CAL.cible_marathon.allure
+      : 'il manque ' + (-mg) + ' s/km', go:['data']});
+
+  // La semaine en cours : couru contre prevu (le prevu adapte s'il existe).
+  if (cur >= 1 && cur <= PLAN.semaines.length) {
+    const fait = (M.semaines[cur] || {}).km || 0;
+    const prevu = ADAPT[cur] ? ADAPT[cur].volume_adapte : nowW.volume_km;
+    const reste = Math.max(0, prevu - fait);
+    const dimanche = today.getDay() === 0;
+    const ok = fait >= prevu * .95;
+    T.push({nom:'Cette semaine', ic:IC_SANTE.activite, col:COL_ACTIVITE,
+      etat:ok ? 'ok' : dimanche && fait < prevu * .7 ? 'veille' : 'neutre',
+      mot:ok ? 'Objectif atteint' : dimanche ? 'Dernier jour' : 'En cours',
+      val:km1(fait), unit:'km sur ' + km1(prevu),
+      sous:ok ? 'Le volume prévu est fait' : 'Reste ' + km1(reste) + ' km',
+      jauge:prevu ? fait / prevu : null, go:['today', 'prog-sem']});
+  }
+
+  // La regularite des trois dernieres semaines terminees.
+  const O = ad.observance;
+  if (O) {
+    if (O.ratio == null) T.push({nom:'Régularité', ic:IC_POINT.calendrier,
+      col:COL_SCORE, etat:'neutre', mot:'En attente', val:'·',
+      sous:'Première mesure en fin de semaine', go:['plan', 'adapt']});
+    else {
+      const n = O.ratio >= .95 ? 'haute' : O.ratio >= .7 ? 'moyenne' : 'basse';
+      T.push({nom:'Régularité', ic:IC_POINT.calendrier, col:COL_SCORE,
+        etat:n === 'haute' ? 'ok' : n === 'moyenne' ? 'veille' : 'al', mot:NIV_OBS[n],
+        val:Math.round(O.ratio * 100), unit:'% du plan',
+        sous:O.seances_faites + ' séances sur ' + O.seances_prevues + ', '
+          + O.fenetre.length + ' dernières semaines',
+        jauge:O.ratio, go:['plan', 'adapt']});
+    }
+  }
+
+  // La recuperation de la nuit : le score de preparation du jour.
+  const P = calcPreparation();
+  if (P.attente) T.push({nom:'Récupération', ic:IC_SANTE.lune, col:COL_SOMMEIL,
+    etat:'neutre', mot:'En attente', val:'·', sous:'Quelques nuits de plus',
+    go:['sante']});
+  else {
+    const faible = P.COMP.slice().sort((a, b) => a.points / a.max - b.points / b.max)[0];
+    T.push({nom:'Récupération', ic:IC_SANTE.lune, col:COL_SOMMEIL,
+      etat:P.cls === 'ok' ? 'ok' : P.cls === 'no' ? 'veille' : 'al', mot:P.mot,
+      val:P.total, unit:'/100',
+      sous:P.total >= 60 ? 'Nuit et cœur dans ta norme'
+        : 'Freinée par : ' + faible.nom.toLowerCase() + ' (' + faible.valeur + ')',
+      jauge:P.total / 100, go:['sante']});
+  }
+
+  // Le cout de l'entrainement recent.
+  const C = ad.cout;
+  if (C && C.indice != null) {
+    const top = coutPese(C)[0];
+    T.push({nom:'Charge', ic:IC_SANTE.forme, col:COL_DERIVE,
+      etat:C.niveau === 'eleve' ? 'al' : 'ok', mot:NIV_COUT[C.niveau],
+      val:C.indice, unit:'/100',
+      sous:top ? 'Surtout : ' + top.nom.toLowerCase() : 'Rien ne pèse',
+      jauge:C.indice / 100, go:['plan', 'adapt']});
+  }
+
+  // La surveillance : les six regles d'alerte.
+  const crit = AL.filter(a => a.niveau === 'critique').length;
+  T.push({nom:'Surveillance', ic:IC_POINT.oeil, col:'var(--acier)',
+    etat:crit ? 'al' : AL.length ? 'veille' : M.nb_activites >= 3 ? 'ok' : 'neutre',
+    mot:AL.length ? (crit ? 'Alerte' : 'À surveiller')
+      : M.nb_activites >= 3 ? 'Rien à signaler' : 'En veille',
+    val:AL.length || '0', unit:AL.length > 1 ? 'alertes' : 'alerte',
+    sous:AL.length ? AL[0].titre : M.nb_activites >= 3 ? 'Six règles vérifiées'
+      : 'S’active avec les premières sorties', go:['today', 'alerts']});
+
+  // La phrase de tete : rien ne va mal, ou ce qui coince, par gravite.
+  const rouges = T.filter(t => t.etat === 'al'), oranges = T.filter(t => t.etat === 'veille');
+  const coince = rouges.concat(oranges).map(t => t.nom.toLowerCase());
+  const tete = !coince.length
+    ? '<span class="pill ok">Tout va bien</span><span class="pt-r">Rien à corriger '
+      + 'pour l’instant.</span>'
+    : '<span class="pill ' + (rouges.length ? 'al' : 'no') + '">' + coince.length
+      + (coince.length > 1 ? ' points' : ' point') + ' à surveiller</span>'
+      + '<span class="pt-r">' + coince.join(', ').replace(/^./, x => x.toUpperCase())
+      + '.</span>';
+
+  $('point').innerHTML = '<div class="pt-h">' + tete + '</div><div class="pts">'
+    + T.map((t, i) => '<button type="button" class="pt pt-' + t.etat + '" data-i="' + i
+      + '"><span class="pt-k"><i class="pt-ic" style="color:' + t.col + '">'
+      + '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">' + t.ic
+      + '</svg></i>' + t.nom + '</span>'
+      + '<span class="pt-m">' + t.mot + '</span>'
+      + '<span class="pt-v">' + t.val + (t.unit ? '<em>' + t.unit + '</em>' : '')
+      + '</span>'
+      + (t.jauge != null ? '<span class="pt-j"><i style="width:'
+        + (Math.max(0, Math.min(1, t.jauge)) * 100).toFixed(1) + '%"></i></span>' : '')
+      + '<span class="pt-s">' + t.sous + '</span></button>').join('') + '</div>';
+
+  $('point').addEventListener('click', e => {
+    const b = e.target.closest('.pt');
+    if (!b) return;
+    const [onglet, ancre] = T[+b.dataset.i].go;
+    if (onglet !== ongletActif) show(onglet);
+    const cible = ancre && $(ancre);
+    if (cible) requestAnimationFrame(() =>
+      (cible.closest('.sec') || cible).scrollIntoView({behavior:'smooth', block:'start'}));
+  });
 })();
 
 /* ================= plan ================= */
@@ -2496,7 +2795,7 @@ $('kpis').innerHTML = [
   const CH = [
     {t:'Volume hebdomadaire', s:'Réalisé contre planifié, en kilomètres',
      k:[['Réalisé', COL_ACTIVITE], ['Planifié', 'var(--acier)']],
-     ic:{icon:IC_SANTE.activite, color:COL_ACTIVITE}, ouvert:true,
+     ic:{icon:IC_SANTE.activite, color:COL_ACTIVITE},
      draw(b) {
        if (!sk.length) { b.innerHTML = '<div class="wait">Se remplit dès la première '
          + 'séance. Le plan démarre lundi 7 septembre.</div>'; return false; }
@@ -2508,7 +2807,7 @@ $('kpis').innerHTML = [
             v:PLAN.semaines[k - 1].volume_km}))}], {unit:' km', zero:true});
      }},
     {t:'Forme et fatigue', s:'CTL la forme de fond, ATL la fatigue récente',
-     k:[['Forme', 'var(--mesure)'], ['Fatigue', 'var(--effort)']], ouvert:true,
+     k:[['Forme', 'var(--mesure)'], ['Fatigue', 'var(--effort)']],
      ic:{icon:IC_SANTE.forme, color:COL_FORME},
      draw:b => lineChart(b, [{name:'Forme', color:'var(--mesure)', data:g('ctl')},
        {name:'Fatigue', color:'var(--effort)', data:g('atl')}],
@@ -2536,7 +2835,7 @@ $('kpis').innerHTML = [
         + 'pour voir la tendance.'})},
     {t:'Dérive cardiaque', s:'FC de la 2e moitié contre la 1re, sur toute séance '
        + 'd’au moins dix minutes de cardio',
-     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']], ouvert:true,
+     k:[['Seuil de 5 %, à ne pas dépasser', 'var(--effort)']],
      ic:{icon:IC_SANTE.ecg, color:COL_DERIVE},
      draw:b => lineChart(b, [{name:'Dérive', color:COL_DERIVE,
        data:M.derives.map(x => ({d:x.date, v:x.derive_pct}))}],
@@ -2555,12 +2854,10 @@ $('kpis').innerHTML = [
        {wait:'Garmin a besoin de 2 à 3 courses avec cardio et GPS avant de produire '
         + 'une première estimation.'})},
   ];
-  // Ouverts : ce qui dit si l'entrainement fonctionne (volume, forme contre
-  // fatigue, derive). La FC de repos, la VFC et le sommeil sont detailles
-  // dans l'onglet Sante, le poids et la VO2max bougent trop lentement pour
-  // etre lus chaque jour : ils restent replies. Un graphique en attente de
-  // donnees ne s'ouvre jamais, meme s'il est marque ouvert : ouvrir un bloc
-  // vide, c'est faire croire qu'il y a quelque chose a lire.
+  // Tous ouverts des qu'ils ont des donnees (choix du 01/10/2026 : on vient
+  // ici pour voir les courbes, pas pour les deplier une a une). Un graphique
+  // en attente de donnees reste ferme : ouvrir un bloc vide, c'est faire
+  // croire qu'il y a quelque chose a lire.
   $('charts').innerHTML = CH.map((c, i) => bloc(c.t, '',
     '<p class="bl-s">' + c.s + '</p><div class="cb" id="ch' + i + '"></div>'
     + '<div class="keys" id="k' + i + '"></div>', false, c.ic)).join('');
@@ -2572,7 +2869,7 @@ $('kpis').innerHTML = [
     const bl = document.querySelector('#ch' + i).closest('.bl');
     const r = bl.querySelector('.bl-r');
     if (r) r.textContent = ok ? '' : 'en attente';
-    bl.open = !!(ok && c.ouvert);
+    bl.open = !!ok;
   });
 })();
 
@@ -2929,12 +3226,8 @@ function lectureNuits() {
       + 'la qualité des séances.',
   };
 
-  // Ouverts par defaut : l'indice de fatigue, la synthese de la
-  // recuperation, et la duree de sommeil, le signal sur lequel un plan casse
-  // le plus souvent. La VFC et la FC de repos se lisent deja nuit par nuit
-  // dans la carte au-dessus ; les pas, le score, le poids et la SpO2 sont
-  // secondaires pour la course.
-  const OUVERTS = ['fatigue_indice', 'sommeil_h'];
+  // Tous ouverts par defaut des qu'ils ont des donnees (choix du
+  // 01/10/2026), comme les courbes de Progres.
 
   function dessine() {
     // Changer de periode redessine tout : on garde ce que l'utilisateur a
@@ -2962,7 +3255,7 @@ function lectureNuits() {
          target:c.cle === 'fatigue_indice' ? 50 : null,
          wait:ATTENTE[mode]});
       $('sc' + i).closest('.bl').open = !!ok
-        && (avant ? !!avant[i] : OUVERTS.includes(c.cle));
+        && (avant ? !!avant[i] : true);
     });
     const p = PERIODES.find(x => x[0] === mode);
     $('sante-n').textContent = mode === 'jour'
