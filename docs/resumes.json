@@ -97,5 +97,16 @@
     "source": "claude_conversation",
     "fige": true,
     "date_redaction": "2026-09-30"
+  },
+  "2026-10-03": {
+    "verdict": "attention",
+    "titre": "Sortie longue arrêtée au premier kilomètre",
+    "essentiel": "1,59 km courus sur les 12 prévus : replace la sortie longue dans les deux jours, sinon la semaine 4 perd son socle aérobie.",
+    "execution": "6:08/km et FC 128 avec 93 % du temps en Z2, donc rien à redire sur le peu que tu as couru. Effort perçu 1 sur 10, et la dérive cardiaque n'est pas calculable sur 10 minutes.",
+    "conformite": "13 % de la sortie longue prévue, ce qui laisse la semaine très en dessous des 25,1 km visés.",
+    "objectif": "Accumuler du volume continu en endurance fondamentale. Dix minutes n'y contribuent pas, le rôle n'est pas rempli.",
+    "source": "claude_conversation",
+    "fige": true,
+    "date_redaction": "2026-10-03"
   }
 }
