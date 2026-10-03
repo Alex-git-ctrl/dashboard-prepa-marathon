@@ -1,14 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <!-- Variante de favicon.svg pour l'ecran d'accueil : fond plein jusqu'aux
        bords (Android et iOS decoupent eux-memes la forme de l'icone) et
-       dessin ramene a 72 % au centre, dans la zone que les masques ne
+       dessin ramene a 80 % au centre, dans la zone que les masques ne
        rognent jamais. -->
-  <rect width="32" height="32" fill="#1d1d1f"/>
-  <g transform="translate(16 16) scale(.72) translate(-16 -16)">
-    <circle cx="16" cy="16" r="11" fill="none" stroke="#3a3a3c" stroke-width="3"/>
-    <path d="M16 5a11 11 0 1 1-10.3 7.1" fill="none" stroke="#2997ff"
-      stroke-width="3" stroke-linecap="round"/>
-    <path d="M17.6 21.6V10.4l-6.4 8h8.2" fill="none" stroke="#ffffff"
-      stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="100" height="100" fill="#1d1d1f"/>
+  <g transform="translate(50 50) scale(.8) translate(-50 -50)">
+    <g fill="#2997ff">
+      <path d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z"/>
+      <path d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(90 50 50)"/>
+      <path d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(180 50 50)"/>
+      <path d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(270 50 50)"/>
+    </g>
+    <g fill="#636366">
+      <circle cx="67.68" cy="32.32" r="4.2"/><circle cx="67.68" cy="67.68" r="4.2"/>
+      <circle cx="32.32" cy="67.68" r="4.2"/><circle cx="32.32" cy="32.32" r="4.2"/>
+    </g>
+    <circle cx="50" cy="50" r="5.2" fill="#ffffff"/>
   </g>
 </svg>
