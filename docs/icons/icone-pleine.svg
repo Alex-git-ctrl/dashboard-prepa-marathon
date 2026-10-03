@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Variante de favicon.svg pour l'ecran d'accueil : fond plein jusqu'aux
+       bords (Android et iOS decoupent eux-memes la forme de l'icone) et
+       dessin ramene a 72 % au centre, dans la zone que les masques ne
+       rognent jamais. -->
+  <rect width="32" height="32" fill="#1d1d1f"/>
+  <g transform="translate(16 16) scale(.72) translate(-16 -16)">
+    <circle cx="16" cy="16" r="11" fill="none" stroke="#3a3a3c" stroke-width="3"/>
+    <path d="M16 5a11 11 0 1 1-10.3 7.1" fill="none" stroke="#2997ff"
+      stroke-width="3" stroke-linecap="round"/>
+    <path d="M17.6 21.6V10.4l-6.4 8h8.2" fill="none" stroke="#ffffff"
+      stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

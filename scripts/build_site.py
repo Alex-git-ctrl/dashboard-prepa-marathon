@@ -124,6 +124,40 @@ def metas_couleur(meta):
             'media="(prefers-color-scheme: dark)">' % (clair, sombre))
 
 
+def manifeste(meta):
+    """La fiche d'application : ce qui rend la page installable.
+
+    Installee depuis le navigateur (Android, iPhone, Chrome ou Edge sur PC),
+    la page s'ouvre comme une app : une icone, sa propre fenetre, pas de
+    barre d'adresse. Rien ne change pour le reste : c'est la meme page,
+    servie au meme endroit, mise a jour par le meme pipeline. Generee ici
+    plutot qu'ecrite a la main pour que sa couleur suive le theme actif.
+    Chemins relatifs : le site vit sous /dashboard-prepa-marathon/ sur
+    GitHub Pages, pas a la racine du domaine.
+    """
+    fond = meta.get("theme_color_clair") or "#ffffff"
+    return {
+        "name": "Sub-4 à Barcelone",
+        "short_name": "Sub-4",
+        "description": "Préparation au marathon de Barcelone, 14 mars 2027.",
+        "lang": "fr",
+        "id": "./",
+        "start_url": "./",
+        "scope": "./",
+        "display": "standalone",
+        "background_color": fond,
+        "theme_color": fond,
+        "icons": [
+            {"src": "icons/icone-192.png", "sizes": "192x192", "type": "image/png",
+             "purpose": "any"},
+            {"src": "icons/icone-512.png", "sizes": "512x512", "type": "image/png",
+             "purpose": "any"},
+            {"src": "icons/icone-masquable-512.png", "sizes": "512x512",
+             "type": "image/png", "purpose": "maskable"},
+        ],
+    }
+
+
 SQUELETTE = """<!doctype html>
 <html lang="fr">
 <head>
@@ -131,10 +165,18 @@ SQUELETTE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {couleurs}
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Sub-4">
 {tete}
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:')
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js')
+    .catch(() => {{}}));
+</script>
 </head>
 <body>
 {corps}
@@ -195,6 +237,10 @@ def main():
     doc = SQUELETTE.format(couleurs=metas_couleur(meta), tete=tete, corps=corps)
     with open(os.path.join(D, "index.html"), "w", encoding="utf-8") as fh:
         fh.write(doc)
+
+    with open(os.path.join(D, "manifest.webmanifest"), "w", encoding="utf-8") as fh:
+        json.dump(manifeste(meta), fh, ensure_ascii=False, indent=2)
+        fh.write("\n")
 
     print("theme             : %s (%s)" % (nom, meta.get("nom", nom)))
     print("docs/index.html   : document complet, %d octets" % len(doc))

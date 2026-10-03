@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#f5f5f7">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Sub-4">
@@ -1420,6 +1423,11 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 @media (max-width:380px){.pts{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.pt,.pt:hover{transition:none;transform:none}}
 </style>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:')
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js')
+    .catch(() => {}));
+</script>
 </head>
 <body>
 <header class="top">
