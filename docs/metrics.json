@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-04T11:06:09",
+  "maj": "2026-10-04T22:20:01",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -12818,7 +12818,7 @@
       "ctl": 6.0307136,
       "atl": 10.423561,
       "ramp_rate": -0.3061614,
-      "pas": 1717,
+      "pas": 6624,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -12990,7 +12990,7 @@
     "ctl": 6.0307136,
     "atl": 10.423561,
     "ramp_rate": -0.3061614,
-    "pas": 1717,
+    "pas": 6624,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -13627,7 +13627,7 @@
         "fatigue_indice": 45
       },
       {
-        "pas": 1717,
+        "pas": 6624,
         "sommeil_h": 8.0,
         "sommeil_score": 90.0,
         "fc_repos": 47,
@@ -13639,7 +13639,7 @@
       }
     ],
     "actuel": {
-      "pas": 1717,
+      "pas": 6624,
       "pas_date": "2026-10-04",
       "sommeil_h": 8.0,
       "sommeil_h_date": "2026-10-04",
