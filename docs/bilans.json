@@ -8,16 +8,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-09-14T23:25:58",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Encore tôt, mais VFC redressée à 63 ms",
   "essentiel": "1 semaine terminée sur 27, la VFC remonte à 63 ms comme demandé : trop tôt pour juger la trajectoire complète.",
-  "ou_tu_en_es": "Depuis le dernier bilan, la VFC est passée de 43 à 63 ms, quasiment au niveau demandé (64 ms). Semaine 1 bouclée à 16,1 km sur 19,5 prévus (2 séances sur 3), coût d'entraînement faible (indice 29) et forme de fond en hausse (+1,88/semaine). Seul point noir : la dérive cardiaque grimpe sortie après sortie, de -1,1 % à 8,0 %.",
-  "viser_plus_haut": "Le VDOT projette 3h40, largement sous les 3h59 visés, mais c'est calculé sur un 10 km estimé, jamais couru : ne relève pas l'objectif là-dessus. Il faudrait un 10 km chronométré réel et six semaines de plan bouclées avant de trancher.",
-  "a_changer": "La consigne VFC est tenue : elle est passée à 63 ms, proche des 64 ms visés. Priorité : ralentir les sorties d'endurance, 68,3 % du temps en zone 3, pour faire redescendre la dérive cardiaque à 8,0 %.",
-  "quand": "2026-09-14T23:25:58",
-  "empreinte": "bd22643c799d01b1",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -101,6 +97,18 @@
   "a_changer": "Les deux sorties demandées sont là, mais le 03/10 plafonne à 1,59 km : consigne suivie à moitié. Priorité unique : une troisième sortie de 8 km avant dimanche, puis 20 km pleins en semaine 5.",
   "quand": "2026-10-03T23:01:29",
   "empreinte": "c730f70cbb9a57f9",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Semaine 5 à 0 km, quatrième semaine creuse",
+  "essentiel": "Observance tombée à 0,68 sur les trois dernières semaines, avec 46,3 km courus sur 68 prévus et quatre semaines bouclées sur 27.",
+  "ou_tu_en_es": "Depuis le bilan du 03/10, rien n'a bougé : la semaine 4 a fermé à 7,5 km sur 25,1, et la semaine 5 est à 0 km sur 27,1. L'observance a glissé de 0,88 à 0,681. Forme de fond à 5,89 et VFC à 96 ms montent parce que tu ne cours pas, pas parce que tu progresses.",
+  "viser_plus_haut": "Non. La projection à 3h39 vient d'un 10 km réel (45:33) mais repose sur 15,4 km de base hebdo : il faut six semaines bouclées au-dessus de 0,90 d'observance avant d'en parler.",
+  "a_changer": "La sortie de 8 km demandée n'est pas venue : la semaine 4 s'est close à 2 séances. Objectif unique cette semaine : 3 sorties, 24 km au total (facteur 0,9), toutes sous 6:00/km.",
+  "quand": "2026-10-05T23:37:08",
+  "empreinte": "0e282cf92aa96868",
   "source": "claude_conversation"
  }
 ]
