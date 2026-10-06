@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-06T00:48:52",
+  "maj": "2026-10-06T12:00:53",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -12851,12 +12851,12 @@
     },
     {
       "date": "2026-10-06",
-      "hrv": null,
-      "fc_repos": 52,
+      "hrv": 103.0,
+      "fc_repos": 45,
       "poids": null,
       "vo2max": null,
       "readiness": null,
-      "sommeil_score": null,
+      "sommeil_score": 74.0,
       "fc_sommeil": null,
       "spo2": null,
       "respiration": null,
@@ -12864,13 +12864,13 @@
       "ctl": 5.750267,
       "atl": 7.8330693,
       "ramp_rate": -0.62132025,
-      "pas": 26,
+      "pas": 979,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
       "douleur_niveau": null,
       "commentaire": null,
-      "sommeil_h": null
+      "sommeil_h": 6.3
     }
   ],
   "derives": [
@@ -13023,12 +13023,12 @@
     "vertical_ratio": 8.6
   },
   "actuel": {
-    "hrv": 96.0,
-    "fc_repos": 52,
+    "hrv": 103.0,
+    "fc_repos": 45,
     "poids": 82.0,
     "vo2max": 53.0,
     "readiness": null,
-    "sommeil_score": 80.0,
+    "sommeil_score": 74.0,
     "fc_sommeil": null,
     "spo2": 98.0,
     "respiration": null,
@@ -13036,24 +13036,24 @@
     "ctl": 5.750267,
     "atl": 7.8330693,
     "ramp_rate": -0.62132025,
-    "pas": 26,
+    "pas": 979,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": 6.6,
+    "sommeil_h": 6.3,
     "derive_pct": 4.6,
     "efficacite": 2.12,
     "cadence": 79.4
   },
   "couverture": {
-    "hrv": 32,
+    "hrv": 33,
     "fc_repos": 35,
     "poids": 1,
     "vo2max": 8,
     "readiness": 0,
-    "sommeil_score": 31,
+    "sommeil_score": 32,
     "fc_sommeil": 0,
     "spo2": 1,
     "respiration": 0,
@@ -13079,12 +13079,12 @@
     "Anaerobic"
   ],
   "dates": {
-    "hrv": "2026-10-05",
+    "hrv": "2026-10-06",
     "fc_repos": "2026-10-06",
     "poids": "2026-09-02",
     "vo2max": "2026-09-27",
     "readiness": null,
-    "sommeil_score": "2026-10-05",
+    "sommeil_score": "2026-10-06",
     "fc_sommeil": null,
     "spo2": "2026-09-04",
     "respiration": null,
@@ -13098,7 +13098,7 @@
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": "2026-10-05",
+    "sommeil_h": "2026-10-06",
     "derive_pct": "2026-09-29",
     "efficacite": "2026-10-03",
     "cadence": "2026-10-03",
@@ -13695,30 +13695,30 @@
         "fatigue_indice": 25
       },
       {
-        "pas": 26,
-        "sommeil_h": null,
-        "sommeil_score": null,
-        "fc_repos": 52,
-        "hrv": null,
+        "pas": 979,
+        "sommeil_h": 6.3,
+        "sommeil_score": 74.0,
+        "fc_repos": 45,
+        "hrv": 103.0,
         "poids": null,
         "spo2": null,
         "date": "2026-10-06",
-        "fatigue_indice": 70
+        "fatigue_indice": 28
       }
     ],
     "actuel": {
-      "pas": 26,
+      "pas": 979,
       "pas_date": "2026-10-06",
-      "sommeil_h": 6.6,
-      "sommeil_h_date": "2026-10-05",
-      "sommeil_score": 80.0,
-      "sommeil_score_date": "2026-10-05",
-      "fatigue_indice": 70,
+      "sommeil_h": 6.3,
+      "sommeil_h_date": "2026-10-06",
+      "sommeil_score": 74.0,
+      "sommeil_score_date": "2026-10-06",
+      "fatigue_indice": 28,
       "fatigue_indice_date": "2026-10-06",
-      "fc_repos": 52,
+      "fc_repos": 45,
       "fc_repos_date": "2026-10-06",
-      "hrv": 96.0,
-      "hrv_date": "2026-10-05",
+      "hrv": 103.0,
+      "hrv_date": "2026-10-06",
       "poids": 82.0,
       "poids_date": "2026-09-02",
       "spo2": 98.0,
@@ -13883,19 +13883,19 @@
         },
         {
           "nom": "Variabilité cardiaque",
-          "valeur": "+11 %",
+          "valeur": "+16 %",
           "points": 0,
           "max": 30
         },
         {
           "nom": "FC de repos",
-          "valeur": "-0 bpm",
+          "valeur": "-2 bpm",
           "points": 0,
           "max": 20
         },
         {
           "nom": "Dette de sommeil",
-          "valeur": "5,8 h sur la semaine",
+          "valeur": "5,7 h sur la semaine",
           "points": 12,
           "max": 15
         }
