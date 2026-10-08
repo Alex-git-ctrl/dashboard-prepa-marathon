@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-07T23:35:09",
+  "maj": "2026-10-08T12:00:55",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -12894,6 +12894,29 @@
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": null
+    },
+    {
+      "date": "2026-10-08",
+      "hrv": null,
+      "fc_repos": null,
+      "poids": null,
+      "vo2max": null,
+      "readiness": null,
+      "sommeil_score": null,
+      "fc_sommeil": null,
+      "spo2": null,
+      "respiration": null,
+      "masse_grasse": null,
+      "ctl": 5.482862,
+      "atl": 5.8863735,
+      "ramp_rate": -0.5924268,
+      "pas": null,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
+      "sommeil_h": null
     }
   ],
   "derives": [
@@ -13056,9 +13079,9 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 5.614973,
-    "atl": 6.7903147,
-    "ramp_rate": -0.6067014,
+    "ctl": 5.482862,
+    "atl": 5.8863735,
+    "ramp_rate": -0.5924268,
     "pas": 46,
     "courbatures": null,
     "fatigue": null,
@@ -13081,9 +13104,9 @@
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 36,
-    "atl": 36,
-    "ramp_rate": 29,
+    "ctl": 37,
+    "atl": 37,
+    "ramp_rate": 30,
     "pas": 36,
     "courbatures": 0,
     "fatigue": 0,
@@ -13091,7 +13114,7 @@
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 36,
+  "jours_wellness": 37,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -13112,9 +13135,9 @@
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-10-07",
-    "atl": "2026-10-07",
-    "ramp_rate": "2026-10-07",
+    "ctl": "2026-10-08",
+    "atl": "2026-10-08",
+    "ramp_rate": "2026-10-08",
     "pas": "2026-10-07",
     "courbatures": null,
     "fatigue": null,
@@ -13127,7 +13150,7 @@
     "cadence": "2026-10-03",
     "volume": "2026-10-03"
   },
-  "derniere_donnee": "2026-10-07",
+  "derniere_donnee": "2026-10-08",
   "derniere_seance": "2026-10-03",
   "journal": [
     {
@@ -13738,6 +13761,17 @@
         "spo2": null,
         "date": "2026-10-07",
         "fatigue_indice": 55
+      },
+      {
+        "pas": null,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "fc_repos": null,
+        "hrv": null,
+        "poids": null,
+        "spo2": null,
+        "date": "2026-10-08",
+        "fatigue_indice": null
       }
     ],
     "actuel": {
@@ -13894,89 +13928,55 @@
       "base_km": 15.4
     },
     "cout": {
-      "indice": 35,
-      "niveau": "normal",
+      "indice": 27,
+      "niveau": "faible",
       "composantes": [
         {
           "nom": "Dérive cardiaque",
-          "valeur": "11,2 %",
-          "points": 30,
+          "valeur": "7,4 %",
+          "points": 22,
           "max": 30
         },
         {
           "nom": "Effort perçu",
-          "valeur": "4,4 sur 10",
-          "points": 3,
+          "valeur": "4,2 sur 10",
+          "points": 1,
           "max": 30
         },
         {
           "nom": "Temps en endurance",
-          "valeur": "74 %",
-          "points": 8,
+          "valeur": "78 %",
+          "points": 5,
           "max": 25
         },
         {
           "nom": "Variabilité cardiaque",
-          "valeur": "+30 %",
+          "valeur": "+29 %",
           "points": 0,
           "max": 30
         },
         {
           "nom": "FC de repos",
-          "valeur": "-3 bpm",
+          "valeur": "-2 bpm",
           "points": 0,
           "max": 20
         },
         {
           "nom": "Dette de sommeil",
-          "valeur": "5,8 h sur la semaine",
+          "valeur": "5,7 h sur la semaine",
           "points": 12,
           "max": 15
         }
       ]
     },
     "decision": {
-      "action": "alleger",
-      "facteur": 0.9,
-      "raison": "Trop de séances manquées pour repartir sur le volume prévu.",
+      "action": "maintenir",
+      "facteur": 1.0,
+      "raison": "Peu de séances faites, mais sans difficulté apparente.",
       "observance": "basse",
-      "cout": "normal"
+      "cout": "faible"
     },
-    "semaines_ajustees": [
-      {
-        "semaine": 6,
-        "volume_origine": 30.8,
-        "volume_adapte": 17.2,
-        "longue_origine": 16,
-        "longue_adapte": 9.0,
-        "seance1_origine": 45,
-        "seance1_adapte": 25,
-        "seance2_origine": 45,
-        "seance2_adapte": 25
-      },
-      {
-        "semaine": 7,
-        "volume_origine": 32.8,
-        "volume_adapte": 18.7,
-        "longue_origine": 18,
-        "longue_adapte": 10.5,
-        "seance1_origine": 45,
-        "seance1_adapte": 25,
-        "seance2_origine": 45,
-        "seance2_adapte": 25
-      },
-      {
-        "semaine": 8,
-        "volume_origine": 25.5,
-        "volume_adapte": 21.3,
-        "longue_origine": 14,
-        "longue_adapte": 11.5,
-        "seance1_origine": 35,
-        "seance1_adapte": 30,
-        "seance2_origine": 35,
-        "seance2_adapte": 30
-      }
-    ],
+    "semaines_ajustees": [],
     "reglages": {
       "rampe_max_pct": 10,
       "fenetre_semaines": 3,
@@ -14225,19 +14225,19 @@
       "note": "",
       "phase_calisthenie": "Fondations",
       "phase_quoi": "Neuf semaines de volume propre : rien ne tient sans tractions et dips stricts.",
-      "volume_km": 17.2,
-      "adapte": true,
+      "volume_km": 30.8,
+      "adapte": false,
       "seances": [
         {
           "type": "course",
           "nom": "Endurance fondamentale",
-          "duree_min": 25,
+          "duree_min": 45,
           "pourquoi": "Construit la base aérobie. Ne compte que si elle reste lente.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
-              "duree_s": 1500,
+              "duree_s": 2700,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14253,13 +14253,13 @@
         {
           "type": "course",
           "nom": "Endurance et 6 lignes droites",
-          "duree_min": 25,
+          "duree_min": 45,
           "pourquoi": "L'intensité est dans la sortie longue de samedi. Jeudi reste léger.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
-              "duree_s": 1180,
+              "duree_s": 2380,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14384,15 +14384,15 @@
         },
         {
           "type": "course",
-          "nom": "Sortie longue 9 km",
-          "distance_km": 9.0,
+          "nom": "Sortie longue 16 km",
+          "distance_km": 16,
           "pourquoi": "Accélérer sur des jambes vides : c'est le 30e kilomètre du marathon.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
               "duree_s": null,
-              "distance_m": 5000,
+              "distance_m": 12000,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
               "allure_texte": "6:00 à 6:39 /km",
@@ -14520,19 +14520,19 @@
       "note": "Première sortie longue à 18 km.",
       "phase_calisthenie": "Fondations",
       "phase_quoi": "Neuf semaines de volume propre : rien ne tient sans tractions et dips stricts.",
-      "volume_km": 18.7,
-      "adapte": true,
+      "volume_km": 32.8,
+      "adapte": false,
       "seances": [
         {
           "type": "course",
           "nom": "Endurance fondamentale",
-          "duree_min": 25,
+          "duree_min": 45,
           "pourquoi": "Construit la base aérobie. Ne compte que si elle reste lente.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
-              "duree_s": 1500,
+              "duree_s": 2700,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14547,14 +14547,14 @@
         },
         {
           "type": "course",
-          "nom": "1 × 8 min à allure marathon",
-          "duree_min": 25,
+          "nom": "3 × 8 min à allure marathon",
+          "duree_min": 45,
           "pourquoi": "Plus de temps passé à l'allure de course, toujours fractionné pour qu'il n'en coûte rien.",
           "etapes": [
             {
               "nom": "Échauffement",
               "zone": "ef",
-              "duree_s": 632,
+              "duree_s": 595,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14562,7 +14562,47 @@
               "consigne": "Progressif, sans jamais forcer."
             },
             {
-              "nom": "Effort 1 sur 1",
+              "nom": "Effort 1 sur 3",
+              "zone": "marathon",
+              "duree_s": 480,
+              "distance_m": null,
+              "allure_rapide_s_km": 317,
+              "allure_lente_s_km": 333,
+              "allure_texte": "5:17 à 5:33 /km",
+              "consigne": "Allure régulière du début à la fin."
+            },
+            {
+              "nom": "Récupération",
+              "zone": "ef",
+              "duree_s": 150,
+              "distance_m": null,
+              "allure_rapide_s_km": 360,
+              "allure_lente_s_km": 399,
+              "allure_texte": "6:00 à 6:39 /km",
+              "consigne": "Trot lent, pas d'arrêt complet."
+            },
+            {
+              "nom": "Effort 2 sur 3",
+              "zone": "marathon",
+              "duree_s": 480,
+              "distance_m": null,
+              "allure_rapide_s_km": 317,
+              "allure_lente_s_km": 333,
+              "allure_texte": "5:17 à 5:33 /km",
+              "consigne": "Allure régulière du début à la fin."
+            },
+            {
+              "nom": "Récupération",
+              "zone": "ef",
+              "duree_s": 150,
+              "distance_m": null,
+              "allure_rapide_s_km": 360,
+              "allure_lente_s_km": 399,
+              "allure_texte": "6:00 à 6:39 /km",
+              "consigne": "Trot lent, pas d'arrêt complet."
+            },
+            {
+              "nom": "Effort 3 sur 3",
               "zone": "marathon",
               "duree_s": 480,
               "distance_m": null,
@@ -14574,7 +14614,7 @@
             {
               "nom": "Retour au calme",
               "zone": "ef",
-              "duree_s": 388,
+              "duree_s": 365,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14590,15 +14630,15 @@
         },
         {
           "type": "course",
-          "nom": "Sortie longue 10,5 km",
-          "distance_km": 10.5,
+          "nom": "Sortie longue 18 km",
+          "distance_km": 18,
           "pourquoi": "La séance qui décide d'un marathon : réserves, appuis, tolérance à l'inconfort.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
               "duree_s": null,
-              "distance_m": 10500,
+              "distance_m": 18000,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
               "allure_texte": "6:00 à 6:39 /km",
@@ -14716,19 +14756,19 @@
       "note": "",
       "phase_calisthenie": "Fondations",
       "phase_quoi": "Neuf semaines de volume propre : rien ne tient sans tractions et dips stricts.",
-      "volume_km": 21.3,
-      "adapte": true,
+      "volume_km": 25.5,
+      "adapte": false,
       "seances": [
         {
           "type": "course",
           "nom": "Endurance fondamentale",
-          "duree_min": 30,
+          "duree_min": 35,
           "pourquoi": "Construit la base aérobie. Ne compte que si elle reste lente.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
-              "duree_s": 1800,
+              "duree_s": 2100,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14744,13 +14784,13 @@
         {
           "type": "course",
           "nom": "Endurance et 6 lignes droites",
-          "duree_min": 30,
+          "duree_min": 35,
           "pourquoi": "Semaine de décharge. Rien de dur, juste de quoi ne pas s'endormir.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
-              "duree_s": 1480,
+              "duree_s": 1780,
               "distance_m": null,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
@@ -14875,15 +14915,15 @@
         },
         {
           "type": "course",
-          "nom": "Sortie longue 11,5 km",
-          "distance_km": 11.5,
+          "nom": "Sortie longue 14 km",
+          "distance_km": 14,
           "pourquoi": "La séance qui décide d'un marathon : réserves, appuis, tolérance à l'inconfort.",
           "etapes": [
             {
               "nom": "Endurance",
               "zone": "ef",
               "duree_s": null,
-              "distance_m": 11500,
+              "distance_m": 14000,
               "allure_rapide_s_km": 360,
               "allure_lente_s_km": 399,
               "allure_texte": "6:00 à 6:39 /km",
