@@ -16,16 +16,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-09-16T23:14:10",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Encore tôt, dérive cardiaque grimpe à 30 %",
   "essentiel": "1 semaine bouclée sur 27 (ratio 0,826) et une dérive cardiaque à 30 % le 16/09 : trop tôt pour juger, mais le signal inquiète.",
-  "ou_tu_en_es": "Le temps en zone 3 recule de 68,3 % à 58,5 %, mais la dérive cardiaque grimpe à 30 % sur la sortie du 16/09. VFC et FC repos progressent bien (75 ms, 47 bpm), la forme de fond aussi (+1,9/semaine). Mais la fatigue explose (+8,4/semaine), le sommeil tombe à 5,7 h, et la semaine 2 n'affiche que 5,6 km sur 23,1 prévus.",
-  "viser_plus_haut": "La projection donne 3h40 (5:14/km), bien sous la cible de 3h59, mais elle sort d'un 10 km estimé, jamais couru. Il faudrait un vrai chrono sur 10 km ou semi pour trancher, pas avant.",
-  "a_changer": "La consigne de ralentir n'a pas tenu : la sortie du 16/09 était à 5:17/km, plus rapide qu'avant, avec une dérive à 30 %. Priorité : allure d'endurance nettement plus lente et sommeil remonté au-dessus de 6 h.",
-  "quand": "2026-09-16T23:14:10",
-  "empreinte": "7c747101843e4629",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -109,6 +105,18 @@
   "a_changer": "La sortie de 8 km demandée n'est pas venue : la semaine 4 s'est close à 2 séances. Objectif unique cette semaine : 3 sorties, 24 km au total (facteur 0,9), toutes sous 6:00/km.",
   "quand": "2026-10-05T23:37:08",
   "empreinte": "0e282cf92aa96868",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Repos prescrit en cours, rien à trancher",
+  "essentiel": "Semaine 5 à 0 km sur 0 prévu, consigne respectée, et seulement 4 semaines terminées sur 27 avant la reprise du 19 octobre.",
+  "ou_tu_en_es": "Depuis le dernier bilan, le repos est déclaré et la cible de la semaine 5 réécrite à 0 km : les 24 km que j'avais demandés ne tiennent plus. L'observance de référence reste 0,88 sur les semaines 1 à 3, base 18,3 km par semaine. Fatigue 5,89 contre 12,57 de moyenne, VFC 103 ms, coût faible à 27.",
+  "viser_plus_haut": "Non, pas sur ces chiffres : projection 3h39 à 5:11/km tirée d'un seul 10 km et 4 semaines terminées sur 27, confiance faible. Il faudrait six semaines pleines après la reprise, puis un semi chronométré.",
+  "a_changer": "La priorité des 3 sorties et 24 km est annulée par le repos : semaine 5 à 0 km sur 0 prévu, c'est tenu. Une seule chose jusqu'au 18 octobre : ni course ni renfo.",
+  "quand": "2026-10-08T23:47:07",
+  "empreinte": "1e3ef6736e70be67",
   "source": "claude_conversation"
  }
 ]

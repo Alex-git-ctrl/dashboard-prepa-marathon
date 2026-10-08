@@ -10,7 +10,7 @@
 
    Seules les ressources du site lui-meme passent ici. Les polices Google
    vont directement au reseau : hors ligne, la police systeme prend le relais. */
-const CACHE = 'sub4-v1';
+const CACHE = 'sub4-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(

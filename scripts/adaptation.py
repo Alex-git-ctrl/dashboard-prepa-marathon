@@ -11,9 +11,26 @@ cote, et la page affiche les deux avec la raison de l'ecart.
 
 Regle d'honnetete qui prime sur tout le reste : quand les mesures manquent,
 on ne decide pas. On suit le plan d'origine et on dit pourquoi.
+
+LES PAUSES (data/pauses.json). Un arret declare, typiquement un repos
+prescrit par un medecin, n'est pas un manque de regularite et ne doit
+jamais etre lu comme tel. Trois consequences :
+  - une semaine touchee par une pause sort de l'observance : la fenetre
+    regarde les semaines d'avant, celles ou l'on pouvait courir ;
+  - pendant la pause, la matrice est suspendue et les semaines restantes
+    sont reecrites a zero (repos) ;
+  - apres la pause, la reprise repart de ce qui etait couru AVANT
+    (50 %, 75 %, puis 100 %), sans intensite les trois premieres semaines,
+    puis remonte de 10 % par semaine jusqu'a rejoindre le plan. Une course
+    ou un test arrete la remontee : on ne reecrit jamais une course.
 """
 
+import json
+import os
 from datetime import date, timedelta
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PAUSES = os.path.join(ROOT, "data", "pauses.json")
 
 # ---------------------------------------------------------------- reglages
 SEMAINES_REGARDEES = 3      # fenetre d'observance, en semaines terminees
@@ -26,6 +43,11 @@ MINI_JOURS_VFC = 14         # reference glissante de la VFC et de la FC de repos
 
 # Types de semaine que l'adaptation ne touche jamais.
 INTOUCHABLES = {"COURSE", "TEST"}
+
+# Reprise apres une pause : part de la base d'avant, semaine par semaine.
+# Trois semaines sans intensite, puis la remontee a +RAMPE_MAX par semaine.
+REPRISE = (.50, .75, 1.00)
+REMONTEE_MAX = 8            # semaines reecrites au plus apres une pause
 
 # La matrice. Cle : (observance, cout) -> (facteur, action, phrase).
 MATRICE = {
@@ -71,20 +93,25 @@ def _lin(x, x0, y0, x1, y1):
 
 
 # ============================================================== observance
-def observance(metrics, plan, aujourd_hui):
+def observance(metrics, plan, aujourd_hui, exclues=frozenset(), cibles=None):
     """Ce qui a ete fait, sur les dernieres semaines TERMINEES.
 
     La semaine en cours ne compte pas : la juger a mi-parcours reviendrait a
-    sanctionner un mardi.
+    sanctionner un mardi. Une semaine de `exclues` (touchee par une pause)
+    reste listee, marquee "pause", mais n'entre pas dans la fenetre : la
+    fenetre remonte aux semaines d'avant. `cibles` remplace le volume prevu
+    des semaines de reprise : on juge une reprise sur ce qu'elle demandait,
+    pas sur le plan d'avant l'arret.
     """
     faites = metrics.get("semaines") or {}
+    cibles = cibles or {}
     lignes = []
     for w in plan["semaines"]:
         fin = date.fromisoformat(w["dimanche"])
         if fin >= aujourd_hui:
             continue
         reel = faites.get(str(w["semaine"]), {})
-        prevu_km = w["volume_km"] or 0
+        prevu_km = cibles.get(w["semaine"], w["volume_km"]) or 0
         prevu_seances = sum(1 for x in (w.get("seance1_min"), w.get("seance2_min")) if x) + 1
         lignes.append({
             "semaine": w["semaine"],
@@ -95,9 +122,10 @@ def observance(metrics, plan, aujourd_hui):
             "renfo_prevu": 2,
             "renfo_fait": reel.get("renfo_seances", 0),
             "ratio": round(reel.get("km", 0) / prevu_km, 3) if prevu_km else None,
+            "pause": w["semaine"] in exclues,
         })
 
-    recentes = lignes[-SEMAINES_REGARDEES:]
+    recentes = [l for l in lignes if not l["pause"]][-SEMAINES_REGARDEES:]
     km_p = sum(l["km_prevu"] for l in recentes)
     km_f = sum(l["km_fait"] for l in recentes)
     s_p = sum(l["seances_prevues"] for l in recentes)
@@ -196,6 +224,91 @@ def cout(metrics, plan, aujourd_hui):
     }
 
 
+# ================================================================= pauses
+def charge_pauses(chemin=PAUSES):
+    """Les pauses declarees, triees. Liste vide si le fichier manque."""
+    if not os.path.exists(chemin):
+        return []
+    with open(chemin, encoding="utf-8") as fh:
+        brut = json.load(fh) or {}
+    out = []
+    for p in brut.get("pauses") or []:
+        d, f = date.fromisoformat(p["debut"]), date.fromisoformat(p["fin"])
+        if f < d:
+            raise ValueError("Pause du %s : la fin precede le debut." % p["debut"])
+        out.append(dict(p, motif=p.get("motif") or "medical"))
+    return sorted(out, key=lambda p: p["debut"])
+
+
+def _jours_en_pause(w, p):
+    """Nombre de jours de la semaine `w` couverts par la pause `p`."""
+    lundi, dimanche = date.fromisoformat(w["lundi"]), date.fromisoformat(w["dimanche"])
+    d = max(lundi, date.fromisoformat(p["debut"]))
+    f = min(dimanche, date.fromisoformat(p["fin"]))
+    return max(0, (f - d).days + 1)
+
+
+def pause_du_jour(pauses, jour):
+    """La pause en cours ce jour-la, ou None."""
+    j = jour.isoformat()
+    return next((p for p in pauses if p["debut"] <= j <= p["fin"]), None)
+
+
+def plan_pauses(plan, metrics, pauses):
+    """Ce que chaque pause fait au plan.
+
+    Renvoie (touchees, reprise, detail) :
+      - touchees : {semaine: jours en pause}, pour toute semaine touchee ;
+      - reprise  : {semaine: {"volume", "phase"}}, le volume vise apres une
+        pause, "reprise" sans intensite puis "remontee" ;
+      - detail   : une entree par pause, pour la page et le bilan.
+    """
+    faites = metrics.get("semaines") or {}
+    S = plan["semaines"]
+    touchees = {}
+    for p in pauses:
+        for w in S:
+            n = _jours_en_pause(w, p)
+            if n:
+                touchees[w["semaine"]] = touchees.get(w["semaine"], 0) + n
+
+    reprise, detail = {}, []
+    for p in pauses:
+        debut, fin = date.fromisoformat(p["debut"]), date.fromisoformat(p["fin"])
+        # La base : ce qui etait vraiment couru avant l'arret, sur les
+        # dernieres semaines pleines qu'aucune pause n'a touchees.
+        avant = [w for w in S if date.fromisoformat(w["dimanche"]) < debut
+                 and w["semaine"] not in touchees][-SEMAINES_REGARDEES:]
+        base = (round(sum((faites.get(str(w["semaine"])) or {}).get("km", 0)
+                          for w in avant) / len(avant), 1) if avant else None)
+        precedent, celle_ci = None, {}
+        for i, w in enumerate([w for w in S if date.fromisoformat(w["lundi"]) > fin]
+                              [:REMONTEE_MAX]):
+            if (w.get("type") in INTOUCHABLES or w.get("course")
+                    or w["semaine"] >= 25 or w["semaine"] in touchees):
+                break
+            if i < len(REPRISE):
+                vise = REPRISE[i] * (base if base else w["volume_km"])
+            else:
+                vise = precedent * (1 + RAMPE_MAX)
+            vise = round(min(vise, w["volume_km"]), 1)
+            if i >= len(REPRISE) and vise >= w["volume_km"] - .3:
+                break                           # le plan est rejoint
+            celle_ci[w["semaine"]] = {"volume": vise,
+                                      "phase": "reprise" if i < len(REPRISE) else "remontee"}
+            precedent = vise
+        reprise.update(celle_ci)                # une pause plus recente l'emporte
+        detail.append({
+            "debut": p["debut"], "fin": p["fin"], "motif": p["motif"],
+            "libelle": p.get("libelle") or "Pause",
+            "consigne": p.get("consigne"),
+            "semaines": sorted(w["semaine"] for w in S if _jours_en_pause(w, p)),
+            "base_avant_km": base,
+            "reprise": [dict(semaine=k, **v) for k, v in sorted(celle_ci.items())],
+        })
+    return touchees, reprise, detail
+
+
 # =============================================================== decision
 def decide(obs, ct):
     """La matrice, puis les garde-fous."""
@@ -260,10 +373,63 @@ def _reecrit(w, facteur, base_km, plafond_km):
     return longue, m1, m2, total
 
 
-def applique(plan, metrics, aujourd_hui=None):
+JOURS_FR = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
+MOIS_FR = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+           "août", "septembre", "octobre", "novembre", "décembre")
+
+
+def _date_fr(iso):
+    d = date.fromisoformat(iso)
+    return "%s %d %s" % (JOURS_FR[d.weekday()], d.day, MOIS_FR[d.month - 1])
+
+
+def _reecritures_pauses(plan, touchees, reprise, pauses):
+    """Les semaines reecrites par les pauses, passees comprises.
+
+    Passees comprises parce que l'observance d'une semaine de reprise deja
+    courue se juge sur sa cible de reprise, pas sur le plan d'avant l'arret.
+    """
+    out = {}
+    for w in plan["semaines"]:
+        n = w["semaine"]
+        if n in touchees:
+            libres = max(0, 7 - touchees[n])
+            if libres:
+                longue, m1, m2, total = _reecrit(w, libres / 7, None, w["volume_km"])
+            else:
+                longue, m1, m2, total = 0, 0, 0, 0
+            motif = "pause"
+        elif n in reprise:
+            k = reprise[n]["volume"] / w["volume_km"] if w["volume_km"] else 1
+            longue, m1, m2, total = _reecrit(w, min(1.0, k), None, w["volume_km"])
+            motif = reprise[n]["phase"]
+        else:
+            continue
+        p = next((p for p in pauses if _jours_en_pause(w, p)), None)
+        out[n] = {
+            "semaine": n, "motif": motif,
+            "volume_origine": w["volume_km"], "volume_adapte": total,
+            "longue_origine": w["sortie_longue_km"], "longue_adapte": longue,
+            "seance1_origine": w.get("seance1_min"), "seance1_adapte": m1 or None,
+            "seance2_origine": w.get("seance2_min"), "seance2_adapte": m2 or None,
+            # Trois semaines de reprise sans fractionne ni allure specifique.
+            "sans_qualite": motif in ("pause", "reprise"),
+            "jours_en_pause": touchees.get(n, 0),
+            "libelle": p.get("libelle") if p else None,
+        }
+    return out
+
+
+def applique(plan, metrics, aujourd_hui=None, pauses=None):
     """Produit le plan adapte, la decision, et la trace de ce qui a bouge."""
     aujourd_hui = aujourd_hui or date.today()
-    obs = observance(metrics, plan, aujourd_hui)
+    pauses = charge_pauses() if pauses is None else pauses
+    touchees, reprise, detail = plan_pauses(plan, metrics, pauses)
+    reecrites = _reecritures_pauses(plan, touchees, reprise, pauses)
+    cibles = {n: e["volume_adapte"] for n, e in reecrites.items() if e["motif"] != "pause"}
+
+    obs = observance(metrics, plan, aujourd_hui, exclues=frozenset(touchees),
+                     cibles=cibles)
     ct = cout(metrics, plan, aujourd_hui)
     dec = decide(obs, ct)
 
@@ -273,10 +439,43 @@ def applique(plan, metrics, aujourd_hui=None):
             courante = w["semaine"]
             break
 
-    ajustees = []
+    # Une pause, puis sa reprise, priment sur la matrice : on ne juge pas la
+    # regularite de quelqu'un a qui on a prescrit de ne pas courir.
+    en_pause = pause_du_jour(pauses, aujourd_hui)
+    if en_pause:
+        dec = {"action": "pause", "facteur": 1.0,
+               "raison": "%s jusqu'au %s. Ces jours-là ne comptent pas comme "
+                         "manqués." % (en_pause.get("libelle") or "Pause",
+                                       _date_fr(en_pause["fin"])),
+               "jusqu_au": en_pause["fin"], "consigne": en_pause.get("consigne"),
+               "observance": dec.get("observance"), "cout": dec.get("cout")}
+    elif courante in reprise or courante in touchees:
+        passees = [d for d in detail if d["fin"] < aujourd_hui.isoformat()]
+        base = passees[-1]["base_avant_km"] if passees else None
+        phase = (reprise.get(courante) or {}).get("phase", "reprise")
+        rampe = round(RAMPE_MAX * 100)
+        if phase == "remontee":
+            raison = ("Remontée après le repos : +%d %% par semaine jusqu'à "
+                      "rejoindre le plan, l'intensité revient." % rampe)
+        elif base:
+            raison = ("Retour après le repos : on repart de ce que tu courais "
+                      "avant (%s km par semaine), sans intensité les trois "
+                      "premières semaines, puis +%d %% par semaine."
+                      % (_fr("%.1f", base), rampe))
+        else:
+            raison = ("Retour après le repos : on repart à la moitié du plan, "
+                      "sans intensité, puis +%d %% par semaine." % rampe)
+        dec = {"action": "reprise", "facteur": 1.0, "phase": phase,
+               "raison": raison,
+               "observance": dec.get("observance"), "cout": dec.get("cout")}
+
+    # Les reecritures des pauses, de la semaine en cours a la fin de la reprise.
+    ajustees = [e for n, e in sorted(reecrites.items()) if courante and n >= courante]
+    deja = {e["semaine"] for e in ajustees}
     if dec["facteur"] != 1.0 and courante:
         cibles = [w for w in plan["semaines"]
-                  if courante < w["semaine"] <= courante + SEMAINES_AJUSTEES]
+                  if courante < w["semaine"] <= courante + SEMAINES_AJUSTEES
+                  and w["semaine"] not in deja]
         base = obs["base_km"]
         for w in cibles:
             if w.get("type") in INTOUCHABLES or w.get("course"):
@@ -289,7 +488,7 @@ def applique(plan, metrics, aujourd_hui=None):
             if abs(total - avant) < .3:
                 continue
             ajustees.append({
-                "semaine": w["semaine"],
+                "semaine": w["semaine"], "motif": "matrice",
                 "volume_origine": avant, "volume_adapte": total,
                 "longue_origine": w["sortie_longue_km"], "longue_adapte": longue,
                 "seance1_origine": w.get("seance1_min"), "seance1_adapte": m1 or None,
@@ -299,6 +498,7 @@ def applique(plan, metrics, aujourd_hui=None):
             # d'ambition, et l'ecart voyage dans semaines_ajustees. La page
             # applique l'ajustement a l'affichage, en gardant l'origine a cote.
             base = total                        # la rampe s'enchaine de proche en proche
+        ajustees.sort(key=lambda e: e["semaine"])
 
     return {
         "semaine_courante": courante,
@@ -306,6 +506,12 @@ def applique(plan, metrics, aujourd_hui=None):
         "cout": ct,
         "decision": dec,
         "semaines_ajustees": ajustees,
+        # Toutes les semaines reecrites par une pause, passees comprises : la
+        # page en a besoin pour dessiner le repos et la reprise sur le ruban.
+        "pauses": [dict(d, reecrites=[reecrites[n] for n in sorted(reecrites)
+                                      if n in d["semaines"]
+                                      or n in {r["semaine"] for r in d["reprise"]}])
+                   for d in detail],
         "reglages": {"rampe_max_pct": round(RAMPE_MAX * 100),
                      "fenetre_semaines": SEMAINES_REGARDEES,
                      "horizon_semaines": SEMAINES_AJUSTEES,

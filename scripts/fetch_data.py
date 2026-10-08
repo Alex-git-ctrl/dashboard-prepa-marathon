@@ -401,7 +401,7 @@ def main():
     # ---- Alertes ----
     plan = PLAN
     sem_courante = (today - S1).days // 7 + 1
-    metrics["alertes"] = alerts.compute(metrics, plan, sem_courante)
+    metrics["alertes"] = alerts.compute(metrics, plan, sem_courante, today)
 
     with open(os.path.join(ROOT, "docs", "metrics.json"), "w", encoding="utf-8") as fh:
         json.dump(metrics, fh, indent=2, ensure_ascii=False)

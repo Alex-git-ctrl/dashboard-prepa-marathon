@@ -147,9 +147,39 @@ le calendrier de quelqu'un doit rester un geste volontaire.
   (booléen vs chaîne), la comparaison peut être fausse dans les deux sens, ce
   qui produirait une "panne muette" (le job passe au vert, rien ne part sur
   la montre). Ne pas revenir en arrière là-dessus.
+- **Changer le logo** : redessiner `docs/favicon.svg` et
+  `docs/icons/icone-pleine.svg`, régénérer les PNG de `docs/icons/`, puis
+  incrémenter `VERSION_ICONES` dans `build_site.py`. Sans ce numéro, l'onglet,
+  l'écran d'accueil et l'app installée gardent l'ancienne icône en cache.
 - **Cron GitHub Actions décalé** : les horaires `7h13`/`21h17` (au lieu de
   7h/21h) sont volontaires, pour limiter (pas supprimer) le retard que
   GitHub applique aux crons programmés sur les petits dépôts peu actifs.
+
+## Pauses : blessure, repos médical (`data/pauses.json`)
+
+Un arrêt déclaré n'est jamais lu comme un manque de régularité. Le fichier
+`data/pauses.json` (commité, lu par `adaptation.py` à chaque collecte, y
+compris dans Actions) liste les pauses : début et fin inclus, un libellé, une
+consigne. Jamais de diagnostic dedans : le dépôt est public.
+
+Ce que fait une pause :
+- les semaines touchées sortent de l'observance (la fenêtre remonte aux
+  semaines d'avant) et de la règle de charge d'`alerts.py` ;
+- pendant la pause, la décision vaut `pause`, la matrice est suspendue, les
+  semaines entièrement couvertes sont réécrites à 0 km et n'ont aucune séance
+  dans le programme (donc rien ne part vers Garmin) ;
+- après, `reprise` : 50 %, 75 %, puis 100 % de la base courue avant l'arrêt,
+  sans fractionné ni finale à allure ; puis `remontee` à +10 % par semaine
+  jusqu'à rejoindre le plan. Une course ou un test arrête la remontée ;
+- une alerte `info` annonce le repos (la page ne la compte pas comme une
+  alerte), une alerte `attention` signale une sortie enregistrée pendant le
+  repos, et une semaine de reprise se juge sur sa cible (alerte au-delà de
+  +20 %) ;
+- `bilan.py` reçoit les pauses, et sa consigne lui interdit de reprocher une
+  semaine de repos.
+
+Historique : repos médical prescrit du 04/10/2026 au 18/10/2026 (semaines 4
+à 6, déclaré le 08/10/2026), reprise à partir du lundi 19/10/2026.
 
 ## En local
 

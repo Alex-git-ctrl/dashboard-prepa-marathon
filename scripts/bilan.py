@@ -108,6 +108,16 @@ concrète, pour les deux semaines à venir.
 Ces trois derniers champs sont le détail, replié sur la page. Ils étayent \
 "essentiel", ils ne le paraphrasent pas.
 
+LES PAUSES PASSENT AVANT TOUT LE RESTE. Le dossier peut contenir un repos \
+déclaré sous "pauses" (repos prescrit par un médecin, par exemple). Une semaine \
+marquée "pause" n'est JAMAIS un manque de régularité ni de motivation : tu ne \
+la comptes pas comme manquée, tu ne la reproches pas, tu ne dis pas que la \
+forme monte "parce qu'il ne court pas". Pendant un repos, la seule priorité \
+est de le respecter jusqu'au bout. Après, c'est une reprise : tu la juges sur \
+sa cible ("prevu_km" de la semaine, déjà réécrit), jamais sur le plan d'avant \
+l'arrêt, et tu signales si elle va plus vite que prévu. Tu ne poses aucun \
+diagnostic médical.
+
 Le dossier contient tes bilans précédents sous "bilans_precedents". Quand il \
 y en a, "ou_tu_en_es" DOIT dire ce qui a changé depuis le dernier, et \
 "a_changer" doit dire si la priorité que tu avais fixée a été suivie, en \
@@ -156,6 +166,10 @@ def contexte():
     cal = m.get("calibration") or {}
     ad = m.get("adaptation") or {}
     faites = m.get("semaines") or {}
+    # Les semaines reecrites par une pause, avec leur cible : une semaine de
+    # repos se lit "pause", une reprise se juge sur ce qu'elle demandait.
+    pauses = ad.get("pauses") or []
+    reecrites = {e["semaine"]: e for p in pauses for e in p.get("reecrites") or []}
     auj = date.today()
     course = plan["courses"][-1]
 
@@ -165,9 +179,13 @@ def contexte():
         if w["lundi"] > auj.isoformat():
             continue
         f = faites.get(str(w["semaine"])) or {}
+        e = reecrites.get(w["semaine"])
         semaines.append({
             "s": w["semaine"], "bloc": w["bloc"], "type": w["type"],
-            "prevu_km": w["volume_km"], "fait_km": f.get("km", 0),
+            "prevu_km": e["volume_adapte"] if e else w["volume_km"],
+            "pause": bool(e and e["motif"] == "pause"),
+            "reprise": e["motif"] if e and e["motif"] != "pause" else None,
+            "fait_km": f.get("km", 0),
             "seances_faites": f.get("seances", 0),
             "renfo_faits": f.get("renfo_seances", 0),
             "terminee": w["dimanche"] < auj.isoformat(),
@@ -212,6 +230,10 @@ def contexte():
             "cible_marathon": cal.get("cible_marathon"),
         },
         "semaines": semaines,
+        # Une ligne par pause : quelques dizaines d'octets, le dossier reste borne.
+        "pauses": [{k: p.get(k) for k in ("debut", "fin", "libelle", "consigne",
+                                           "semaines", "base_avant_km")}
+                   for p in pauses],
         "observance": ad.get("observance"),
         "cout": ad.get("cout"),
         "decision_du_moteur": ad.get("decision"),

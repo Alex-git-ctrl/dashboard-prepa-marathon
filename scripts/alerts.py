@@ -10,8 +10,14 @@ les trois causes classiques d'echec d'une preparation :
 
 Toutes les regles renvoient None tant qu'il n'y a pas assez de donnees.
 Mieux vaut ne rien dire que dire n'importe quoi sur trois mesures.
+
+Un arret declare (data/pauses.json, lu par adaptation.py) n'est jamais un
+signal de derapage : les semaines qu'il touche sortent de la regle de
+charge, la reprise se juge sur SA cible et non sur le plan d'avant, et une
+alerte d'information dit simplement qu'un repos est en cours.
 """
 
+from datetime import date
 from statistics import mean
 
 NIVEAUX = {"critique": 3, "attention": 2, "info": 1}
@@ -27,18 +33,46 @@ def _serie(wellness, champ, n=None):
     return vals[-n:] if n else vals
 
 
-def charge(semaines, plan_semaines, semaine_courante):
+def charge(semaines, plan_semaines, semaine_courante, exclues=(), cibles=None):
     """Montee de charge : compare la semaine ecoulee aux trois precedentes.
 
     La regle des 10% est une approximation, mais l'ecart au plan est plus
     parlant : si le realise depasse largement le planifie, c'est un choix
     de l'instant, pas une progression construite.
+
+    `exclues` : semaines touchees par une pause, qui ne servent jamais de
+    reference (comparer une reprise a des semaines a zero declencherait
+    l'alerte a chaque retour). `cibles` : volume vise des semaines de
+    reprise, qui remplace le plan d'avant l'arret.
     """
+    cibles = cibles or {}
     faits = {int(k): v["km"] for k, v in semaines.items()}
     precedente = semaine_courante - 1
-    if precedente < 1 or precedente not in faits:
+    if precedente < 1 or precedente not in faits or precedente in exclues:
         return None
-    ref = [faits[n] for n in range(max(1, precedente - 3), precedente) if n in faits]
+
+    if precedente in cibles:
+        # Une semaine de reprise ne se compare qu'a sa cible : la moyenne des
+        # semaines d'avant l'arret n'a plus de sens.
+        vise = cibles[precedente]
+        ecart = (faits[precedente] - vise) / vise * 100 if vise else 0
+        if ecart > 20:
+            return _alerte(
+                "critique", "Reprise plus rapide que prévu",
+                f"Semaine {precedente} : {faits[precedente]:.0f} km pour "
+                f"{vise:.0f} km visés, soit {ecart:+.0f} %.",
+                "Après un arrêt, c'est la semaine trop ambitieuse qui fait "
+                "rechuter. Reviens à la cible, même si tu te sens bien.")
+        if ecart > 10:
+            return _alerte(
+                "attention", "Reprise un peu au-dessus de la cible",
+                f"Semaine {precedente} : {faits[precedente]:.0f} km pour "
+                f"{vise:.0f} km visés.",
+                "Tiens la cible de cette semaine et note la moindre gêne.")
+        return None
+
+    ref = [faits[n] for n in range(max(1, precedente - 3), precedente)
+           if n in faits and n not in exclues]
     if len(ref) < 2:
         return None
     base = mean(ref)
@@ -106,8 +140,11 @@ def derive_cardiaque(derives):
     return None
 
 
-def variabilite(wellness):
-    """VFC : la valeur brute ne dit rien, seul l'ecart a la reference compte."""
+def variabilite(wellness, en_pause=False):
+    """VFC : la valeur brute ne dit rien, seul l'ecart a la reference compte.
+
+    Pendant un repos prescrit, conseiller "deux jours de repos" n'a pas de
+    sens : le conseil renvoie alors vers le medecin."""
     vals = _serie(wellness, "hrv")
     if len(vals) < 14:
         return None
@@ -122,6 +159,8 @@ def variabilite(wellness):
             "critique", "Variabilité cardiaque en net recul",
             f"Moyenne sur 7 jours à {recent:.0f} ms, contre {base:.0f} ms "
             f"de référence, soit {ecart:+.0f} %.",
+            "Tu es déjà au repos : si la baisse dure, signale-la au médecin "
+            "au moment du contrôle." if en_pause else
             "Ton système nerveux ne récupère plus. Deux jours faciles ou de "
             "repos complet, avant que ça ne devienne une blessure ou un virus.")
     if ecart < -8:
@@ -134,7 +173,7 @@ def variabilite(wellness):
     return None
 
 
-def fc_repos(wellness):
+def fc_repos(wellness, en_pause=False):
     vals = _serie(wellness, "fc_repos")
     if len(vals) < 14:
         return None
@@ -145,6 +184,8 @@ def fc_repos(wellness):
             "attention", "FC de repos élevée",
             f"Moyenne sur 7 jours à {recent:.0f} bpm, contre {base:.0f} bpm "
             f"de référence.",
+            "Tu es déjà au repos : si elle reste haute, parles-en au médecin, "
+            "une inflammation peut aussi la faire monter." if en_pause else
             "Une hausse de 5 bpm ou plus signale une fatigue, un manque de "
             "sommeil ou un début d'infection. Croisée avec une VFC en baisse, "
             "elle demande du repos.")
@@ -186,13 +227,77 @@ def rpe(journal):
     return None
 
 
-def compute(metrics, plan, semaine_courante):
+MOIS = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+        "août", "septembre", "octobre", "novembre", "décembre")
+JOURS = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
+
+
+def _jour(iso):
+    d = date.fromisoformat(iso)
+    return "%s %d %s" % (JOURS[d.weekday()], d.day, MOIS[d.month - 1])
+
+
+def repos(pauses, seances, aujourd_hui, semaine_courante):
+    """Le repos declare : une information pendant, une vigilance apres.
+
+    Ce n'est pas une alerte de derapage. Elle dit que l'absence de seances
+    est voulue, pour que rien d'autre sur la page ne la lise comme un
+    relachement. Seule exception : une sortie enregistree pendant le repos.
+    """
+    j = aujourd_hui.isoformat()
+    for p in pauses:
+        if p["debut"] <= j <= p["fin"]:
+            courues = [s for s in seances
+                       if p["debut"] <= s["date"] <= j and (s.get("km") or 0) > 0]
+            if courues:
+                s = courues[-1]
+                km = ("%.1f" % s["km"]).replace(".", ",")
+                combien = ("Une sortie" if len(courues) == 1
+                           else "%d sorties" % len(courues))
+                return _alerte(
+                    "attention", "Sortie pendant le repos prescrit",
+                    f"{combien} depuis le {_jour(p['debut'])}, la dernière le "
+                    f"{_jour(s['date'])} ({km} km). Le repos court jusqu'au "
+                    f"{_jour(p['fin'])}.",
+                    "Une inflammation qu'on fait travailler guérit plus "
+                    "lentement. Mieux vaut perdre une semaine maintenant qu'un "
+                    "mois en décembre.")
+            return _alerte(
+                "info", p.get("libelle") or "Repos en cours",
+                f"Jusqu'au {_jour(p['fin'])}. Les jours de repos ne comptent "
+                f"pas comme manqués, et le plan reprend ensuite en douceur.",
+                (p["consigne"] + " " if p.get("consigne") else "")
+                + "Si la douleur est encore là à la fin du repos, on décale "
+                "la reprise plutôt que de la forcer.")
+    for p in pauses:
+        douces = [r["semaine"] for r in p.get("reprise") or []
+                  if r["phase"] == "reprise"]
+        if j > p["fin"] and semaine_courante in douces:
+            return _alerte(
+                "info", "Reprise après le repos",
+                f"Pas d'intensité jusqu'à la semaine {max(douces)}, puis le "
+                f"volume remonte de 10 % par semaine jusqu'à rejoindre le plan.",
+                "Tout en endurance fondamentale. À la moindre douleur, tu "
+                "t'arrêtes et tu rentres en marchant.")
+    return None
+
+
+def compute(metrics, plan, semaine_courante, aujourd_hui=None):
     """Applique toutes les regles et renvoie les alertes, plus graves d'abord."""
+    aujourd_hui = aujourd_hui or date.today()
+    pauses = (metrics.get("adaptation") or {}).get("pauses") or []
+    exclues = {n for p in pauses for n in p["semaines"]}
+    cibles = {e["semaine"]: e["volume_adapte"] for p in pauses
+              for e in p.get("reecrites") or [] if e["motif"] != "pause"}
+    j = aujourd_hui.isoformat()
+    en_pause = any(p["debut"] <= j <= p["fin"] for p in pauses)
     out = [
-        charge(metrics["semaines"], plan["semaines"], semaine_courante),
+        repos(pauses, metrics.get("seances") or [], aujourd_hui, semaine_courante),
+        charge(metrics["semaines"], plan["semaines"], semaine_courante,
+               exclues, cibles),
         derive_cardiaque(metrics["derives"]),
-        variabilite(metrics["wellness"]),
-        fc_repos(metrics["wellness"]),
+        variabilite(metrics["wellness"], en_pause),
+        fc_repos(metrics["wellness"], en_pause),
         douleurs(metrics["journal"]),
         rpe(metrics["journal"]),
     ]

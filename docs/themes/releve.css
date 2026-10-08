@@ -1209,3 +1209,13 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   padding:var(--s3) 0 var(--s4)}
 .pt:hover{transform:none;box-shadow:none}
 .pt:hover .pt-k{color:var(--encre)}
+
+/* ---------- ajout du 08/10/2026 : le logo dans l'en-tete, le repos ---------- */
+.top-g{display:flex;align-items:center;gap:var(--s2);min-width:0}
+.top-logo{display:block;flex-shrink:0;border-radius:7px}
+/* Une semaine de repos dans la carte d'adaptation : listee, hors calcul. */
+.ad-wp{display:block;font-size:var(--t1);color:var(--acier);text-align:center;
+  border:1.5px dashed var(--filet);border-radius:999px;padding:2px 8px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Pendant un repos et sa reprise, la grille est suspendue : elle reste lisible, en retrait. */
+.ad-mx-off{opacity:.45}

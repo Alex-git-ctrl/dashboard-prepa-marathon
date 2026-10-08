@@ -4,7 +4,16 @@ __THEME__
 
 <header class="top">
   <div class="top-in">
-    <span class="top-t" id="topt">Aujourd'hui</span>
+    <span class="top-g"><svg class="top-logo" viewBox="0 0 100 100" width="26" height="26"
+      aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1d1d1f"/><g
+      fill="#2997ff"><path d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z"/><path
+      d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(90 50 50)"/><path
+      d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(180 50 50)"/><path
+      d="M50 50A21 21 0 0 1 50 20A21 21 0 0 1 50 50Z" transform="rotate(270 50 50)"/></g><g
+      fill="#636366"><circle cx="67.68" cy="32.32" r="4.2"/><circle cx="67.68" cy="67.68"
+      r="4.2"/><circle cx="32.32" cy="67.68" r="4.2"/><circle cx="32.32" cy="32.32"
+      r="4.2"/></g><circle cx="50" cy="50" r="5.2" fill="#fff"/></svg><span
+      class="top-t" id="topt">Aujourd'hui</span></span>
     <span class="fresh" id="fresh"></span>
   </div>
 </header>
@@ -149,6 +158,27 @@ const W1 = new Date(PLAN.semaines[0].lundi + 'T12:00:00');
 const cur = Math.floor((today - W1) / 6048e5) + 1;
 const nowW = PLAN.semaines.find(w => w.semaine === cur) || PLAN.semaines[0];
 const A = M.actuel, D = M.dates || {}, wl = M.wellness, AL = M.alertes || [];
+/* Les semaines reecrites, en tete du script : le ruban de l'accueil les lit
+   des son premier rendu. ADAPT porte la semaine en cours et les suivantes
+   (adaptation et pauses), REPOS toutes les semaines qu'une pause a
+   reecrites, passees comprises. Une pause est un repos DECLARE
+   (data/pauses.json) : la page ne le lit jamais comme un relachement. */
+const ADAPT = {};
+(((M.adaptation || {}).semaines_ajustees) || []).forEach(a => { ADAPT[a.semaine] = a; });
+const PAUSES = (M.adaptation || {}).pauses || [];
+const REPOS = {};
+PAUSES.forEach(p => (p.reecrites || []).forEach(e => { REPOS[e.semaine] = e; }));
+const pauseAuj = PAUSES.find(p => p.debut <= iso(today) && iso(today) <= p.fin);
+/** La reecriture d'une semaine, qu'elle vienne de l'adaptation ou d'une pause. */
+const reecrite = n => ADAPT[n] || REPOS[n];
+/** Une semaine entierement couverte par un repos. */
+const auRepos = n => { const e = reecrite(n);
+  return !!(e && e.motif === 'pause' && e.jours_en_pause >= 7); };
+/** Le lendemain de la fin d'un repos : le jour ou l'on peut recourir. */
+const lendemain = s => { const d = new Date(s + 'T12:00:00');
+  d.setDate(d.getDate() + 1); return iso(d); };
+const MOTIF = {pause:'Repos médical', reprise:'Reprise sans intensité',
+  remontee:'Remontée progressive'};
 const RACE = {dix:'10K', semi:'SEMI', marathon:'BCN'};
 const CAL = M.calibration;
 const allure = sec => sec == null ? null
@@ -416,10 +446,22 @@ $('lede').textContent = cur < 1
   Object.entries(M.semaines).forEach(([k, v]) => { done[+k] = v.km; });
   let s = '';
   W.forEach((w, i) => {
-    const x = i * step + off, h = Math.max(3, (w.volume_km / mx) * H), y = T + H - h;
     const ici = w.semaine === cur;
-    s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw}"
-      height="${h.toFixed(1)}" rx="2.5" fill="${ici ? 'var(--volt)' : gc[w.bloc]}"
+    // Une semaine reecrite par une pause montre ce qui est vraiment demande ;
+    // le plan d'origine reste en pointille au-dessus, pour voir l'ecart.
+    const e = reecrite(w.semaine);
+    const vp = e ? e.volume_adapte : w.volume_km;
+    const x = i * step + off, h = Math.max(3, (vp / mx) * H), y = T + H - h;
+    const col = ici ? 'var(--volt)' : gc[w.bloc];
+    if (e && e.motif !== 'matrice' && vp < w.volume_km - .3) {
+      const ho = Math.max(3, (w.volume_km / mx) * H);
+      s += `<rect x="${(x + .7).toFixed(1)}" y="${(T + H - ho).toFixed(1)}"
+        width="${bw - 1.4}" height="${(ho - .7).toFixed(1)}" rx="2.5" fill="none"
+        stroke="${col}" stroke-width="1.4" stroke-dasharray="3 3"
+        opacity="${ici ? .95 : .7}"/>`;
+    }
+    if (!auRepos(w.semaine)) s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw}"
+      height="${h.toFixed(1)}" rx="2.5" fill="${col}"
       opacity="${ici ? 1 : w.semaine < cur ? .95 : .58}"/>`;
     const r = done[w.semaine];
     if (r) { const rh = Math.max(2, (r / mx) * H);
@@ -455,6 +497,8 @@ $('lede').textContent = cur < 1
       <span><i style="background:var(--mesure)"></i>Réalisé</span>
       <span><i style="background:var(--effort);border-radius:50%"></i>Course</span>
       <span>Bloc 1 → 5</span>
+      ${PAUSES.length ? '<span><i style="background:none;border:1.5px dashed '
+        + 'var(--sur-bitume-faible)"></i>Plan d’avant le repos</span>' : ''}
       <span class="rlg-h">Survole ou touche une semaine : prévu et réalisé</span></div></div>`;
   const rb = document.querySelector('.ruban');
   if (rb) rb.scrollLeft = Math.max(0, (cur - 1) / n * rb.scrollWidth - rb.clientWidth / 2);
@@ -476,7 +520,7 @@ $('lede').textContent = cur < 1
     if (vise) vise.setAttribute('fill-opacity', '0');
     vise = h; h.setAttribute('fill-opacity', '.22');
     const w = W[+h.dataset.i];
-    const ad = ADAPT[w.semaine];
+    const ad = reecrite(w.semaine);
     const prevu = ad ? ad.volume_adapte : w.volume_km;
     const fait = done[w.semaine];
     const passe = w.semaine < cur, ici = w.semaine === cur;
@@ -491,8 +535,12 @@ $('lede').textContent = cur < 1
       + (ad ? ' (au lieu de ' + km1(ad.volume_origine) + ')' : ''));
     if (ici && prevu > (fait || 0)) t += ligneTip('var(--volt)', 'Reste',
       km1(prevu - (fait || 0)) + ' km');
-    t += ligneTip(null, 'Sortie longue', km1(w.sortie_longue_km) + ' km');
+    if (!auRepos(w.semaine)) t += ligneTip(null, 'Sortie longue',
+      km1(ad ? ad.longue_adapte : w.sortie_longue_km) + ' km');
     if (c) t += ligneTip('var(--effort)', c.nom, c.cible);
+    if (ad && MOTIF[ad.motif]) t += ligneTip('var(--sur-bitume-faible)', MOTIF[ad.motif],
+      ad.motif === 'pause' ? ad.jours_en_pause + (ad.jours_en_pause > 1 ? ' jours' : ' jour')
+        : ad.motif === 'reprise' ? 'endurance' : '+10 % / sem.');
     if (bl) t += '<div class="tip-n">' + bl.nom + ' · ' + bl.desc + '</div>';
     tip.innerHTML = t;
     const r = h.getBoundingClientRect();
@@ -639,9 +687,14 @@ function scoreFacteurs(box, titre, total, mot, cls, COMP) {
 function calcPreparation() {
   const S = M.sante || {};
   const J = (S.jours || []);
-  const jour = J[J.length - 1];
+  // La derniere nuit MESUREE, pas le dernier jour de la serie : une nuit sans
+  // montre laissait une ligne vide en bout de serie, et le score se croyait
+  // en attente de donnees alors que des semaines de nuits etaient la.
+  const k = J.map(j => ['sommeil_score', 'hrv', 'fc_repos'].some(c => j[c] != null))
+    .lastIndexOf(true);
+  const jour = J[k];
   if (!jour) return {attente:'Se calcule dès la première nuit mesurée.'};
-  const hist = J.slice(0, -1);
+  const hist = J.slice(0, k);
   const moyenne = cle => {
     const v = hist.map(j => j[cle]).filter(x => x != null);
     return v.length >= 3 ? v.reduce((a, b) => a + b, 0) / v.length : null;
@@ -674,7 +727,7 @@ function calcPreparation() {
   const mot = total >= 80 ? 'Excellente' : total >= 60 ? 'Bonne'
     : total >= 40 ? 'Correcte' : 'Faible';
   const cls = total >= 60 ? 'ok' : total >= 40 ? 'no' : 'al';
-  return {COMP, total, mot, cls};
+  return {COMP, total, mot, cls, date:jour.date};
 }
 function scorePreparation(box) {
   const P = calcPreparation();
@@ -725,7 +778,7 @@ function scoreCharge(box) {
   /* --- volume hebdomadaire couru, en tendance --- */
   const sems = Object.keys(M.semaines).map(Number).sort((a, b) => a - b);
   const ptsVol = sems.map(k => ({v:M.semaines[k].km, lbl:'S' + k,
-    partiel:k === cur}));
+    partiel:k === cur || (REPOS[k] && REPOS[k].motif === 'pause')}));
   if (ptsVol.length) {
     html += '<div class="hcard"><div class="hcard-h">'
       + '<i class="hcard-ic" style="color:' + COL_ACTIVITE + '">'
@@ -1818,8 +1871,9 @@ function detailSeance(s) {
     <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${SYM[sym]}</svg></div>
     <div style="min-width:0"><div class="at">${t}</div><div class="ad">${d}</div>
     ${a ? `<div class="aa">${a}</div>` : ''}</div></div>`;
-  if (AL.length) $('alerts').innerHTML = AL.map(a =>
-    b(a.niveau, 'bang', a.titre, a.detail, a.quoi_faire)).join('');
+  if (AL.length) $('alerts').innerHTML = AL.map(a => a.niveau === 'info'
+    ? b('neutre', 'dot', a.titre, a.detail, a.quoi_faire)
+    : b(a.niveau, 'bang', a.titre, a.detail, a.quoi_faire)).join('');
   else if (M.nb_activites >= 3) $('alerts').innerHTML = b('calme', 'check',
     'Rien à signaler', 'Charge, dérive cardiaque et récupération sont dans les '
     + 'clous. Les six règles de surveillance ont été vérifiées.', '');
@@ -1854,7 +1908,8 @@ function detailSeance(s) {
       const course = (w.seances || []).some(x => x.course);
       return '<button type="button" data-i="' + i + '" aria-pressed="'
         + (i === 0) + '">S' + w.semaine
-        + (i === 0 ? ' · en cours' : course ? ' · course' : '') + '</button>';
+        + (i === 0 ? ' · en cours' : w.repos ? ' · repos' : course ? ' · course' : '')
+        + '</button>';
     }).join('') + '</div>';
 
   function duree(s) {
@@ -1915,7 +1970,16 @@ function detailSeance(s) {
       d.setDate(d.getDate() + JOURS.indexOf(j));
       return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); };
 
-    $('prog').innerHTML = w.seances.map(s => {
+    // Une semaine de repos n'a pas de seance : une seule carte le dit.
+    const P0 = PAUSES.find(p => p.semaines.includes(w.semaine));
+    if (w.repos) $('prog').innerHTML = '<article class="se se-on"><div class="se-j">'
+      + 'Semaine ' + w.semaine + ' · du ' + dshort(w.lundi) + ' au ' + dshort(w.dimanche)
+      + '</div><div class="se-t">' + ((P0 && P0.libelle) || 'Repos') + '</div>'
+      + '<p class="se-p">' + ((P0 && P0.consigne) || 'Pas de course cette semaine.')
+      + '</p>' + (P0 ? '<p class="se-c">Reprise le ' + dlong(lendemain(P0.fin))
+        + ', tout en endurance. Si la douleur est encore là, on décale la reprise '
+        + 'plutôt que de la forcer.</p>' : '') + '</article>';
+    else $('prog').innerHTML = w.seances.map(s => {
       const ici = i === 0 && s.jour_suggere === auj;
       const rang = s.type === 'renfo'
         ? 'Calisthénie' + (s.phase ? ' · ' + s.phase : '')
@@ -2042,9 +2106,11 @@ function detailSeance(s) {
   dessine(0);
   // La semaine en cours est la premiere : elle est deja visible. On garde
   // le geste au cas ou la bande aurait ete restauree ailleurs.
+  // On centre la bande seule, pas la page : scrollIntoView faisait aussi
+  // defiler la fenetre, et la page s'ouvrait au milieu, sur le programme.
   const actif = $('prog-sem').querySelector('button[aria-pressed="true"]');
-  if (actif && actif.scrollIntoView)
-    actif.scrollIntoView({block: 'nearest', inline: 'center'});
+  if (actif && bande) bande.scrollLeft = Math.max(0,
+    actif.offsetLeft - (bande.clientWidth - actif.offsetWidth) / 2);
 })();
 
 /* ---------- tuiles ---------- */
@@ -2077,7 +2143,6 @@ $('quick').innerHTML = [
    croisement : ce qui a ete fait, et ce que ca a coute. Chaque composante du
    cout montre sa valeur et ses points, pour qu'aucun chiffre ne tombe du ciel.
    Quand les mesures manquent, le bloc le dit au lieu de bluffer. */
-const ADAPT = {};
 const ACTIONS = {
   progresser_fort:['On monte', 'ok'],
   progresser:['On monte', 'ok'],
@@ -2085,8 +2150,9 @@ const ACTIONS = {
   alleger:['On allège', 'al'],
   alleger_fort:['On allège nettement', 'al'],
   attendre:['En attente de mesures', 'no'],
+  pause:['Repos médical', 'no'],
+  reprise:['Reprise progressive', 'no'],
 };
-(((M.adaptation || {}).semaines_ajustees) || []).forEach(a => { ADAPT[a.semaine] = a; });
 
 /* La refonte du 01/10/2026 : la carte se lit en trois temps, sans paragraphe.
    1. La decision, en une ligne et un chiffre (+7 %, =, -10 %).
@@ -2101,6 +2167,8 @@ const FLECHE = {
   egal:'<path d="M5.5 9.5h13M5.5 14.5h13"/>',
   baisse:'<path d="M12 5v14M6 13l6 6 6-6"/>',
   attente:'<circle cx="12" cy="12" r="8.6"/><path d="M12 7.6V12l3 2"/>',
+  pause:'<path d="M9 6.5v11M15 6.5v11"/>',
+  reprise:'<path d="M4 17.5c4.5 0 6.5-2.4 8.2-5.3S15.6 7 20 7"/><path d="M15.6 7H20v4.4"/>',
 };
 /** Le facteur de volume en clair : "+7 %", "=", "-10 %". */
 const varVol = f => Math.abs(f - 1) < .005 ? '='
@@ -2118,7 +2186,12 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
   const D = A.decision, O = A.observance, C = A.cout, R = A.reglages;
   const [mot, cls] = ACTIONS[D.action] || ACTIONS.attendre;
   const att = D.action === 'attendre';
-  const ic = att ? 'attente' : D.facteur > 1 ? 'monte' : D.facteur < 1 ? 'baisse' : 'egal';
+  // Pendant un repos et sa reprise, la matrice est suspendue : la page ne
+  // place personne dans une case "trop de trous" pour un arret prescrit.
+  const susp = D.action === 'pause' || D.action === 'reprise';
+  const ic = susp ? D.action : att ? 'attente'
+    : D.facteur > 1 ? 'monte' : D.facteur < 1 ? 'baisse' : 'egal';
+  const ici = ADAPT[cur];
   const svg = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
 
   // 1. La decision.
@@ -2127,8 +2200,12 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
     + '<span class="ad-dt"><b>' + mot + (ic === 'egal' ? ' le volume' : '')
       + '</b><span>' + D.raison + '</span></span>'
     // Le chiffre seulement quand il bouge : a 1, la fleche "=" le dit deja.
-    + (att || ic === 'egal' ? '' : '<span class="ad-f"><b>' + varVol(D.facteur)
-      + '</b><em>de volume</em></span>')
+    + (D.action === 'pause' ? '<span class="ad-f"><b>' + dshort(D.jusqu_au)
+        + '</b><em>fin du repos</em></span>'
+      : D.action === 'reprise' && ici ? '<span class="ad-f"><b>' + km1(ici.volume_adapte)
+        + ' km</b><em>cette semaine</em></span>'
+      : att || ic === 'egal' ? '' : '<span class="ad-f"><b>' + varVol(D.facteur)
+        + '</b><em>de volume</em></span>')
     + '</div>';
 
   // 2a. Ce qui a ete fait : une barre par semaine, le prevu en creux, le
@@ -2139,14 +2216,20 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
       + 'première semaine.</div>';
   } else {
     const n = O.ratio >= .95 ? 'haute' : O.ratio >= .7 ? 'moyenne' : 'basse';
-    const mx = Math.max(...O.semaines.map(w => Math.max(w.km_prevu, w.km_fait)), 1);
+    // La fenetre, plus les semaines de repos qui l'ont fait reculer : elles
+    // restent visibles, marquees, mais hors du calcul.
+    const vues = O.semaines.filter(w => O.fenetre.includes(w.semaine) || w.pause).slice(-6);
+    const mx = Math.max(...vues.map(w => Math.max(w.km_prevu, w.km_fait)), 1);
     const pts = (f, p) => Array.from({length:Math.max(f, p)}, (_, i) =>
       '<i class="' + (i < f ? 'on' : '') + '"></i>').join('');
     h += '<div class="ad-big">' + Math.round(O.ratio * 100) + '<em> %</em>'
       + '<span class="ad-niv ad-' + (n === 'haute' ? 'ok' : n === 'moyenne' ? 'no' : 'al')
       + '">' + NIV_OBS[n] + '</span></div>'
-      + '<div class="ad-ws">' + O.semaines.map(w =>
-        '<div class="ad-w"><span class="ad-wn">S' + w.semaine + '</span>'
+      + '<div class="ad-ws">' + vues.map(w => w.pause
+        ? '<div class="ad-w"><span class="ad-wn">S' + w.semaine + '</span>'
+          + '<span class="ad-wp">Repos médical, hors calcul</span>'
+          + '<span class="ad-wv">' + km1(w.km_fait) + '<em> km</em></span><span></span></div>'
+        : '<div class="ad-w"><span class="ad-wn">S' + w.semaine + '</span>'
         + '<span class="ad-wb" title="' + km1(w.km_fait) + ' km sur '
         + km1(w.km_prevu) + ' prévus"><s style="width:'
         + (w.km_prevu / mx * 100).toFixed(1) + '%"></s><i style="width:'
@@ -2202,7 +2285,13 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
       ['eleve', 'Élevé', 'plus de 60']];
     const effet = f => Math.abs(f - 1) < .005 ? 'kilométrage inchangé'
       : varVol(f) + ' de kilométrage';
-    const lecture = att || !D.observance || !D.cout
+    const lecture = D.action === 'pause'
+      ? 'Repos médical en cours : la grille est suspendue. Les jours de repos ne '
+        + 'comptent pas comme manqués, et ta régularité reste celle d’avant l’arrêt.'
+      : D.action === 'reprise'
+      ? 'Reprise après le repos : la grille reprendra la main une fois le plan '
+        + 'rejoint. D’ici là, chaque semaine se juge sur sa cible de reprise.'
+      : att || !D.observance || !D.cout
       ? 'Pas encore assez de mesures pour te placer dans la grille : le plan '
         + 'd’origine s’applique tel quel.'
       : 'Tes ' + O.fenetre.length + ' dernières semaines : <b>'
@@ -2216,16 +2305,17 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
       + (ici ? '<em>ta case</em>' : '') + '</span>';
     h += '<div class="ad-k ad-k-m">Comment on décide</div>'
       + '<p class="ad-lec">' + lecture + '</p>'
-      + '<div class="ad-mx" role="table" aria-label="Variation du kilométrage selon '
+      + '<div class="ad-mx' + (susp ? ' ad-mx-off' : '') + '" role="table" '
+      + 'aria-label="Variation du kilométrage selon '
       + 'ce que tu as fait et ce que ça t’a coûté">'
       + '<span></span><span class="ad-ax ad-ax-c">Ce que ça t’a coûté →</span>'
       + '<span class="ad-ax">Ce que tu as fait ↓</span>'
-      + Co.map(c => '<span class="ad-mh' + (D.cout === c[0] && !att ? ' on' : '')
+      + Co.map(c => '<span class="ad-mh' + (D.cout === c[0] && !att && !susp ? ' on' : '')
         + '"><b>' + c[1] + '</b><em>' + c[2] + '</em></span>').join('')
-      + L.map(l => '<span class="ad-ml' + (D.observance === l[0] && !att ? ' on' : '')
+      + L.map(l => '<span class="ad-ml' + (D.observance === l[0] && !att && !susp ? ' on' : '')
         + '"><b>' + l[1] + '</b><em>' + l[2] + '</em></span>'
         + Co.map(c => cellule(MX[l[0]][c[0]],
-          !att && D.observance === l[0] && D.cout === c[0])).join('')).join('')
+          !att && !susp && D.observance === l[0] && D.cout === c[0])).join('')).join('')
       + '</div><p class="ad-n">Chaque case : comment évolue le kilométrage des '
       + R.horizon_semaines + ' semaines suivantes.</p>';
   }
@@ -2234,7 +2324,9 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
   if (A.semaines_ajustees.length) {
     h += '<div class="ad-k ad-k-m">Semaines réécrites</div><div class="ad-chips">'
       + A.semaines_ajustees.map(a => '<span><b>S' + a.semaine + '</b>'
-        + km1(a.volume_origine) + ' → ' + km1(a.volume_adapte) + ' km</span>').join('')
+        + (a.motif === 'pause' && a.jours_en_pause >= 7 ? 'repos'
+           : km1(a.volume_origine) + ' → ' + km1(a.volume_adapte) + ' km')
+        + '</span>').join('')
       + '</div>';
   } else if (!att) {
     h += '<p class="ad-n">Aucune semaine réécrite : le plan d’origine convient.</p>';
@@ -2247,7 +2339,8 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
     'Jamais les courses ni l’affûtage',
     '+' + R.rampe_max_pct + ' % maximum par semaine',
     'Pas de rattrapage',
-  ];
+  ].concat(PAUSES.length ? ['Un repos ne compte jamais comme manqué',
+    'Après un repos : 50 %, 75 %, puis 100 % de ton volume d’avant'] : []);
   h += '<div class="ad-gf">' + GARDE.map(g => '<span>' + svg(SYM.check) + g
     + '</span>').join('') + '</div></div>';
 
@@ -2287,9 +2380,14 @@ const IC_POINT = {
     const reste = Math.max(0, prevu - fait);
     const dimanche = today.getDay() === 0;
     const ok = fait >= prevu * .95;
-    T.push({nom:'Cette semaine', ic:IC_SANTE.activite, col:COL_ACTIVITE,
+    if (auRepos(cur)) T.push({nom:'Cette semaine', ic:IC_SANTE.activite,
+      col:COL_ACTIVITE, etat:'neutre', mot:'Repos prescrit', val:'0', unit:'km prévu',
+      sous:pauseAuj ? 'Reprise le ' + dlong(lendemain(pauseAuj.fin)) : 'Semaine de repos',
+      go:['today', 'prog-sem']});
+    else T.push({nom:'Cette semaine', ic:IC_SANTE.activite, col:COL_ACTIVITE,
       etat:ok ? 'ok' : dimanche && fait < prevu * .7 ? 'veille' : 'neutre',
-      mot:ok ? 'Objectif atteint' : dimanche ? 'Dernier jour' : 'En cours',
+      mot:ok ? 'Objectif atteint' : ADAPT[cur] && MOTIF[ADAPT[cur].motif]
+        ? MOTIF[ADAPT[cur].motif] : dimanche ? 'Dernier jour' : 'En cours',
       val:km1(fait), unit:'km sur ' + km1(prevu),
       sous:ok ? 'Le volume prévu est fait' : 'Reste ' + km1(reste) + ' km',
       jauge:prevu ? fait / prevu : null, go:['today', 'prog-sem']});
@@ -2303,10 +2401,15 @@ const IC_POINT = {
       sous:'Première mesure en fin de semaine', go:['plan', 'adapt']});
     else {
       const n = O.ratio >= .95 ? 'haute' : O.ratio >= .7 ? 'moyenne' : 'basse';
+      // Pendant un repos et sa reprise, la regularite est celle d'avant
+      // l'arret : elle s'affiche, mais en neutre, et ne monte pas en tete.
+      const susp = ['pause', 'reprise'].includes((ad.decision || {}).action);
       T.push({nom:'Régularité', ic:IC_POINT.calendrier, col:COL_SCORE,
-        etat:n === 'haute' ? 'ok' : n === 'moyenne' ? 'veille' : 'al', mot:NIV_OBS[n],
+        etat:susp ? 'neutre' : n === 'haute' ? 'ok' : n === 'moyenne' ? 'veille' : 'al',
+        mot:NIV_OBS[n],
         val:Math.round(O.ratio * 100), unit:'% du plan',
-        sous:O.seances_faites + ' séances sur ' + O.seances_prevues + ', '
+        sous:susp ? 'Mesurée avant le repos, S' + O.fenetre.join(', S')
+          : O.seances_faites + ' séances sur ' + O.seances_prevues + ', '
           + O.fenetre.length + ' dernières semaines',
         jauge:O.ratio, go:['plan', 'adapt']});
     }
@@ -2322,7 +2425,8 @@ const IC_POINT = {
     T.push({nom:'Récupération', ic:IC_SANTE.lune, col:COL_SOMMEIL,
       etat:P.cls === 'ok' ? 'ok' : P.cls === 'no' ? 'veille' : 'al', mot:P.mot,
       val:P.total, unit:'/100',
-      sous:P.total >= 60 ? 'Nuit et cœur dans ta norme'
+      sous:jrs(P.date) < -1 ? 'Dernière nuit mesurée : ' + dshort(P.date)
+        : P.total >= 60 ? 'Nuit et cœur dans ta norme'
         : 'Freinée par : ' + faible.nom.toLowerCase() + ' (' + faible.valeur + ')',
       jauge:P.total / 100, go:['sante']});
   }
@@ -2339,19 +2443,25 @@ const IC_POINT = {
   }
 
   // La surveillance : les six regles d'alerte.
-  const crit = AL.filter(a => a.niveau === 'critique').length;
+  // Une information (le repos en cours) n'est pas une alerte.
+  const AV = AL.filter(a => a.niveau !== 'info');
+  const crit = AV.filter(a => a.niveau === 'critique').length;
   T.push({nom:'Surveillance', ic:IC_POINT.oeil, col:'var(--acier)',
-    etat:crit ? 'al' : AL.length ? 'veille' : M.nb_activites >= 3 ? 'ok' : 'neutre',
-    mot:AL.length ? (crit ? 'Alerte' : 'À surveiller')
+    etat:crit ? 'al' : AV.length ? 'veille' : M.nb_activites >= 3 ? 'ok' : 'neutre',
+    mot:AV.length ? (crit ? 'Alerte' : 'À surveiller')
       : M.nb_activites >= 3 ? 'Rien à signaler' : 'En veille',
-    val:AL.length || '0', unit:AL.length > 1 ? 'alertes' : 'alerte',
-    sous:AL.length ? AL[0].titre : M.nb_activites >= 3 ? 'Six règles vérifiées'
+    val:AV.length || '0', unit:AV.length > 1 ? 'alertes' : 'alerte',
+    sous:AV.length ? AV[0].titre : M.nb_activites >= 3 ? 'Six règles vérifiées'
       : 'S’active avec les premières sorties', go:['today', 'alerts']});
 
   // La phrase de tete : rien ne va mal, ou ce qui coince, par gravite.
   const rouges = T.filter(t => t.etat === 'al'), oranges = T.filter(t => t.etat === 'veille');
   const coince = rouges.concat(oranges).map(t => t.nom.toLowerCase());
-  const tete = !coince.length
+  const tete = pauseAuj
+    ? '<span class="pill">' + (pauseAuj.libelle || 'Repos') + '</span><span class="pt-r">'
+      + 'Jusqu’au ' + dlong(pauseAuj.fin) + '. Rien n’est compté comme manqué.'
+      + (coince.length ? ' À surveiller : ' + coince.join(', ') + '.' : '') + '</span>'
+    : !coince.length
     ? '<span class="pill ok">Tout va bien</span><span class="pt-r">Rien à corriger '
       + 'pour l’instant.</span>'
     : '<span class="pill ' + (rouges.length ? 'al' : 'no') + '">' + coince.length
@@ -2428,14 +2538,27 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
       <span class="nm">${bl.nom}</span><span class="ds">${bl.desc} ·
       S${bl.debut} à ${bl.fin}</span></div>`;
     out += sem.map(w => {
+      // Une semaine reecrite par une pause : sa vraie demande, et une note
+      // qui dit pourquoi, a la place de celle du plan d'origine.
+      const e = reecrite(w.semaine);
+      const motif = e && e.motif === 'pause' && e.jours_en_pause < 7
+        ? 'Repos médical sur ' + e.jours_en_pause
+          + (e.jours_en_pause > 1 ? ' jours' : ' jour')
+        : e && MOTIF[e.motif];
+      const note = motif || w.note;
+      const longue = e ? e.longue_adapte : w.sortie_longue_km;
+      const vise = e ? e.volume_adapte : w.volume_km;
       if (w.semaine === cur) {
         const r = done[w.semaine];
         return `<div class="wk now"><div>
           <div class="ti">Semaine ${w.semaine} · en cours</div>
           <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)} ·
-            sortie longue ${km1(w.sortie_longue_km)} km${w.note ? ' · ' + w.note : ''}</div>
-          <div class="vo">${r ? km1(r) + ' km réalisés sur ' + km1(w.volume_km)
-            : 'objectif ' + km1(w.volume_km) + ' km'}</div></div></div>`;
+            ${auRepos(w.semaine) ? 'pas de course' : 'sortie longue ' + km1(longue) + ' km'}${
+            note ? ' · ' + note : ''}</div>
+          <div class="vo">${auRepos(w.semaine) ? (pauseAuj ? 'reprise le '
+              + dlong(lendemain(pauseAuj.fin)) : 'semaine de repos')
+            : r ? km1(r) + ' km réalisés sur ' + km1(vise)
+            : 'objectif ' + km1(vise) + ' km'}</div></div></div>`;
       }
       const passe = w.semaine < cur;
       const dist = w.semaine - cur;
@@ -2454,13 +2577,14 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
         <div class="no">${w.semaine}</div>
         <div><div class="ti">${w.course ? PLAN.courses.find(c => c.cle === w.course).nom
           : w.type === 'TEST' ? 'Test 30 km'
-          : 'Sortie longue ' + km1(w.sortie_longue_km) + ' km'}</div>
+          : auRepos(w.semaine) ? 'Repos médical'
+          : 'Sortie longue ' + km1(longue) + ' km'}</div>
           <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)}${
-            w.note ? ' · ' + w.note : ''}</div></div>
+            note ? ' · ' + note : ''}</div></div>
         <div class="vo">${r ? `<span class="done" style="width:${larg}px"></span>${km1(r)}`
-          : ''} ${ADAPT[w.semaine]
-            ? `${km1(ADAPT[w.semaine].volume_adapte)}<span class="av"> au lieu de ${
-                km1(ADAPT[w.semaine].volume_origine)}</span>`
+          : ''} ${e
+            ? `${km1(e.volume_adapte)}<span class="av"> au lieu de ${
+                km1(e.volume_origine)}</span>`
             : km1(w.volume_km)} km</div></div>`;
     }).join('');
   });

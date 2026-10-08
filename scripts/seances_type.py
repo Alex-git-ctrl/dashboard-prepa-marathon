@@ -372,7 +372,10 @@ def calisthenie(w):
 
     # La consigne de la semaine, dans l'ordre ou elle prime : une course
     # passe avant l'affutage, qui passe avant une simple decharge.
-    if w.get("type") == "COURSE":
+    if w.get("sans_qualite"):
+        consigne = ("Reprise après le repos : une série de moins à chaque "
+                    "exercice, et rien qui réveille la douleur.")
+    elif w.get("type") == "COURSE":
         consigne = ("Course cette semaine : rien dans les deux jours qui "
                     "la précèdent, rien qui laisse des courbatures.")
     elif affutage:
@@ -583,7 +586,9 @@ def programme(w, calibration, courses):
         out.append(pose(_endurance(s1, zones), JOUR_S1, LIBRE))
 
     s2 = w.get("seance2_min")
-    q = QUALITE.get(w["semaine"])
+    # Une semaine de reprise apres une pause ne garde que l'endurance : ni
+    # fractionne, ni seuil, ni finale a allure specifique.
+    q = None if w.get("sans_qualite") else QUALITE.get(w["semaine"])
     if q and s2 and q["forme"] == "lignes":
         # Des lignes droites ne fatiguent pas : elles peuvent tomber
         # n'importe quel jour, comme une sortie facile.
@@ -603,7 +608,8 @@ def programme(w, calibration, courses):
                         ("ancree", "Date imposée par la course.")))
     else:
         out.append(pose(_longue(w["sortie_longue_km"], zones,
-                                FINALE.get(w["semaine"])), JOUR_LONGUE, LONGUE))
+                                None if w.get("sans_qualite")
+                                else FINALE.get(w["semaine"])), JOUR_LONGUE, LONGUE))
 
     for j, s in zip(JOUR_RENFO, calisthenie(w)):
         out.append(pose(s, j, RENFO_SOUPLESSE))
@@ -640,12 +646,30 @@ def construit(plan, calibration, ajustees, semaine_courante, combien=3):
             eff["seance1_min"] = a["seance1_adapte"]
             eff["seance2_min"] = a["seance2_adapte"]
             eff["volume_km"] = a["volume_adapte"]
+            eff["sans_qualite"] = a.get("sans_qualite", False)
+        motif = (a or {}).get("motif")
+        # Une semaine entierement couverte par un repos n'a aucune seance :
+        # ni course ni renforcement, et rien a envoyer sur la montre.
+        repos = motif == "pause" and (a or {}).get("jours_en_pause", 0) >= 7
+        # La note du plan d'origine ("Premiere sortie longue a 18 km") devient
+        # fausse des qu'une pause a reecrit la semaine : elle est remplacee.
+        note = {
+            "pause": "Repos : pas de course ni de renforcement cette semaine."
+                     if repos else
+                     "Repos sur une partie de la semaine : ne cours pas avant "
+                     "la fin du repos.",
+            "reprise": "Reprise après le repos : tout en endurance "
+                       "fondamentale, et tu t'arrêtes à la moindre douleur.",
+            "remontee": "Remontée progressive après le repos : le volume "
+                        "regagne 10 % par semaine jusqu'à rejoindre le plan.",
+        }.get(motif, w.get("note"))
         out.append({
             "semaine": w["semaine"], "lundi": w["lundi"], "dimanche": w["dimanche"],
-            "bloc": w["bloc"], "note": w.get("note"),
+            "bloc": w["bloc"], "note": note,
             "phase_calisthenie": _phase(w["semaine"])["nom"],
             "phase_quoi": _phase(w["semaine"])["quoi"],
             "volume_km": eff["volume_km"], "adapte": bool(a),
-            "seances": programme(eff, calibration, plan["courses"]),
+            "motif": motif, "repos": repos,
+            "seances": [] if repos else programme(eff, calibration, plan["courses"]),
         })
     return out

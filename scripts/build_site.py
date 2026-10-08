@@ -124,6 +124,11 @@ def metas_couleur(meta):
             'media="(prefers-color-scheme: dark)">' % (clair, sombre))
 
 
+# A incrementer a chaque nouveau dessin du logo : sans ca, l'onglet, l'ecran
+# d'accueil et l'app installee gardent l'ancienne icone en cache.
+VERSION_ICONES = "2"
+
+
 def manifeste(meta):
     """La fiche d'application : ce qui rend la page installable.
 
@@ -148,12 +153,12 @@ def manifeste(meta):
         "background_color": fond,
         "theme_color": fond,
         "icons": [
-            {"src": "icons/icone-192.png", "sizes": "192x192", "type": "image/png",
-             "purpose": "any"},
-            {"src": "icons/icone-512.png", "sizes": "512x512", "type": "image/png",
-             "purpose": "any"},
-            {"src": "icons/icone-masquable-512.png", "sizes": "512x512",
-             "type": "image/png", "purpose": "maskable"},
+            {"src": "icons/icone-192.png?v=" + VERSION_ICONES, "sizes": "192x192",
+             "type": "image/png", "purpose": "any"},
+            {"src": "icons/icone-512.png?v=" + VERSION_ICONES, "sizes": "512x512",
+             "type": "image/png", "purpose": "any"},
+            {"src": "icons/icone-masquable-512.png?v=" + VERSION_ICONES,
+             "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
         ],
     }
 
@@ -164,9 +169,9 @@ SQUELETTE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {couleurs}
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="favicon.svg?v={v}" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest?v={v}">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v={v}">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -234,7 +239,8 @@ def main():
 
     coupe = html.index("<header")
     tete, corps = html[:coupe].strip(), html[coupe:].strip()
-    doc = SQUELETTE.format(couleurs=metas_couleur(meta), tete=tete, corps=corps)
+    doc = SQUELETTE.format(couleurs=metas_couleur(meta), tete=tete, corps=corps,
+                           v=VERSION_ICONES)
     with open(os.path.join(D, "index.html"), "w", encoding="utf-8") as fh:
         fh.write(doc)
 
