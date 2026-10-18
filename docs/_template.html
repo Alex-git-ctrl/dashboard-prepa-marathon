@@ -168,7 +168,12 @@ const ADAPT = {};
 const PAUSES = (M.adaptation || {}).pauses || [];
 const REPOS = {};
 PAUSES.forEach(p => (p.reecrites || []).forEach(e => { REPOS[e.semaine] = e; }));
-const pauseAuj = PAUSES.find(p => p.debut <= iso(today) && iso(today) <= p.fin);
+// Une pause sans fin ("ouverte") attend un avis medical : elle dure.
+const pauseAuj = PAUSES.find(p => p.debut <= iso(today) && iso(today) <= (p.fin || '9999'));
+/** Quand la course revient, en clair : une date, ou l'avis medical attendu. */
+const quandReprise = p => p.fin ? 'Reprise le ' + dlong(lendemain(p.fin))
+  : 'Reprise après l’avis médical' + (p.fin_minimale && p.fin_minimale >= iso(today)
+    ? ', au plus tôt le ' + dlong(lendemain(p.fin_minimale)) : '');
 /** La reecriture d'une semaine, qu'elle vienne de l'adaptation ou d'une pause. */
 const reecrite = n => ADAPT[n] || REPOS[n];
 /** Une semaine entierement couverte par un repos. */
@@ -1976,9 +1981,10 @@ function detailSeance(s) {
       + 'Semaine ' + w.semaine + ' · du ' + dshort(w.lundi) + ' au ' + dshort(w.dimanche)
       + '</div><div class="se-t">' + ((P0 && P0.libelle) || 'Repos') + '</div>'
       + '<p class="se-p">' + ((P0 && P0.consigne) || 'Pas de course cette semaine.')
-      + '</p>' + (P0 ? '<p class="se-c">Reprise le ' + dlong(lendemain(P0.fin))
+      + '</p>' + (P0 ? '<p class="se-c">' + (P0.fin ? quandReprise(P0)
         + ', tout en endurance. Si la douleur est encore là, on décale la reprise '
-        + 'plutôt que de la forcer.</p>' : '') + '</article>';
+        + 'plutôt que de la forcer.' : quandReprise(P0) + '. Aucune séance de '
+        + 'course n’est programmée avant.') + '</p>' : '') + '</article>';
     else $('prog').innerHTML = w.seances.map(s => {
       const ici = i === 0 && s.jour_suggere === auj;
       const rang = s.type === 'renfo'
@@ -2200,8 +2206,9 @@ const coutPese = C => (C && C.composantes || []).filter(c => c.points > 0)
     + '<span class="ad-dt"><b>' + mot + (ic === 'egal' ? ' le volume' : '')
       + '</b><span>' + D.raison + '</span></span>'
     // Le chiffre seulement quand il bouge : a 1, la fleche "=" le dit deja.
-    + (D.action === 'pause' ? '<span class="ad-f"><b>' + dshort(D.jusqu_au)
-        + '</b><em>fin du repos</em></span>'
+    + (D.action === 'pause' ? (D.jusqu_au ? '<span class="ad-f"><b>' + dshort(D.jusqu_au)
+        + '</b><em>fin du repos</em></span>' : '<span class="ad-f"><b>?</b>'
+        + '<em>fin à fixer par le médecin</em></span>')
       : D.action === 'reprise' && ici ? '<span class="ad-f"><b>' + km1(ici.volume_adapte)
         + ' km</b><em>cette semaine</em></span>'
       : att || ic === 'egal' ? '' : '<span class="ad-f"><b>' + varVol(D.facteur)
@@ -2382,7 +2389,7 @@ const IC_POINT = {
     const ok = fait >= prevu * .95;
     if (auRepos(cur)) T.push({nom:'Cette semaine', ic:IC_SANTE.activite,
       col:COL_ACTIVITE, etat:'neutre', mot:'Repos prescrit', val:'0', unit:'km prévu',
-      sous:pauseAuj ? 'Reprise le ' + dlong(lendemain(pauseAuj.fin)) : 'Semaine de repos',
+      sous:pauseAuj ? quandReprise(pauseAuj) : 'Semaine de repos',
       go:['today', 'prog-sem']});
     else T.push({nom:'Cette semaine', ic:IC_SANTE.activite, col:COL_ACTIVITE,
       etat:ok ? 'ok' : dimanche && fait < prevu * .7 ? 'veille' : 'neutre',
@@ -2459,7 +2466,8 @@ const IC_POINT = {
   const coince = rouges.concat(oranges).map(t => t.nom.toLowerCase());
   const tete = pauseAuj
     ? '<span class="pill">' + (pauseAuj.libelle || 'Repos') + '</span><span class="pt-r">'
-      + 'Jusqu’au ' + dlong(pauseAuj.fin) + '. Rien n’est compté comme manqué.'
+      + (pauseAuj.fin ? 'Jusqu’au ' + dlong(pauseAuj.fin) + '.'
+         : 'Jusqu’à l’avis médical.') + ' Rien n’est compté comme manqué.'
       + (coince.length ? ' À surveiller : ' + coince.join(', ') + '.' : '') + '</span>'
     : !coince.length
     ? '<span class="pill ok">Tout va bien</span><span class="pt-r">Rien à corriger '
@@ -2555,8 +2563,8 @@ $('paces-n').innerHTML = 'Calculées par le modèle de Daniels à partir de '
           <div class="su">${dshort(w.lundi)} au ${dshort(w.dimanche)} ·
             ${auRepos(w.semaine) ? 'pas de course' : 'sortie longue ' + km1(longue) + ' km'}${
             note ? ' · ' + note : ''}</div>
-          <div class="vo">${auRepos(w.semaine) ? (pauseAuj ? 'reprise le '
-              + dlong(lendemain(pauseAuj.fin)) : 'semaine de repos')
+          <div class="vo">${auRepos(w.semaine) ? (pauseAuj
+              ? quandReprise(pauseAuj).toLowerCase() : 'semaine de repos')
             : r ? km1(r) + ' km réalisés sur ' + km1(vise)
             : 'objectif ' + km1(vise) + ' km'}</div></div></div>`;
       }

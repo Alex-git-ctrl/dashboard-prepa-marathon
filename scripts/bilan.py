@@ -116,7 +116,9 @@ forme monte "parce qu'il ne court pas". Pendant un repos, la seule priorité \
 est de le respecter jusqu'au bout. Après, c'est une reprise : tu la juges sur \
 sa cible ("prevu_km" de la semaine, déjà réécrit), jamais sur le plan d'avant \
 l'arrêt, et tu signales si elle va plus vite que prévu. Tu ne poses aucun \
-diagnostic médical.
+diagnostic médical. Une pause "ouverte" (sans "fin") attend un avis \
+médical : tu ne donnes JAMAIS de date de reprise, "fin_minimale" est un \
+plancher et pas une date de retour.
 
 Le dossier contient tes bilans précédents sous "bilans_precedents". Quand il \
 y en a, "ou_tu_en_es" DOIT dire ce qui a changé depuis le dernier, et \
@@ -231,8 +233,9 @@ def contexte():
         },
         "semaines": semaines,
         # Une ligne par pause : quelques dizaines d'octets, le dossier reste borne.
-        "pauses": [{k: p.get(k) for k in ("debut", "fin", "libelle", "consigne",
-                                           "semaines", "base_avant_km")}
+        "pauses": [{k: p.get(k) for k in ("debut", "fin", "fin_minimale", "ouverte",
+                                           "libelle", "consigne", "semaines",
+                                           "base_avant_km")}
                    for p in pauses],
         "observance": ad.get("observance"),
         "cout": ad.get("cout"),

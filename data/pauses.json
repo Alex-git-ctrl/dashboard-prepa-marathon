@@ -3,15 +3,17 @@
     "Les arrets declares : blessure, maladie, repos prescrit. Lu par scripts/adaptation.py a chaque collecte.",
     "Une semaine touchee par une pause ne compte jamais comme manquee : elle sort de l'observance, des alertes de charge et du bilan.",
     "Apres la pause, le plan repart en douceur : 50 %, 75 %, puis 100 % de ce que tu courais avant, et +10 % par semaine ensuite jusqu'a rejoindre le plan.",
-    "Dates au format AAAA-MM-JJ, bornes incluses. Le depot est public : pas de diagnostic ici, seulement le fait qu'il y a un repos."
+    "\"fin\": null = arret ouvert, en attente d'un avis medical. Aucune reprise n'est calculee tant que la fin n'est pas renseignee ; \"fin_minimale\" dit jusqu'ou le plan montre l'arret au moins.",
+    "Dates au format AAAA-MM-JJ, bornes incluses. Le depot est public : pas de diagnostic ici, seulement le fait qu'il y a un arret."
   ],
   "pauses": [
     {
       "debut": "2026-10-04",
-      "fin": "2026-10-18",
+      "fin": null,
+      "fin_minimale": "2026-11-08",
       "motif": "medical",
-      "libelle": "Repos prescrit par le médecin",
-      "consigne": "Ni course ni renforcement jusqu'à la fin du repos."
+      "libelle": "Arrêt médical",
+      "consigne": "Pas de course jusqu'à l'avis médical. Natation, vélo à assistance électrique et renforcement autorisés, sans douleur à la cheville."
     }
   ]
 }

@@ -246,7 +246,7 @@ def repos(pauses, seances, aujourd_hui, semaine_courante):
     """
     j = aujourd_hui.isoformat()
     for p in pauses:
-        if p["debut"] <= j <= p["fin"]:
+        if p["debut"] <= j <= (p.get("fin") or "9999-12-31"):
             courues = [s for s in seances
                        if p["debut"] <= s["date"] <= j and (s.get("km") or 0) > 0]
             if courues:
@@ -257,22 +257,31 @@ def repos(pauses, seances, aujourd_hui, semaine_courante):
                 return _alerte(
                     "attention", "Sortie pendant le repos prescrit",
                     f"{combien} depuis le {_jour(p['debut'])}, la dernière le "
-                    f"{_jour(s['date'])} ({km} km). Le repos court jusqu'au "
-                    f"{_jour(p['fin'])}.",
+                    f"{_jour(s['date'])} ({km} km). "
+                    + (f"Le repos court jusqu'au {_jour(p['fin'])}." if p.get("fin")
+                       else "Le repos court jusqu'à l'avis médical."),
                     "Une inflammation qu'on fait travailler guérit plus "
                     "lentement. Mieux vaut perdre une semaine maintenant qu'un "
                     "mois en décembre.")
-            return _alerte(
-                "info", p.get("libelle") or "Repos en cours",
-                f"Jusqu'au {_jour(p['fin'])}. Les jours de repos ne comptent "
-                f"pas comme manqués, et le plan reprend ensuite en douceur.",
-                (p["consigne"] + " " if p.get("consigne") else "")
-                + "Si la douleur est encore là à la fin du repos, on décale "
-                "la reprise plutôt que de la forcer.")
+            if p.get("fin"):
+                quand = (f"Jusqu'au {_jour(p['fin'])}. Les jours de repos ne "
+                         f"comptent pas comme manqués, et le plan reprend "
+                         f"ensuite en douceur.")
+                apres = ("Si la douleur est encore là à la fin du repos, on "
+                         "décale la reprise plutôt que de la forcer.")
+            else:
+                quand = ("Jusqu'à l'avis médical"
+                         + (f", au moins jusqu'au {_jour(p['fin_minimale'])}"
+                            if (p.get("fin_minimale") or "") >= j else "")
+                         + ". Les jours d'arrêt ne comptent pas comme manqués.")
+                apres = ("La reprise sera calculée le jour où la fin de "
+                         "l'arrêt sera connue, jamais avant.")
+            return _alerte("info", p.get("libelle") or "Repos en cours", quand,
+                           (p["consigne"] + " " if p.get("consigne") else "") + apres)
     for p in pauses:
         douces = [r["semaine"] for r in p.get("reprise") or []
                   if r["phase"] == "reprise"]
-        if j > p["fin"] and semaine_courante in douces:
+        if p.get("fin") and j > p["fin"] and semaine_courante in douces:
             return _alerte(
                 "info", "Reprise après le repos",
                 f"Pas d'intensité jusqu'à la semaine {max(douces)}, puis le "
@@ -290,7 +299,7 @@ def compute(metrics, plan, semaine_courante, aujourd_hui=None):
     cibles = {e["semaine"]: e["volume_adapte"] for p in pauses
               for e in p.get("reecrites") or [] if e["motif"] != "pause"}
     j = aujourd_hui.isoformat()
-    en_pause = any(p["debut"] <= j <= p["fin"] for p in pauses)
+    en_pause = any(p["debut"] <= j <= (p.get("fin") or "9999-12-31") for p in pauses)
     out = [
         repos(pauses, metrics.get("seances") or [], aujourd_hui, semaine_courante),
         charge(metrics["semaines"], plan["semaines"], semaine_courante,

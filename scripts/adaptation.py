@@ -23,6 +23,13 @@ jamais etre lu comme tel. Trois consequences :
     (50 %, 75 %, puis 100 %), sans intensite les trois premieres semaines,
     puis remonte de 10 % par semaine jusqu'a rejoindre le plan. Une course
     ou un test arrete la remontee : on ne reecrit jamais une course.
+
+UNE PAUSE OUVERTE ("fin": null) est un arret dont la fin attend un avis
+medical. Elle reste en cours tant que la fin n'est pas renseignee, couvre au
+moins jusqu'a "fin_minimale" et toujours jusqu'a la fin de la semaine
+suivante, et ne programme AUCUNE reprise : on ne calcule pas un retour a la
+course qu'aucun medecin n'a autorise. Le jour ou la fin est connue, on la
+renseigne et la reprise se calcule seule.
 """
 
 import json
@@ -233,25 +240,45 @@ def charge_pauses(chemin=PAUSES):
         brut = json.load(fh) or {}
     out = []
     for p in brut.get("pauses") or []:
-        d, f = date.fromisoformat(p["debut"]), date.fromisoformat(p["fin"])
-        if f < d:
-            raise ValueError("Pause du %s : la fin precede le debut." % p["debut"])
-        out.append(dict(p, motif=p.get("motif") or "medical"))
+        d = date.fromisoformat(p["debut"])
+        for cle in ("fin", "fin_minimale"):
+            if p.get(cle) and date.fromisoformat(p[cle]) < d:
+                raise ValueError("Pause du %s : %s precede le debut."
+                                 % (p["debut"], cle))
+        out.append(dict(p, motif=p.get("motif") or "medical",
+                        fin=p.get("fin") or None))
     return sorted(out, key=lambda p: p["debut"])
+
+
+def _couverture(pauses, aujourd_hui):
+    """Ajoute a chaque pause "_fin", le dernier jour qu'elle couvre sur le plan.
+
+    Fermee : sa fin. Ouverte : au moins "fin_minimale", et toujours la fin de
+    la semaine prochaine, pour que le programme de la semaine qui vient ne
+    propose jamais de courir pendant un arret sans date de fin.
+    """
+    lundi = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+    semaine_pro = (lundi + timedelta(days=13)).isoformat()
+    out = []
+    for p in pauses:
+        fin = p.get("fin") or max(p.get("fin_minimale") or p["debut"], semaine_pro)
+        out.append(dict(p, _fin=fin))
+    return out
 
 
 def _jours_en_pause(w, p):
     """Nombre de jours de la semaine `w` couverts par la pause `p`."""
     lundi, dimanche = date.fromisoformat(w["lundi"]), date.fromisoformat(w["dimanche"])
     d = max(lundi, date.fromisoformat(p["debut"]))
-    f = min(dimanche, date.fromisoformat(p["fin"]))
+    f = min(dimanche, date.fromisoformat(p.get("_fin") or p["fin"]))
     return max(0, (f - d).days + 1)
 
 
 def pause_du_jour(pauses, jour):
-    """La pause en cours ce jour-la, ou None."""
+    """La pause en cours ce jour-la, ou None. Une pause ouverte dure."""
     j = jour.isoformat()
-    return next((p for p in pauses if p["debut"] <= j <= p["fin"]), None)
+    return next((p for p in pauses
+                 if p["debut"] <= j and (not p.get("fin") or j <= p["fin"])), None)
 
 
 def plan_pauses(plan, metrics, pauses):
@@ -274,7 +301,9 @@ def plan_pauses(plan, metrics, pauses):
 
     reprise, detail = {}, []
     for p in pauses:
-        debut, fin = date.fromisoformat(p["debut"]), date.fromisoformat(p["fin"])
+        debut = date.fromisoformat(p["debut"])
+        # Pas de fin connue, pas de reprise : elle attend l'avis medical.
+        fin = date.fromisoformat(p["fin"]) if p.get("fin") else date.max
         # La base : ce qui etait vraiment couru avant l'arret, sur les
         # dernieres semaines pleines qu'aucune pause n'a touchees.
         avant = [w for w in S if date.fromisoformat(w["dimanche"]) < debut
@@ -299,7 +328,8 @@ def plan_pauses(plan, metrics, pauses):
             precedent = vise
         reprise.update(celle_ci)                # une pause plus recente l'emporte
         detail.append({
-            "debut": p["debut"], "fin": p["fin"], "motif": p["motif"],
+            "debut": p["debut"], "fin": p.get("fin"), "motif": p["motif"],
+            "fin_minimale": p.get("fin_minimale"), "ouverte": not p.get("fin"),
             "libelle": p.get("libelle") or "Pause",
             "consigne": p.get("consigne"),
             "semaines": sorted(w["semaine"] for w in S if _jours_en_pause(w, p)),
@@ -423,7 +453,7 @@ def _reecritures_pauses(plan, touchees, reprise, pauses):
 def applique(plan, metrics, aujourd_hui=None, pauses=None):
     """Produit le plan adapte, la decision, et la trace de ce qui a bouge."""
     aujourd_hui = aujourd_hui or date.today()
-    pauses = charge_pauses() if pauses is None else pauses
+    pauses = _couverture(charge_pauses() if pauses is None else pauses, aujourd_hui)
     touchees, reprise, detail = plan_pauses(plan, metrics, pauses)
     reecrites = _reecritures_pauses(plan, touchees, reprise, pauses)
     cibles = {n: e["volume_adapte"] for n, e in reecrites.items() if e["motif"] != "pause"}
@@ -443,14 +473,24 @@ def applique(plan, metrics, aujourd_hui=None, pauses=None):
     # regularite de quelqu'un a qui on a prescrit de ne pas courir.
     en_pause = pause_du_jour(pauses, aujourd_hui)
     if en_pause:
-        dec = {"action": "pause", "facteur": 1.0,
-               "raison": "%s jusqu'au %s. Ces jours-là ne comptent pas comme "
-                         "manqués." % (en_pause.get("libelle") or "Pause",
-                                       _date_fr(en_pause["fin"])),
-               "jusqu_au": en_pause["fin"], "consigne": en_pause.get("consigne"),
+        libelle = en_pause.get("libelle") or "Pause"
+        if en_pause.get("fin"):
+            raison = ("%s jusqu'au %s. Ces jours-là ne comptent pas comme manqués."
+                      % (libelle, _date_fr(en_pause["fin"])))
+        else:
+            raison = ("%s, sans date de fin pour l'instant : elle viendra de "
+                      "l'avis médical%s. Rien n'est compté comme manqué, et "
+                      "aucune reprise n'est programmée d'ici là."
+                      % (libelle, " (au moins jusqu'au %s)" % _date_fr(en_pause["fin_minimale"])
+                         if (en_pause.get("fin_minimale") or "") >= aujourd_hui.isoformat()
+                         else ""))
+        dec = {"action": "pause", "facteur": 1.0, "raison": raison,
+               "jusqu_au": en_pause.get("fin"),
+               "au_plus_tot": en_pause.get("fin_minimale"),
+               "consigne": en_pause.get("consigne"),
                "observance": dec.get("observance"), "cout": dec.get("cout")}
     elif courante in reprise or courante in touchees:
-        passees = [d for d in detail if d["fin"] < aujourd_hui.isoformat()]
+        passees = [d for d in detail if d["fin"] and d["fin"] < aujourd_hui.isoformat()]
         base = passees[-1]["base_avant_km"] if passees else None
         phase = (reprise.get(courante) or {}).get("phase", "reprise")
         rampe = round(RAMPE_MAX * 100)

@@ -176,10 +176,17 @@ Ce que fait une pause :
   repos, et une semaine de reprise se juge sur sa cible (alerte au-delà de
   +20 %) ;
 - `bilan.py` reçoit les pauses, et sa consigne lui interdit de reprocher une
-  semaine de repos.
+  semaine de repos ;
+- une pause sans `fin` (`null`) est **ouverte** : elle attend un avis
+  médical. Elle reste en cours, couvre au moins jusqu'à `fin_minimale` et
+  toujours jusqu'à la fin de la semaine suivante, et AUCUNE reprise n'est
+  calculée. Le jour où la fin est connue, la renseigner : la reprise se
+  calcule seule. Le bilan n'a pas le droit d'annoncer une date de reprise.
 
-Historique : repos médical prescrit du 04/10/2026 au 18/10/2026 (semaines 4
-à 6, déclaré le 08/10/2026), reprise à partir du lundi 19/10/2026.
+Historique : repos médical prescrit du 04/10/2026 au 18/10/2026 (déclaré le
+08/10/2026), puis, le 18/10/2026, arrêt prolongé sans date de fin en
+attendant l'avis médical (au moins jusqu'au 08/11/2026). Aucune reprise n'est
+programmée.
 
 ## En local
 
