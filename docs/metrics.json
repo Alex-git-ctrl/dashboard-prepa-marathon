@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-18T21:30:34",
+  "maj": "2026-10-19T10:43:53",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -13147,6 +13147,29 @@
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": null
+    },
+    {
+      "date": "2026-10-19",
+      "hrv": null,
+      "fc_repos": null,
+      "poids": null,
+      "vo2max": null,
+      "readiness": null,
+      "sommeil_score": null,
+      "fc_sommeil": null,
+      "spo2": null,
+      "respiration": null,
+      "masse_grasse": null,
+      "ctl": 6.075537,
+      "atl": 6.648579,
+      "ramp_rate": 0.30556202,
+      "pas": null,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
+      "sommeil_h": null
     }
   ],
   "derives": [
@@ -13309,9 +13332,9 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 6.2219286,
-    "atl": 7.669568,
-    "ramp_rate": 0.31292439,
+    "ctl": 6.075537,
+    "atl": 6.648579,
+    "ramp_rate": 0.30556202,
     "pas": 2471,
     "courbatures": null,
     "fatigue": null,
@@ -13334,9 +13357,9 @@
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 47,
-    "atl": 47,
-    "ramp_rate": 40,
+    "ctl": 48,
+    "atl": 48,
+    "ramp_rate": 41,
     "pas": 46,
     "courbatures": 0,
     "fatigue": 0,
@@ -13344,7 +13367,7 @@
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 47,
+  "jours_wellness": 48,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -13365,9 +13388,9 @@
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-10-18",
-    "atl": "2026-10-18",
-    "ramp_rate": "2026-10-18",
+    "ctl": "2026-10-19",
+    "atl": "2026-10-19",
+    "ramp_rate": "2026-10-19",
     "pas": "2026-10-17",
     "courbatures": null,
     "fatigue": null,
@@ -13380,7 +13403,7 @@
     "cadence": "2026-10-03",
     "volume": "2026-10-03"
   },
-  "derniere_donnee": "2026-10-18",
+  "derniere_donnee": "2026-10-19",
   "derniere_seance": "2026-10-03",
   "journal": [
     {
@@ -14112,6 +14135,17 @@
         "spo2": null,
         "date": "2026-10-18",
         "fatigue_indice": null
+      },
+      {
+        "pas": null,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "fc_repos": null,
+        "hrv": null,
+        "poids": null,
+        "spo2": null,
+        "date": "2026-10-19",
+        "fatigue_indice": null
       }
     ],
     "actuel": {
@@ -14211,7 +14245,7 @@
     "marge_marathon_s": 29
   },
   "adaptation": {
-    "semaine_courante": 6,
+    "semaine_courante": 7,
     "observance": {
       "semaines": [
         {
@@ -14268,6 +14302,17 @@
           "renfo_fait": 0,
           "ratio": 0.0,
           "pause": true
+        },
+        {
+          "semaine": 6,
+          "km_prevu": 30.8,
+          "km_fait": 0,
+          "seances_prevues": 3,
+          "seances_faites": 0,
+          "renfo_prevu": 2,
+          "renfo_fait": 0,
+          "ratio": 0.0,
+          "pause": true
         }
       ],
       "fenetre": [
@@ -14283,30 +14328,30 @@
       "base_km": 18.3
     },
     "cout": {
-      "indice": 30,
-      "niveau": "normal",
+      "indice": 16,
+      "niveau": "faible",
       "composantes": [
         {
           "nom": "Dérive cardiaque",
-          "valeur": "3,8 %",
-          "points": 11,
+          "valeur": "4,6 %",
+          "points": 14,
           "max": 30
         },
         {
           "nom": "Effort perçu",
-          "valeur": "4,0 sur 10",
+          "valeur": "1,5 sur 10",
           "points": 0,
           "max": 30
         },
         {
           "nom": "Temps en endurance",
-          "valeur": "52 %",
-          "points": 23,
+          "valeur": "100 %",
+          "points": 0,
           "max": 25
         },
         {
           "nom": "Variabilité cardiaque",
-          "valeur": "+13 %",
+          "valeur": "+9 %",
           "points": 0,
           "max": 30
         },
@@ -14318,8 +14363,8 @@
         },
         {
           "nom": "Dette de sommeil",
-          "valeur": "4,7 h sur la semaine",
-          "points": 10,
+          "valeur": "5,0 h sur la semaine",
+          "points": 11,
           "max": 15
         }
       ]
@@ -14332,24 +14377,9 @@
       "au_plus_tot": "2026-11-08",
       "consigne": "Pas de course jusqu'à l'avis médical. Natation, vélo à assistance électrique et renforcement autorisés, sans douleur à la cheville.",
       "observance": "moyenne",
-      "cout": "normal"
+      "cout": "faible"
     },
     "semaines_ajustees": [
-      {
-        "semaine": 6,
-        "motif": "pause",
-        "volume_origine": 30.8,
-        "volume_adapte": 0,
-        "longue_origine": 16,
-        "longue_adapte": 0,
-        "seance1_origine": 45,
-        "seance1_adapte": null,
-        "seance2_origine": 45,
-        "seance2_adapte": null,
-        "sans_qualite": true,
-        "jours_en_pause": 7,
-        "libelle": "Arrêt médical"
-      },
       {
         "semaine": 7,
         "motif": "pause",
@@ -14533,20 +14563,6 @@
     }
   },
   "programme": [
-    {
-      "semaine": 6,
-      "lundi": "2026-10-12",
-      "dimanche": "2026-10-18",
-      "bloc": "Bloc 1",
-      "note": "Repos : pas de course ni de renforcement cette semaine.",
-      "phase_calisthenie": "Fondations",
-      "phase_quoi": "Neuf semaines de volume propre : rien ne tient sans tractions et dips stricts.",
-      "volume_km": 0,
-      "adapte": true,
-      "motif": "pause",
-      "repos": true,
-      "seances": []
-    },
     {
       "semaine": 7,
       "lundi": "2026-10-19",
