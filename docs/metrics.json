@@ -1,5 +1,5 @@
 {
-  "maj": "2026-10-23T10:01:19",
+  "maj": "2026-10-23T22:09:57",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -13243,7 +13243,7 @@
     {
       "date": "2026-10-23",
       "hrv": 76.0,
-      "fc_repos": 51,
+      "fc_repos": 53,
       "poids": null,
       "vo2max": null,
       "readiness": null,
@@ -13252,10 +13252,10 @@
       "spo2": null,
       "respiration": null,
       "masse_grasse": null,
-      "ctl": 6.2061534,
-      "atl": 6.2385235,
-      "ramp_rate": 0.018107891,
-      "pas": 240,
+      "ctl": 6.4414363,
+      "atl": 7.5697446,
+      "ramp_rate": 0.2533908,
+      "pas": 2201,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -13415,7 +13415,7 @@
   },
   "actuel": {
     "hrv": 76.0,
-    "fc_repos": 51,
+    "fc_repos": 53,
     "poids": 81.0,
     "vo2max": 53.0,
     "readiness": null,
@@ -13424,10 +13424,10 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 6.2061534,
-    "atl": 6.2385235,
-    "ramp_rate": 0.018107891,
-    "pas": 240,
+    "ctl": 6.4414363,
+    "atl": 7.5697446,
+    "ramp_rate": 0.2533908,
+    "pas": 2201,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -14273,27 +14273,27 @@
         "fatigue_indice": 45
       },
       {
-        "pas": 240,
+        "pas": 2201,
         "sommeil_h": 6.8,
         "sommeil_score": 72.0,
-        "fc_repos": 51,
+        "fc_repos": 53,
         "hrv": 76.0,
         "poids": null,
         "spo2": null,
         "date": "2026-10-23",
-        "fatigue_indice": 68
+        "fatigue_indice": 69
       }
     ],
     "actuel": {
-      "pas": 240,
+      "pas": 2201,
       "pas_date": "2026-10-23",
       "sommeil_h": 6.8,
       "sommeil_h_date": "2026-10-23",
       "sommeil_score": 72.0,
       "sommeil_score_date": "2026-10-23",
-      "fatigue_indice": 68,
+      "fatigue_indice": 69,
       "fatigue_indice_date": "2026-10-23",
-      "fc_repos": 51,
+      "fc_repos": 53,
       "fc_repos_date": "2026-10-23",
       "hrv": 76.0,
       "hrv_date": "2026-10-23",
@@ -14464,7 +14464,7 @@
       "base_km": 18.3
     },
     "cout": {
-      "indice": 14,
+      "indice": 15,
       "niveau": "faible",
       "composantes": [
         {
@@ -14487,8 +14487,8 @@
         },
         {
           "nom": "FC de repos",
-          "valeur": "+1 bpm",
-          "points": 5,
+          "valeur": "+2 bpm",
+          "points": 6,
           "max": 20
         },
         {
