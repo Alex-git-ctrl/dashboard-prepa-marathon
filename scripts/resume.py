@@ -192,7 +192,7 @@ def valide_texte(out, cles):
         v = out.get(k)
         if not isinstance(v, str):
             continue
-        if "—" in v or "–" in v:
+        if chr(0x2014) in v or chr(0x2013) in v:     # cadratin, demi-cadratin
             return "le champ %s contient un tiret cadratin" % k
         for m in MOJIBAKE:
             if m in v:

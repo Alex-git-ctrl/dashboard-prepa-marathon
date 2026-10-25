@@ -1193,3 +1193,12 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .ph-z{position:relative;display:block;min-width:0}
 .ph-m{position:absolute;top:-3px;width:2px;height:20px;border-radius:1px;
   background:var(--encre);margin-left:-2px}
+/* La semaine en cours peut porter une phrase longue (un arret, sa reprise) :
+   elle passe a la ligne au lieu de pousser la page en largeur. */
+.wk.now>div{min-width:0}
+.wk.now .vo{white-space:normal}
+
+/* Un mot parmi les chiffres d'une seance (la dominante Garmin) : a la taille
+   d'un intitule, et autorise a passer a la ligne dans une case etroite. */
+.cg-n>div{min-width:0}
+.chiffres div .n .n-mot{font-size:var(--t4);line-height:1.2;overflow-wrap:anywhere}

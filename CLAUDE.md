@@ -191,7 +191,9 @@ Garmin (EPOC) n'est pas reprise : celle d'Intervals fait foi.
 d'Intervals.icu, dans `metrics["autres"]` et `autres_minutes` par semaine.
 Ils s'affichent (onglet Séances, tuile de la semaine sur l'accueil) mais ne
 comptent ni dans le volume de course, ni dans l'observance, ni dans les
-alertes de charge.
+alertes de charge. Le bilan les reçoit (`autres_recentes`, borné à dix, et
+`autres_min` par semaine), et l'accueil montre le temps d'activité tous
+sports dans les tendances.
 
 **Confidentialité des activités.** Le nom d'une activité contient la ville
 (« Choisy-le-Roi eBiking ») et le résumé Garmin porte la position GPS de

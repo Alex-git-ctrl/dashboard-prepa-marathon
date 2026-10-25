@@ -48,16 +48,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-09-28T23:24:22",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "10 km enfin couru, 3 semaines sur 27",
   "essentiel": "Le 10 km du 27/09 (45:33, VDOT 42,4) cale enfin la calibration, mais 3 semaines bouclées sur 27 ne permettent aucun jugement.",
-  "ou_tu_en_es": "Depuis le dernier bilan, la référence n'est plus estimée : 9,59 km en 45:33 le 27/09. L'observance reste à 0,88 sur trois semaines (54,9 km sur 62,4) et la semaine 4 est à 0 km sur 25,1. Forme de fond à 6,19 et VFC à 73 ms montent, mais la fatigue grimpe de 4,39 par semaine.",
-  "viser_plus_haut": "Non, pas sur 3 semaines : la projection 3h39 sort d'un 9,59 km à RPE 9 et 179 de FC. Il faudrait 6 semaines terminées, une observance au-dessus de 0,95 et une sortie longue tenue à 5:41/km.",
-  "a_changer": "Les renfos demandés ne sont pas revenus à 2 : 0 en semaine 3, 1 en semaine 4. Priorité unique des deux semaines : boucler les 3 séances hebdo, la semaine 4 est encore à 0 km sur 25,1.",
-  "quand": "2026-09-28T23:24:22",
-  "empreinte": "4de82aa09485ce65",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -141,6 +137,18 @@
   "a_changer": "Consigne à moitié suivie : 0 km tenu, mais la dette de sommeil est passée de 4,7 à 5,0 h. Priorité unique des deux semaines : remonter vers 6,5 h de moyenne, et aucune course avant l'avis médical.",
   "quand": "2026-10-19T23:23:31",
   "empreinte": "79795b54f7a51bb3",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt toujours ouvert, dette de sommeil réduite",
+  "essentiel": "Septième semaine sans course sur 0 km prévu, et aucune donnée de course depuis le 3 octobre : rien de mesurable avant l'avis médical.",
+  "ou_tu_en_es": "Trois semaines pleines avant l'arrêt : 88 % du volume prévu (54,9 km sur 62,4). Depuis le dernier bilan, la dette de sommeil tombe de 5,0 à 2,7 h et la fatigue recule de 1,59 point par semaine. L'activité reste réelle : 100 min de vélo et natation cette semaine, 213 la précédente ; la VFC reste basse à 55 ms contre 81.",
+  "viser_plus_haut": "Non, pas tant que l'arrêt est ouvert : confiance faible, zéro kilomètre depuis le 3 octobre. La projection à 3h39 vient d'un 10 km réellement couru, mais pour trancher il faut l'avis médical et quatre semaines pleines.",
+  "a_changer": "Consigne tenue : 0 km, et la dette de sommeil passée de 5,0 à 2,7 h. Priorité unique des deux semaines : finir d'effacer ces 2,7 h, et aucune course avant l'avis médical, le 8 novembre restant un plancher.",
+  "quand": "2026-10-25T21:13:51",
+  "empreinte": "3d3254a563c0b38a",
   "source": "claude_conversation"
  }
 ]

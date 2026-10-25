@@ -108,6 +108,12 @@ concrète, pour les deux semaines à venir.
 Ces trois derniers champs sont le détail, replié sur la page. Ils étayent \
 "essentiel", ils ne le paraphrasent pas.
 
+LES AUTRES SPORTS COMPTENT COMME ACTIVITÉ. Natation, vélo, foot et \
+musculation arrivent sous "autres_recentes" et, par semaine, "autres_min". \
+Ce n'est jamais du volume de course, mais c'est de l'activité réelle : une \
+semaine sans course avec deux heures de natation n'est pas une semaine \
+inactive, et tu le dis.
+
 LES PAUSES PASSENT AVANT TOUT LE RESTE. Le dossier peut contenir un repos \
 déclaré sous "pauses" (repos prescrit par un médecin, par exemple). Une semaine \
 marquée "pause" n'est JAMAIS un manque de régularité ni de motivation : tu ne \
@@ -190,6 +196,7 @@ def contexte():
             "fait_km": f.get("km", 0),
             "seances_faites": f.get("seances", 0),
             "renfo_faits": f.get("renfo_seances", 0),
+            "autres_min": f.get("autres_minutes", 0),
             "terminee": w["dimanche"] < auj.isoformat(),
         })
 
@@ -246,6 +253,13 @@ def contexte():
             for x in (m.get("efficacite") or [])[-POINTS_EFFICACITE:]],
         "repartition_zones_montre_pct": (m.get("zones_montre") or {}).get("pct"),
         "seances_recentes": recentes,
+        # Les autres sports : les DIX derniers, une ligne chacun, comme les
+        # seances de course. Borne fixe, le dossier ne grossit pas avec eux.
+        "autres_recentes": [{
+            "date": a["date"], "sport": a.get("sport"), "min": a.get("minutes"),
+            "km": a.get("km"), "fc": a.get("fc_moy"),
+            "effet_aerobie": a.get("te_aerobie"),
+        } for a in (m.get("autres") or [])[-SEANCES_ENVOYEES:]],
         "alertes_ouvertes": [a.get("titre") for a in (m.get("alertes") or [])],
         "bilans_precedents": [
             {k: b.get(k) for k in TRACE + ("a_changer",)}

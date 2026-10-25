@@ -821,6 +821,27 @@ function scoreCharge(box) {
       + '<div class="tend-cap" id="tv-vol-cap"></div></div>';
   }
 
+  /* --- temps d'activite, tous sports ---
+     Le volume couru ne dit pas tout : pendant un arret de course, la
+     natation et le velo sont toute l'activite. Les heures par semaine,
+     course et autres sports ensemble ; la semaine en cours est estompee. */
+  const ptsAct = sems.map(k => ({
+    v:((M.semaines[k].minutes || 0) + (M.semaines[k].autres_minutes || 0)) / 60,
+    lbl:'S' + k, partiel:k === cur}));
+  const aDesAutres = sems.some(k => M.semaines[k].autres_minutes);
+  if (aDesAutres) {
+    html += '<div class="hcard"><div class="hcard-h">'
+      + '<i class="hcard-ic" style="color:' + COL_SCORE + '">'
+      + '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">'
+      + IC_SANTE.forme + '</svg></i>'
+      + '<span class="hcard-t" style="color:' + COL_SCORE
+      + '">Temps d’activité, tous sports</span></div>'
+      + '<p class="hcard-i">Course, natation, vélo, foot et musculation, en heures '
+      + 'par semaine.</p>'
+      + '<div class="hcard-div"></div><div class="cb" id="tv-act"></div>'
+      + '<div class="tend-cap" id="tv-act-cap"></div></div>';
+  }
+
   /* --- score de preparation du jour --- */
   html += '<div class="hcard"><div class="hcard-h">'
     + '<i class="hcard-ic" style="color:' + COL_SCORE + '">'
@@ -846,6 +867,16 @@ function scoreCharge(box) {
       + (r.n > r.nRecent ? '<span style="color:' + COL_ACTIVITE + '">'
          + r.nRecent + ' dernières · ' + nf(Math.round(r.moyRecent))
          + ' km</span>' : '<span>semaine en cours estompée</span>');
+  }
+  if (aDesAutres) {
+    const r = tendance($('tv-act'), ptsAct, {color:COL_SCORE, recent:4,
+      alt:'Heures d’activité par semaine, tous sports'});
+    const ici = M.semaines[cur] || {};
+    if (r) $('tv-act-cap').innerHTML = '<span>moyenne sur ' + r.n
+      + (r.n > 1 ? ' semaines terminées' : ' semaine terminée') + ' · '
+      + hmin(r.moyBase * 60) + '</span><span style="color:' + COL_SCORE
+      + '">cette semaine · ' + hmin((ici.minutes || 0) + (ici.autres_minutes || 0))
+      + '</span>';
   }
   scorePreparation($('tv-score'));
 })();
@@ -1218,7 +1249,9 @@ function chiffres(s) {
     ['Ce que ça a travaillé', [
       [s.te_aerobie != null ? nf(s.te_aerobie) : null, '/5', 'effet aérobie'],
       [s.te_anaerobie != null ? nf(s.te_anaerobie) : null, '/5', 'effet anaérobie'],
-      [TE_TYPE[s.te_label] || null, '', 'dominante de la séance']]],
+      // Un mot, pas un nombre : plus petit, et il peut passer a la ligne.
+      [TE_TYPE[s.te_label] ? '<span class="n-mot">' + TE_TYPE[s.te_label] + '</span>'
+        : null, '', 'dominante de la séance']]],
     ['Ce que ça a coûté', [
       [s.calories ? nf(s.calories) : null, 'kcal', 'dépense'],
       [s.charge ? Math.round(s.charge) : null, '', 'charge'],

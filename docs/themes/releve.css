@@ -1235,3 +1235,18 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
 .ph-z{position:relative;display:block;min-width:0}
 .ph-m{position:absolute;top:-3px;width:2px;height:20px;border-radius:1px;
   background:var(--encre);margin-left:-2px}
+/* La semaine en cours peut porter une phrase longue (un arret, sa reprise) :
+   elle passe a la ligne au lieu de pousser la page en largeur. */
+.wk.now>div{min-width:0}
+.wk.now .vo{white-space:normal}
+/* Six onglets en 1fr ne descendaient pas sous la largeur du mot "Données" :
+   la barre faisait 432 px sur un écran de 390. minmax(0,1fr) les laisse
+   rétrécir, et un libellé trop long se tronque au lieu de pousser la page. */
+.bar-in{grid-template-columns:repeat(6,minmax(0,1fr))}
+.tb{min-width:0}
+.tb span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Un mot parmi les chiffres d'une seance (la dominante Garmin) : a la taille
+   d'un intitule, et autorise a passer a la ligne dans une case etroite. */
+.cg-n>div{min-width:0}
+.chiffres div .n .n-mot{font-size:var(--t4);line-height:1.2;overflow-wrap:anywhere}
