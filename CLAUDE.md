@@ -76,6 +76,8 @@ Forerunner 265 + HRM-Pro Plus
    Garmin Connect
         │  partenariat officiel
    Intervals.icu          ← source unique de vérité
+        │                   (+ API personnelle Garmin, seulement pour ce
+        │                    qu'Intervals ne reçoit pas : voir plus bas)
         │  API HTTP (INTERVALS_API_KEY)
   GitHub Actions, ~7h13 et ~21h17 Paris (update.yml)
         │
@@ -107,11 +109,12 @@ le calendrier de quelqu'un doit rester un geste volontaire.
 | `seance_detail.py` | Détail d'une séance : splits au km, dérive, dynamique de course |
 | `seances_type.py` | Décompose une semaine du plan en séances pas-à-pas avec allure cible, exportables vers Garmin |
 | `sante.py` | Pas, sommeil, indice de fatigue (calculé comme déviation à la moyenne glissante de VFC/FC repos, pas en valeur absolue) |
+| `garmin.py` | API personnelle Garmin : Body Battery, stress, phases et respiration du sommeil, statut VFC. Seulement ce qu'Intervals.icu ne reçoit pas ; cache cumulé dans `docs/garmin.json` |
 | `journal.py` | Écrit le ressenti (RPE, douleur, fatigue) dans Intervals.icu, jamais en local |
 | `build_site.py` | Assemble `docs/_template.html` + JSON + thème → `docs/index.html` et `docs/artifact.html` |
 | `maj_locale.py` | Même enchaînement qu'Actions mais en local, pour que les résumés soient rédigés par Claude Code (abonnement) plutôt que par une clé API facturée au token |
 | `export_garmin.py` | Pousse les séances planifiées vers Garmin via Intervals.icu ; ne supprime que ce qu'il a lui-même posé (suivi dans `docs/export_garmin.json`) |
-| `set_secrets.py` | Envoie `.env` vers les secrets GitHub via `gh` |
+| `set_secrets.py` | Envoie `.env` vers les secrets GitHub via `gh` (Intervals.icu obligatoire, Garmin facultatif) |
 
 ## Fichiers de données (`docs/`)
 
@@ -119,6 +122,7 @@ le calendrier de quelqu'un doit rester un geste volontaire.
 - `plan.json` : sortie de `build_plan.py`
 - `bilans.json` : historique des bilans hebdomadaires (append-only)
 - `resumes.json` : cache des résumés de séance, clé = hash du contenu
+- `garmin.json` : cache des agrégats quotidiens de l'API Garmin (un objet par jour, aucune trace ni position). Indispensable : Garmin limite le sommeil à 28 jours par requête, et `metrics.json` est reconstruit de zéro à chaque collecte
 - `export_garmin.json` : IDs des événements posés sur le calendrier Garmin, pour pouvoir les remplacer sans dupliquer
 - `_template.html` : le gabarit source, avec placeholders `__THEME__`, `__PLAN__`, `__METRICS__` — **c'est ce fichier qu'on édite**, pas `index.html` ni `artifact.html` qui sont générés
 - `index.html` : page complète générée par `build_site.py`
@@ -154,6 +158,40 @@ le calendrier de quelqu'un doit rester un geste volontaire.
 - **Cron GitHub Actions décalé** : les horaires `7h13`/`21h17` (au lieu de
   7h/21h) sont volontaires, pour limiter (pas supprimer) le retard que
   GitHub applique aux crons programmés sur les petits dépôts peu actifs.
+
+## API personnelle Garmin : une source par donnée (`scripts/garmin.py`)
+
+Branchée le 25/10/2026, quatre jours après l'ouverture par Garmin de son API
+personnelle (gratuite, lecture seule, à la demande, sans webhook). Décision
+prise avec Alex : **pas de bascule de tout le pipeline vers Garmin.**
+Intervals.icu reste la source de vérité, parce que l'API Garmin ne sait ni
+écrire sur le calendrier de la montre (`export_garmin.py` passe par
+Intervals) ni recevoir le journal (`journal.py`), ne calcule ni charge ni
+forme, et retire VO2max et Training Readiness.
+
+La règle : **chaque champ a une seule source.**
+- Intervals.icu : séances, streams, charge et forme, calendrier, journal,
+  durée et score du sommeil, VFC, FC de repos, poids, VO2max.
+- Garmin : Body Battery (pic, creux, recharge, dépense), stress de la
+  journée, phases du sommeil (et la durée Garmin qui les englobe),
+  respiration et FC pendant le sommeil, statut de la VFC.
+
+`sante.construit(wellness, garmin)` applique cette règle : un champ Garmin
+n'écrase jamais un champ Intervals. Écart connu et assumé : la nuit du
+25/10/2026, Intervals donne 8,8 h de sommeil et Garmin 7,7 h ; les autres
+nuits concordent à 0,1 h. La tuile « Sommeil » reste celle d'Intervals, la
+carte des phases dit qu'elle montre la durée Garmin.
+
+Technique : la clé `GARMIN_PERSONAL_API_KEY` (`.env`, secret GitHub)
+s'échange contre un jeton de 24 h (`POST
+/personalapitoken-service/personal-api/personal-api-key/token`, en-tête
+`Authorization: ApiKey <clé>`). Base `https://personal.connectapi.garmin.com`,
+client de référence `github.com/garmin/connect-personal-api-python`. Le
+sommeil est limité à 28 jours par requête (400 et corps vide au-delà) : tout
+est tiré par tranches de 28 jours. **La clé expire au plus tard un an après
+sa création (créée le 25/10/2026)** et se recrée à la main ; refusée, la
+collecte continue sur le cache et la page affiche l'alerte « Clé Garmin
+refusée ». Sans clé, rien ne casse : les courbes Garmin restent vides.
 
 ## Pauses : blessure, repos médical (`data/pauses.json`)
 

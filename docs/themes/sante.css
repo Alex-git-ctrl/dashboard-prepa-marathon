@@ -1177,3 +1177,14 @@ line.gx{stroke:var(--encre);stroke-width:1;stroke-dasharray:3 3}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Pendant un repos et sa reprise, la grille est suspendue : elle reste lisible, en retrait. */
 .ad-mx-off{opacity:.45}
+
+/* ---------- ajout du 25/10/2026 : les phases du sommeil (API Garmin) ---------- */
+.ph{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ph-r{display:grid;grid-template-columns:4.2em minmax(0,1fr) 5.6em;gap:var(--s3);
+  align-items:center;font-size:var(--t2)}
+.ph-d{color:var(--acier);white-space:nowrap}
+.ph-r>span:nth-child(2){display:flex}
+.ph-b{display:flex;height:14px;border-radius:7px;overflow:hidden;min-width:6px}
+.ph-b i{display:block;height:100%;min-width:2px}
+.ph-t{text-align:right;font-variant-numeric:tabular-nums;color:var(--encre);
+  white-space:nowrap}

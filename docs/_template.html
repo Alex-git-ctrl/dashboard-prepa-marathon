@@ -73,6 +73,19 @@ __THEME__
         <div class="hcard-div"></div>
         <div class="gc" id="nuits"></div>
       </div></div>
+    <div class="sec" id="sec-phases" hidden><h2>Les phases du sommeil</h2>
+      <div class="hcard">
+        <div class="hcard-h">
+          <i class="hcard-ic" style="color:var(--sante-sommeil, var(--m-puissance))">
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+              <path d="M15.8 3.5a8.6 8.6 0 1 0 4.7 10.4A7 7 0 0 1 15.8 3.5z"
+                stroke-linejoin="round"/></svg></i>
+          <span class="hcard-t" style="color:var(--sante-sommeil, var(--m-puissance))"
+            >Les sept dernières nuits</span></div>
+        <p class="hcard-i" id="phases-n"></p>
+        <div class="hcard-div"></div>
+        <div id="phases"></div>
+      </div></div>
     <div class="sec"><h2>Évolution</h2>
       <div class="seg" id="sante-seg" role="group"
         aria-label="Période d'agrégation"></div>
@@ -3284,6 +3297,10 @@ function lectureNuits() {
     fatigue_indice:{icon:IC_SANTE.score, color:COL_SCORE},
     poids:{icon:IC_SANTE.poids, color:COL_POIDS},
     spo2:{icon:IC_SANTE.poumons, color:COL_OXY},
+    // Les trois courbes qui viennent de l'API personnelle Garmin.
+    body_battery:{icon:IC_SANTE.score, color:COL_SCORE},
+    stress:{icon:IC_SANTE.forme, color:COL_ACTIVITE},
+    respiration_nuit:{icon:IC_SANTE.poumons, color:COL_OXY},
   };
 
   /* --- tuiles du jour --- */
@@ -3291,6 +3308,7 @@ function lectureNuits() {
     ['pas', 'Pas aujourd’hui', 'pas', 0, 'Dès la première journée portée'],
     ['sommeil_h', 'Sommeil', 'h', 1, 'Dès la première nuit synchronisée'],
     ['sommeil_score', 'Score de sommeil', '/100', 0, 'Mesuré par la montre'],
+    ['body_battery', 'Body Battery', '/100', 0, 'Arrive par l’API Garmin'],
     ['fatigue_indice', 'Indice de fatigue', '/100', 0,
      'Calculé après ' + S.minimum_jours + ' nuits'],
   ];
@@ -3314,6 +3332,67 @@ function lectureNuits() {
 
   if (nuits($('nuits'))) $('nuits-n').innerHTML = lectureNuits();
   else $('nuits-n').textContent = '';
+  phases();
+
+  /* --- les phases du sommeil ---
+     Une barre par nuit, de la longueur de la nuit, coupee en quatre phases :
+     ce qu'aucune courbe ne montre, c'est la composition. En dessous, la
+     repartition moyenne sur 28 nuits et le statut VFC de Garmin. Ces donnees
+     viennent de l'API personnelle Garmin : sans elle, la carte reste cachee. */
+  function phases() {
+    // Les trois phases, puis ce que Garmin compte dans la duree de sommeil
+    // sans le classer dans aucune phase (gris), puis l'eveil. La duree
+    // affichee est celle de Garmin, eveil exclu.
+    const classe = j => (j.sommeil_profond || 0) + (j.sommeil_paradoxal || 0)
+      + (j.sommeil_leger || 0);
+    J.forEach(j => { if (j.sommeil_duree != null)
+      j.sommeil_non_classe = Math.max(0, j.sommeil_duree - classe(j)); });
+    const PH = [['sommeil_profond', 'Profond', COL_SOMMEIL],
+      ['sommeil_paradoxal', 'Paradoxal', COL_VFC],
+      ['sommeil_leger', 'Léger', 'color-mix(in srgb, ' + COL_SOMMEIL + ' 35%, var(--surface))'],
+      ['sommeil_non_classe', 'Non classé', 'var(--creux)'],
+      ['sommeil_eveil', 'Éveil', 'var(--veille)']];
+    const nuitsG = J.filter(j => j.sommeil_profond != null || j.sommeil_leger != null);
+    if (!nuitsG.length) return;
+    const lit = j => PH.reduce((s, p) => s + (j[p[0]] || 0), 0);
+    const dort = j => j.sommeil_duree != null ? j.sommeil_duree
+      : lit(j) - (j.sommeil_eveil || 0);
+    const sept = nuitsG.slice(-7);
+    const mx = Math.max(...sept.map(lit), 1);
+    const court = d => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR',
+      {weekday:'short', day:'numeric'});
+    const hm = m => heuresMin(m / 60);
+    $('phases').innerHTML = '<div class="ph">' + sept.map(j =>
+      '<div class="ph-r"><span class="ph-d">' + court(j.date) + '</span>'
+      + '<span class="ph-b" style="width:' + (lit(j) / mx * 100).toFixed(1) + '%">'
+      + PH.map(p => j[p[0]] ? '<i title="' + p[1] + ' ' + hm(j[p[0]]) + '" style="flex:'
+        + j[p[0]] + ';background:' + p[2] + '"></i>' : '').join('') + '</span>'
+      + '<span class="ph-t">' + hm(dort(j)) + '</span></div>').join('') + '</div>';
+    // La repartition moyenne sur 28 nuits au plus : chaque phase en part du
+    // sommeil MESURE (profond + paradoxal + leger), comme les reperes qu'on
+    // cite ; l'eveil en minutes par nuit.
+    const vingt8 = nuitsG.slice(-28);
+    const somme = k => vingt8.reduce((s, j) => s + (j[k] || 0), 0);
+    const mesure = PH.slice(0, 3).reduce((s, p) => s + somme(p[0]), 0) || 1;
+    $('phases').insertAdjacentHTML('beforeend', '<div class="keys">'
+      + PH.slice(0, 3).map(p => '<span><i style="background:' + p[2]
+        + ';height:8px;width:12px"></i>' + p[1] + ' '
+        + Math.round(somme(p[0]) / mesure * 100) + ' %</span>').join('')
+      + '<span><i style="background:var(--creux);height:8px;width:12px"></i>Non classé</span>'
+      + '<span><i style="background:var(--veille);height:8px;width:12px"></i>Éveil '
+      + Math.round(somme('sommeil_eveil') / vingt8.length) + ' min par nuit</span></div>');
+    const STATUT = {BALANCED:'équilibré', UNBALANCED:'déséquilibré', LOW:'bas',
+      POOR:'faible'};
+    const dv = J.slice().reverse().find(j => j.statut_vfc);
+    $('phases-n').innerHTML = 'Durée de sommeil selon Garmin, éveil exclu. '
+      + 'Répartition moyenne sur ' + vingt8.length + ' nuits en bas de carte. '
+      + 'Repères habituels chez l’adulte : 13 à 23 % de sommeil profond, 20 à 25 % '
+      + 'de paradoxal.'
+      + (dv ? ' Statut de ta variabilité cardiaque selon Garmin : <b>'
+        + (STATUT[dv.statut_vfc] || dv.statut_vfc.toLowerCase()) + '</b> ('
+        + dshort(dv.date) + ').' : '');
+    $('sec-phases').hidden = false;
+  }
 
   /* --- agregation par periode --- */
   const PERIODES = [['jour', 'Jour', 30], ['semaine', 'Semaine', 12],
@@ -3356,6 +3435,13 @@ function lectureNuits() {
     pas:'Marche quotidienne hors séances de course, un bon marqueur de dépense de fond.',
     sommeil_h:'Sous 7 heures régulières, la progression ralentit quelle que soit '
       + 'la qualité des séances.',
+    body_battery:'Le niveau le plus haut de la journée, en général au réveil : ce '
+      + 'que la nuit a rechargé. Calculé par Garmin, via son API personnelle.',
+    stress:'Moyenne de la journée, calculée par Garmin à partir de la variabilité '
+      + 'cardiaque. Au-dessus de 50, la journée a pesé plus que d’habitude.',
+    respiration_nuit:'Fréquence respiratoire moyenne pendant le sommeil. C’est '
+      + 'sa hausse par rapport à ton habitude qui compte : fatigue ou début '
+      + 'd’infection.',
   };
 
   // Tous ouverts par defaut des qu'ils ont des donnees (choix du
@@ -3457,6 +3543,15 @@ $('vrows').innerHTML = [
 
 (function () {
   const cv = M.couverture || {};
+  // Ce qui arrive par l'API personnelle Garmin : recu si au moins un jour de
+  // la serie sante en porte la valeur.
+  const G = M.garmin || {};
+  const recuG = cle => ((M.sante || {}).jours || []).some(j => j[cle] != null);
+  const sousG = {ok:'Via l’API personnelle Garmin',
+    absente:'Nécessite la clé de l’API personnelle Garmin',
+    refusee:'Clé Garmin refusée : à recréer',
+    injoignable:'Garmin n’a pas répondu à la dernière collecte'}[G.etat]
+    || 'Via l’API personnelle Garmin';
   $('cover').innerHTML = [
     ['Distance, allure, durée', 'Chaque séance', !!M.nb_activites],
     ['FC seconde par seconde', 'Alimente la dérive cardiaque', !!M.nb_activites],
@@ -3476,11 +3571,12 @@ $('vrows').innerHTML = [
     ['SpO2 nocturne', 'Signal de surcharge', !!cv.spo2],
     ['Masse grasse', 'Nécessite une balance connectée', !!cv.masse_grasse],
     ['Effort perçu et douleur', 'Journal, saisie manuelle', !!(M.journal || []).length],
-    ['Training Readiness', 'Non transmis par Garmin à des tiers', null],
-    ['Body Battery', 'Absent du schéma, et le stress dont il dérive aussi', null],
-    ['Phases du sommeil', 'Seules la durée et le score sont transmis', null],
-    ['Fréquence respiratoire', 'Hors des champs poussés par Garmin', null],
-    ['FC de sommeil', 'Hors des champs poussés par Garmin', null],
+    ['Training Readiness', 'Absent même de l’API personnelle Garmin', null],
+    ['Body Battery', sousG, recuG('body_battery')],
+    ['Stress de la journée', sousG, recuG('stress')],
+    ['Phases du sommeil', sousG, recuG('sommeil_profond')],
+    ['Fréquence respiratoire au sommeil', sousG, recuG('respiration_nuit')],
+    ['FC de sommeil', sousG, recuG('fc_nuit')],
   ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
     <div class="li-s">${r[1]}</div></div>
     <span class="pill ${r[2] ? 'ok' : 'no'}">${r[2] === null ? 'Indisponible'
@@ -3488,7 +3584,8 @@ $('vrows').innerHTML = [
 })();
 
 $('priv').innerHTML = `Les données viennent de la montre Garmin, synchronisées vers
-  Intervals.icu puis agrégées. <b>Aucune coordonnée GPS ni trace de parcours n'est
+  Intervals.icu puis agrégées. Body Battery, stress et phases du sommeil, qu'Intervals.icu
+  ne reçoit pas, viennent directement de l'API personnelle Garmin. <b>Aucune coordonnée GPS ni trace de parcours n'est
   publiée sur cette page.</b><br><br>Les projections utilisent la formule de Riegel,
   exposant 1,06, appliquée à ` + (CAL.reference.estime
     ? 'la référence estimée de <b>' + CAL.reference.temps + '</b>'

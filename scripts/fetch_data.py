@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 import alerts
 import adaptation
+import garmin
 import calibration
 import seances_type
 import resume_ia
@@ -358,7 +359,12 @@ def main():
     metrics["journal"] = journal[-40:]
 
     # ---- Vie quotidienne : pas, sommeil, fatigue ----
-    metrics["sante"] = sante.construit(serie)
+    # Garmin ne fournit que ce qu'Intervals.icu n'a pas (Body Battery, stress,
+    # phases du sommeil) : voir garmin.py. Sans cle, ou si Garmin refuse, la
+    # collecte continue et l'etat le dit sur la page.
+    g = garmin.met_a_jour(ROOT, OLDEST, today)
+    metrics["garmin"] = {k: v for k, v in g.items() if k != "jours"}
+    metrics["sante"] = sante.construit(serie, g["jours"])
 
     # ---- Calibration : zones et projections issues des courses reelles ----
     metrics["calibration"] = calibration.calcule(seances, PLAN["courses"])

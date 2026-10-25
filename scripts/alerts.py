@@ -291,6 +291,19 @@ def repos(pauses, seances, aujourd_hui, semaine_courante):
     return None
 
 
+def cle_garmin(etat):
+    """La cle de l'API Garmin refusee : elle expire au plus tard en un an."""
+    if (etat or {}).get("etat") != "refusee":
+        return None
+    return _alerte(
+        "attention", "Clé Garmin refusée",
+        "Body Battery, stress et phases du sommeil ne se mettent plus à jour : "
+        "la clé de l'API personnelle a expiré ou a été révoquée.",
+        "Recrée-la sur Garmin Connect (réglages du compte, jeton d'API "
+        "personnel, validité 1 an), remplace-la dans .env, puis lance "
+        "scripts/set_secrets.py.")
+
+
 def compute(metrics, plan, semaine_courante, aujourd_hui=None):
     """Applique toutes les regles et renvoie les alertes, plus graves d'abord."""
     aujourd_hui = aujourd_hui or date.today()
@@ -309,6 +322,7 @@ def compute(metrics, plan, semaine_courante, aujourd_hui=None):
         fc_repos(metrics["wellness"], en_pause),
         douleurs(metrics["journal"]),
         rpe(metrics["journal"]),
+        cle_garmin(metrics.get("garmin")),
     ]
     out = [a for a in out if a]
     out.sort(key=lambda a: -NIVEAUX[a["niveau"]])

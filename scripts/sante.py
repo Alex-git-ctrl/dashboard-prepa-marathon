@@ -17,16 +17,26 @@ CHAMPS = [
     ("pas", "Pas", "pas", 0),
     ("sommeil_h", "Sommeil", "h", 1),
     ("sommeil_score", "Score de sommeil", "/100", 0),
+    ("body_battery", "Body Battery", "/100", 0),
     ("fatigue_indice", "Indice de fatigue", "/100", 0),
+    ("stress", "Stress moyen", "/100", 0),
     ("fc_repos", "FC de repos", "bpm", 0),
     ("hrv", "Variabilité cardiaque", "ms", 0),
+    ("respiration_nuit", "Respiration au sommeil", "/min", 1),
     ("poids", "Poids", "kg", 1),
     ("spo2", "SpO2", "%", 0),
 ]
-# Pas de frequence respiratoire ni de FC de sommeil : Garmin ne les pousse pas
-# vers Intervals.icu. La liste qu'il envoie vraiment est icu_garmin_wellness_keys
-# sur le profil, et ces deux champs n'y sont pas. Les afficher serait promettre
-# une courbe qui ne viendra jamais.
+# Body Battery, stress et respiration au sommeil ne viennent PAS
+# d'Intervals.icu, qui ne les recoit pas : ils arrivent par l'API personnelle
+# Garmin (garmin.py). Les autres champs restent ceux d'Intervals.icu. Une
+# source par champ, jamais deux.
+DE_GARMIN = {"body_battery", "stress", "respiration_nuit"}
+
+# Ce que Garmin ajoute a chaque jour sans en faire une courbe : la
+# composition de la nuit, que la page dessine a part, et le detail.
+DETAIL_GARMIN = ("sommeil_profond", "sommeil_paradoxal", "sommeil_leger",
+                 "sommeil_eveil", "sommeil_duree", "fc_nuit", "statut_vfc", "body_battery_min",
+                 "bb_recharge", "bb_depense", "stress_eleve_min")
 
 JOURS_REFERENCE = 28   # fenetre de la moyenne de reference
 JOURS_MINIMUM = 14     # en dessous, on ne dit rien plutot que n'importe quoi
@@ -69,12 +79,20 @@ def indice_fatigue(serie):
     return serie
 
 
-def construit(wellness):
-    """Serie quotidienne prete a agreger, plus l'etat du jour."""
+def construit(wellness, garmin=None):
+    """Serie quotidienne prete a agreger, plus l'etat du jour.
+
+    `garmin` : {date: champs} de garmin.py, ou None. Il ne remplit que ses
+    propres champs (DE_GARMIN, DETAIL_GARMIN), jamais ceux d'Intervals.icu.
+    """
+    garmin = garmin or {}
     serie = []
     for w in wellness:
-        serie.append({c[0]: w.get(c[0]) for c in CHAMPS if c[0] != "fatigue_indice"}
-                     | {"date": w["date"]})
+        g = garmin.get(w["date"]) or {}
+        jour = {c[0]: (g.get(c[0]) if c[0] in DE_GARMIN else w.get(c[0]))
+                for c in CHAMPS if c[0] != "fatigue_indice"}
+        jour.update({k: g.get(k) for k in DETAIL_GARMIN})
+        serie.append(jour | {"date": w["date"]})
     indice_fatigue(serie)
 
     def dernier(champ):
