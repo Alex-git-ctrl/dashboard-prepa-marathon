@@ -35,6 +35,10 @@ jobs:
           # Facultatif. Sans ce secret, les resumes de seance basculent sur
           # l'analyse par regles, qui s'annonce comme telle sur la page.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Facultatif. L'API personnelle Garmin, pour ce qu'Intervals.icu ne
+          # transmet pas (Body Battery, phases de sommeil, stress). Sans ce
+          # secret, la collecte s'en passe.
+          GARMIN_PERSONAL_API_KEY: ${{ secrets.GARMIN_PERSONAL_API_KEY }}
         run: python scripts/fetch_data.py
 
       - name: Regenerer le plan et la page
