@@ -418,6 +418,9 @@ def main():
     absent = [k for k, v in metrics["couverture"].items() if not v]
     print(f"  wellness alimente : {', '.join(dispo_ok) or 'aucun'}")
     print(f"  wellness vide     : {', '.join(absent) or 'aucun'}")
+    ga = metrics["garmin"]
+    print(f"  garmin : {ga['etat']}, {ga['nb_jours']} jour(s), dernier "
+          f"{ga['derniere_date'] or 'aucun'}")
     sa = metrics["sante"]["actuel"]
     dispo_sante = [c["nom"] for c in metrics["sante"]["champs"] if sa.get(c["cle"])]
     print(f"  sante : {', '.join(dispo_sante) or 'aucun indicateur'}")
