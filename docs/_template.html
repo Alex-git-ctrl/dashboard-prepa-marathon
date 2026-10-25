@@ -52,6 +52,9 @@ __THEME__
       semaines qui indique si la préparation fonctionne.</p>
     <div class="sec"><h2>Où tu en es</h2><div id="bilan"></div></div>
     <div class="sec"><h2>Indicateurs</h2><div class="grid" id="kpis"></div></div>
+    <div class="sec" id="sec-records" hidden><h2>Meilleurs efforts</h2>
+      <div class="list" id="records"></div>
+      <p class="note" id="records-n"></p></div>
     <div class="sec"><h2>Évolution</h2><div id="charts"></div></div>
   </section>
 
@@ -101,6 +104,9 @@ __THEME__
     <div class="sec"><h2>Choisir une séance</h2><div id="sea-choix"></div>
       <div id="sea-liste"></div>
       <p class="note" id="sea-n"></p></div>
+    <div class="sec" id="sec-autres" hidden><h2>Les autres sports</h2>
+      <div class="list" id="autres"></div>
+      <p class="note" id="autres-n"></p></div>
     <div class="sec"><h2>Jours sans course</h2><div id="journal"></div></div>
     <div class="sec"><h2>Comment remplir le journal</h2>
       <div class="card"><div class="card-in" id="howto"></div></div></div>
@@ -1010,6 +1016,29 @@ const GLOSSAIRE = {
     'Le coût d’une séance en un seul nombre, tiré de sa durée et de son '
     + 'intensité cardiaque. Il sert à comparer ce qui n’est pas comparable : '
     + 'une sortie longue lente et un fractionné court.',
+  'effet-aerobie':
+    'Le Training Effect aérobie de Garmin, de 0 à 5 : ce que la séance a '
+    + 'apporté à ton endurance. Sous 2, elle entretient ; de 3 à 4, elle '
+    + 'fait progresser ; à 5, elle dépasse ce que ta forme du moment absorbe.',
+  'effet-anaerobie':
+    'Le Training Effect anaérobie de Garmin, de 0 à 5 : ce que la séance a '
+    + 'demandé à ta capacité à tenir des efforts courts et intenses.',
+  'dominante-de-la-seance':
+    'Ce que Garmin estime que la séance a surtout travaillé : récupération, '
+    + 'endurance de base, tempo, seuil, VO2max, vitesse.',
+  'body-battery':
+    'La réserve d’énergie estimée par Garmin, de 0 à 100, à partir de ta '
+    + 'variabilité cardiaque, de ton stress et de ton sommeil. Sur une séance, '
+    + 'c’est ce que l’effort a consommé.',
+  'perte-hydrique':
+    'L’eau perdue par la sueur pendant la séance, estimée par Garmin. Un repère '
+    + 'pour boire après, et pour préparer les ravitaillements des sorties longues.',
+  'minutes-d-intensite':
+    'Les minutes d’activité modérée de la semaine, plus le double des minutes '
+    + 'intenses, comme les compte Garmin. L’OMS recommande 150 par semaine.',
+  'age-de-forme':
+    'L’âge que Garmin attribue à ton corps d’après ta FC de repos, ton IMC et '
+    + 'tes minutes d’activité intense. Un repère de fond, pas d’entraînement.',
   'vo2max':
     'L’estimation par la montre du volume d’oxygène que tu utilises au '
     + 'maximum. Sa valeur absolue vaut peu, sa pente sur deux mois vaut '
@@ -1140,6 +1169,26 @@ function aide(libelle) {
   window.addEventListener('resize', ferme);
 })();
 
+/* ---------- ce que Garmin dit d'une seance ----------
+   Le Training Effect et sa dominante viennent de l'API personnelle Garmin,
+   joints aux seances Intervals.icu par leur identifiant. */
+const TE_TYPE = {RECOVERY:'Récupération', AEROBIC_BASE:'Endurance de base',
+  TEMPO:'Tempo', LACTATE_THRESHOLD:'Seuil', THRESHOLD:'Seuil', VO2MAX:'VO2max',
+  ANAEROBIC_CAPACITY:'Capacité anaérobie', SPEED:'Vitesse',
+  NO_BENEFIT:'Sans effet notable'};
+/** Une duree en minutes, a la francaise : "40 min", "1 h 05". */
+function hmin(m) {
+  m = Math.round(m || 0);
+  return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0');
+}
+/** Un chrono en secondes : "4:13", "23:03", "1:45:20". */
+function chrono(sec) {
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  const p = n => String(n).padStart(2, '0');
+  return h ? h + ':' + p(m) + ':' + p(s) : m + ':' + p(s);
+}
+
 function chiffres(s) {
   // Douze nombres a la suite ne se lisent pas : l'oeil n'a aucune raison de
   // s'arreter quelque part. On les range donc par question posee, et chaque
@@ -1165,9 +1214,16 @@ function chiffres(s) {
     ['La foulée', [
       [s.cadence ? ppm(s.cadence) : null, 'ppm', 'cadence'],
       [s.puissance_moy ? nf(s.puissance_moy) : null, 'W', 'puissance moyenne']]],
+    // Garmin : ce que la seance a travaille, et ce qu'elle a coute de plus.
+    ['Ce que ça a travaillé', [
+      [s.te_aerobie != null ? nf(s.te_aerobie) : null, '/5', 'effet aérobie'],
+      [s.te_anaerobie != null ? nf(s.te_anaerobie) : null, '/5', 'effet anaérobie'],
+      [TE_TYPE[s.te_label] || null, '', 'dominante de la séance']]],
     ['Ce que ça a coûté', [
       [s.calories ? nf(s.calories) : null, 'kcal', 'dépense'],
-      [s.charge ? Math.round(s.charge) : null, '', 'charge']]],
+      [s.charge ? Math.round(s.charge) : null, '', 'charge'],
+      [s.bb != null ? (s.bb > 0 ? '+' : '') + s.bb : null, '', 'Body Battery'],
+      [s.eau_ml ? nf(Math.round(s.eau_ml / 10) * 10) : null, 'ml', 'perte hydrique']]],
   ];
   const bloc = ([titre, N]) => {
     const vus = N.filter(n => n[0] != null && n[0] !== '');
@@ -1851,6 +1907,63 @@ function detailSeance(s) {
     + 'seconde par seconde sur ' + S.filter(s => s.courbes).length + '.';
 })();
 
+/* ---------- les autres sports ----------
+   Natation, velo, foot, musculation : les seances viennent d'Intervals.icu,
+   le Training Effect et la Body Battery de Garmin. Elles ne comptent ni dans
+   le volume de course ni dans la regularite du plan : elles sont la pour que
+   toute l'activite soit visible, surtout pendant un arret de course. */
+(function () {
+  const X = (M.autres || []).slice().reverse();
+  if (!X.length) return;
+  $('autres').innerHTML = X.slice(0, 12).map(a => {
+    const dist = a.km ? (a.type === 'Swim' ? nf(Math.round(a.km * 1000)) + ' m'
+      : km1(a.km) + ' km') : null;
+    const sous = [dist, a.fc_moy ? 'FC ' + Math.round(a.fc_moy) : null,
+      a.te_aerobie != null ? (TE_TYPE[a.te_label] || 'Effet aérobie') + ' '
+        + nf(a.te_aerobie) + '/5' : null,
+      a.swolf ? 'SWOLF ' + Math.round(a.swolf) : null,
+      a.bb ? 'Body Battery ' + a.bb : null].filter(Boolean).join(' · ');
+    return '<div class="li"><div class="li-k"><div>' + a.sport + '</div>'
+      + '<div class="li-s">' + dlong(a.date) + (sous ? ' · ' + sous : '') + '</div></div>'
+      + '<div class="li-v">' + hmin(a.minutes) + '</div></div>';
+  }).join('');
+  const sem = X.filter(a => a.semaine === cur);
+  const parSport = {};
+  sem.forEach(a => { parSport[a.sport] = (parSport[a.sport] || 0) + 1; });
+  $('autres-n').innerHTML = (sem.length ? 'Cette semaine : <b>'
+      + hmin(sem.reduce((t, a) => t + a.minutes, 0)) + '</b> en ' + sem.length
+      + (sem.length > 1 ? ' séances' : ' séance') + ' ('
+      + Object.entries(parSport).map(([k, n]) => k.toLowerCase() + ' ' + n).join(', ')
+      + '). ' : '')
+    + 'Ces séances ne comptent ni dans le volume de course ni dans la régularité '
+    + 'du plan. Le Training Effect et la Body Battery viennent de Garmin.';
+  $('sec-autres').hidden = false;
+})();
+
+/* ---------- meilleurs efforts ----------
+   Le passage le plus rapide sur chaque distance a l'interieur d'une seance,
+   tel que Garmin le mesure. Ce n'est pas un chrono de course officiel. */
+(function () {
+  const DIST = [['meilleur_1000', '1 km', 1000], ['meilleur_1609', '1 mile', 1609],
+    ['meilleur_5000', '5 km', 5000], ['meilleur_10000', '10 km', 10000],
+    ['meilleur_21097', 'Semi-marathon', 21097]];
+  const S = M.seances || [];
+  const L = DIST.map(([k, nom, m]) => {
+    const b = S.filter(s => s[k]).sort((p, q) => p[k] - q[k])[0];
+    return b && {nom, t:b[k], date:b.date, m};
+  }).filter(Boolean);
+  if (!L.length) return;
+  $('records').innerHTML = L.map(r => '<div class="li"><div class="li-k"><div>'
+    + r.nom + '</div><div class="li-s">' + dlong(r.date) + ' · '
+    + allure(r.t / r.m * 1000) + ' /km</div></div><div class="li-v">' + chrono(r.t)
+    + '</div></div>').join('');
+  $('records-n').textContent = 'Le passage le plus rapide sur chaque distance à '
+    + 'l’intérieur d’une séance, mesuré par Garmin sur les séances gardées en détail. '
+    + 'Ce n’est pas un chrono de course officiel : il sert à voir la vitesse revenir '
+    + 'après l’arrêt.';
+  $('sec-records').hidden = false;
+})();
+
 /* ---------- journal des jours sans course ---------- */
 (function () {
   $('howto').innerHTML = `<div><b>Depuis le téléphone</b>, dans Intervals.icu :
@@ -2400,16 +2513,21 @@ const IC_POINT = {
     const reste = Math.max(0, prevu - fait);
     const dimanche = today.getDay() === 0;
     const ok = fait >= prevu * .95;
+    // Les autres sports de la semaine : pendant un arret de course, c'est
+    // toute l'activite, et la tuile la montre au lieu d'un 0 km.
+    const aut = (M.semaines[cur] || {}).autres_minutes || 0;
     if (auRepos(cur)) T.push({nom:'Cette semaine', ic:IC_SANTE.activite,
-      col:COL_ACTIVITE, etat:'neutre', mot:'Repos prescrit', val:'0', unit:'km prévu',
+      col:COL_ACTIVITE, etat:'neutre', mot:'Repos de course',
+      val:aut ? hmin(aut) : '0', unit:aut ? 'd’autres sports' : 'km prévu',
       sous:pauseAuj ? quandReprise(pauseAuj) : 'Semaine de repos',
-      go:['today', 'prog-sem']});
+      go:aut ? ['sea', 'autres'] : ['today', 'prog-sem']});
     else T.push({nom:'Cette semaine', ic:IC_SANTE.activite, col:COL_ACTIVITE,
       etat:ok ? 'ok' : dimanche && fait < prevu * .7 ? 'veille' : 'neutre',
       mot:ok ? 'Objectif atteint' : ADAPT[cur] && MOTIF[ADAPT[cur].motif]
         ? MOTIF[ADAPT[cur].motif] : dimanche ? 'Dernier jour' : 'En cours',
       val:km1(fait), unit:'km sur ' + km1(prevu),
-      sous:ok ? 'Le volume prévu est fait' : 'Reste ' + km1(reste) + ' km',
+      sous:(ok ? 'Le volume prévu est fait' : 'Reste ' + km1(reste) + ' km')
+        + (aut ? ' · + ' + hmin(aut) + ' d’autres sports' : ''),
       jauge:prevu ? fait / prevu : null, go:['today', 'prog-sem']});
   }
 
@@ -2703,6 +2821,10 @@ function lineChart(box, series, opt) {
   if (opt.target != null) {
     mn = Math.min(mn, opt.target); mx = Math.max(mx, opt.target);
   }
+  // Une plage de reference [bas, haut], dessinee en bande sous la courbe.
+  if (opt.bande) {
+    mn = Math.min(mn, opt.bande[0]); mx = Math.max(mx, opt.bande[1]);
+  }
   const bas = mn, pad = (mx - mn) * .15 || 1;
   mn -= pad; mx += pad;
   // Une grandeur qui ne peut pas etre negative ne doit pas avoir d'axe negatif.
@@ -2750,6 +2872,10 @@ function lineChart(box, series, opt) {
     s += `<text class="ax" x="${L - 7}"
       y="${(y + 3.4).toFixed(1)}" text-anchor="end">${v.toFixed(dec)}</text>`;
   }
+  if (opt.bande) s += `<rect x="${L}" y="${Y(opt.bande[1]).toFixed(1)}"
+    width="${(W - L - R).toFixed(1)}" height="${(Y(opt.bande[0]) - Y(opt.bande[1])).toFixed(1)}"
+    fill="var(--ok)" fill-opacity=".10"/><text class="ax" x="${W - R - 4}"
+    y="${(Y(opt.bande[1]) + 11).toFixed(1)}" text-anchor="end">${opt.bande[2] || ''}</text>`;
   if (opt.target != null && opt.target > mn && opt.target < mx)
     s += `<line x1="${L}" y1="${Y(opt.target).toFixed(1)}" x2="${W - R}"
       y2="${Y(opt.target).toFixed(1)}" stroke="var(--effort)" stroke-width="1.5"
@@ -3330,6 +3456,21 @@ function lectureNuits() {
       + '<div class="d">' + (dt ? dshort(dt) : '') + '</div></div>';
   }).join('');
 
+  /* Deux tuiles de l'API Garmin : les minutes d'intensite de la semaine
+     (moderees + 2 x intenses, le compte de Garmin et de l'OMS) et l'age de
+     forme. L'age reel n'est jamais publie : la page est publique. */
+  const lun = new Date(today); lun.setDate(lun.getDate() - (lun.getDay() + 6) % 7);
+  const aIM = J.some(j => j.im_moderees != null || j.im_intenses != null);
+  const semIM = J.filter(j => j.date >= iso(lun)).reduce((t, j) =>
+    t + (j.im_moderees || 0) + 2 * (j.im_intenses || 0), 0);
+  const AF = (M.garmin || {}).age_forme;
+  const tuileG = (nom, v, u, d) => '<div class="tile"><div class="l">' + nom + aide(nom)
+    + '</div><div class="v">' + v + '<em>' + u + '</em></div><div class="d">' + d
+    + '</div></div>';
+  $('sante-tuiles').insertAdjacentHTML('beforeend',
+    (aIM ? tuileG('Minutes d’intensité', nf(semIM), 'min', 'sur 150 cette semaine') : '')
+    + (AF ? tuileG('Âge de forme', AF.age_forme, 'ans', dshort(AF.date)) : ''));
+
   if (nuits($('nuits'))) $('nuits-n').innerHTML = lectureNuits();
   else $('nuits-n').textContent = '';
   phases();
@@ -3358,15 +3499,21 @@ function lectureNuits() {
     const dort = j => j.sommeil_duree != null ? j.sommeil_duree
       : lit(j) - (j.sommeil_eveil || 0);
     const sept = nuitsG.slice(-7);
-    const mx = Math.max(...sept.map(lit), 1);
+    // L'echelle couvre aussi le besoin : un trait au-dela de la barre dit
+    // d'un coup d'oeil que la nuit a ete trop courte.
+    const mx = Math.max(...sept.map(j => Math.max(lit(j), j.besoin_sommeil || 0)), 1);
     const court = d => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR',
       {weekday:'short', day:'numeric'});
     const hm = m => heuresMin(m / 60);
     $('phases').innerHTML = '<div class="ph">' + sept.map(j =>
       '<div class="ph-r"><span class="ph-d">' + court(j.date) + '</span>'
-      + '<span class="ph-b" style="width:' + (lit(j) / mx * 100).toFixed(1) + '%">'
+      + '<span class="ph-z"><span class="ph-b" style="width:'
+      + (lit(j) / mx * 100).toFixed(1) + '%">'
       + PH.map(p => j[p[0]] ? '<i title="' + p[1] + ' ' + hm(j[p[0]]) + '" style="flex:'
         + j[p[0]] + ';background:' + p[2] + '"></i>' : '').join('') + '</span>'
+      + (j.besoin_sommeil ? '<b class="ph-m" style="left:'
+        + (j.besoin_sommeil / mx * 100).toFixed(1) + '%" title="Besoin de sommeil : '
+        + hm(j.besoin_sommeil) + '"></b>' : '') + '</span>'
       + '<span class="ph-t">' + hm(dort(j)) + '</span></div>').join('') + '</div>';
     // La repartition moyenne sur 28 nuits au plus : chaque phase en part du
     // sommeil MESURE (profond + paradoxal + leger), comme les reperes qu'on
@@ -3380,11 +3527,18 @@ function lectureNuits() {
         + Math.round(somme(p[0]) / mesure * 100) + ' %</span>').join('')
       + '<span><i style="background:var(--creux);height:8px;width:12px"></i>Non classé</span>'
       + '<span><i style="background:var(--veille);height:8px;width:12px"></i>Éveil '
-      + Math.round(somme('sommeil_eveil') / vingt8.length) + ' min par nuit</span></div>');
+      + Math.round(somme('sommeil_eveil') / vingt8.length) + ' min par nuit</span>'
+      + (sept.some(j => j.besoin_sommeil) ? '<span><i style="background:var(--encre);'
+        + 'height:12px;width:2px"></i>Besoin de sommeil</span>' : '') + '</div>');
     const STATUT = {BALANCED:'équilibré', UNBALANCED:'déséquilibré', LOW:'bas',
       POOR:'faible'};
     const dv = J.slice().reverse().find(j => j.statut_vfc);
+    const besoins = sept.filter(j => j.besoin_sommeil);
+    const dette = besoins.reduce((t, j) => t + Math.max(0, j.besoin_sommeil - dort(j)), 0);
     $('phases-n').innerHTML = 'Durée de sommeil selon Garmin, éveil exclu. '
+      + (besoins.length ? 'Le trait marque le besoin que Garmin calcule chaque nuit '
+        + '(il monte après une dette, une charge ou une VFC basse) : sur ces nuits, '
+        + 'il t’a manqué <b>' + hm(dette) + '</b> au total. ' : '')
       + 'Répartition moyenne sur ' + vingt8.length + ' nuits en bas de carte. '
       + 'Repères habituels chez l’adulte : 13 à 23 % de sommeil profond, 20 à 25 % '
       + 'de paradoxal.'
@@ -3446,6 +3600,8 @@ function lectureNuits() {
 
   // Tous ouverts par defaut des qu'ils ont des donnees (choix du
   // 01/10/2026), comme les courbes de Progres.
+  const dvb = J.slice().reverse().find(j => j.vfc_bas && j.vfc_haut);
+  const bandeVfc = dvb ? [dvb.vfc_bas, dvb.vfc_haut, 'ta plage normale (Garmin)'] : null;
 
   function dessine() {
     // Changer de periode redessine tout : on garde ce que l'utilisateur a
@@ -3471,6 +3627,8 @@ function lectureNuits() {
         color:(IC_CHAMP[c.cle] || {}).color || 'var(--mesure)', data:data}],
         {unit:u, dec:c.dec,
          target:c.cle === 'fatigue_indice' ? 50 : null,
+         // Ta plage normale de VFC selon Garmin, la plus recente connue.
+         bande:c.cle === 'hrv' && bandeVfc ? bandeVfc : null,
          wait:ATTENTE[mode]});
       $('sc' + i).closest('.bl').open = !!ok
         && (avant ? !!avant[i] : true);
@@ -3577,6 +3735,14 @@ $('vrows').innerHTML = [
     ['Phases du sommeil', sousG, recuG('sommeil_profond')],
     ['Fréquence respiratoire au sommeil', sousG, recuG('respiration_nuit')],
     ['FC de sommeil', sousG, recuG('fc_nuit')],
+    ['Autres sports', 'Natation, vélo, foot, musculation, via Intervals.icu',
+      !!(M.autres || []).length],
+    ['Training Effect', sousG,
+      (M.seances || []).concat(M.autres || []).some(x => x.te_aerobie != null)],
+    ['Meilleurs efforts', sousG, (M.seances || []).some(x => x.meilleur_1000)],
+    ['Zones cardiaques de la montre', sousG, !!G.zones],
+    ['Besoin de sommeil', sousG, recuG('besoin_sommeil')],
+    ['Âge de forme', sousG, !!G.age_forme],
   ].map(r => `<div class="li"><div class="li-k"><div>${r[0]}</div>
     <div class="li-s">${r[1]}</div></div>
     <span class="pill ${r[2] ? 'ok' : 'no'}">${r[2] === null ? 'Indisponible'

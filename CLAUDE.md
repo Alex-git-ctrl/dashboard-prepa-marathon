@@ -174,10 +174,29 @@ La règle : **chaque champ a une seule source.**
   durée et score du sommeil, VFC, FC de repos, poids, VO2max.
 - Garmin : Body Battery (pic, creux, recharge, dépense), stress de la
   journée, phases du sommeil (et la durée Garmin qui les englobe),
-  respiration et FC pendant le sommeil, statut de la VFC.
+  respiration et FC pendant le sommeil, statut et plage normale de la VFC,
+  besoin de sommeil du jour, minutes d'intensité, âge de forme ; par
+  activité, Training Effect aérobie et anaérobie et sa dominante, Body
+  Battery consommée, perte hydrique, meilleurs efforts (1 km au semi),
+  SWOLF ; et les zones cardiaques réglées dans la montre, qui remplacent les
+  bornes de repli de `seance_detail.py` (`regle_zones`).
 
 `sante.construit(wellness, garmin)` applique cette règle : un champ Garmin
-n'écrase jamais un champ Intervals. Écart connu et assumé : la nuit du
+n'écrase jamais un champ Intervals. Les champs Garmin d'une activité sont
+joints aux séances Intervals par `external_id`, qui vaut l'identifiant de
+l'activité Garmin (`fetch_data.extras_garmin`). La charge d'entraînement
+Garmin (EPOC) n'est pas reprise : celle d'Intervals fait foi.
+
+**Les autres sports** (natation, vélo, foot, musculation) viennent
+d'Intervals.icu, dans `metrics["autres"]` et `autres_minutes` par semaine.
+Ils s'affichent (onglet Séances, tuile de la semaine sur l'accueil) mais ne
+comptent ni dans le volume de course, ni dans l'observance, ni dans les
+alertes de charge.
+
+**Confidentialité des activités.** Le nom d'une activité contient la ville
+(« Choisy-le-Roi eBiking ») et le résumé Garmin porte la position GPS de
+départ et d'arrivée : rien de cela n'est copié. `garmin.CHAMPS_ACTIVITE` est
+une liste blanche, et l'âge réel n'est jamais publié (seul l'âge de forme). Écart connu et assumé : la nuit du
 25/10/2026, Intervals donne 8,8 h de sommeil et Garmin 7,7 h ; les autres
 nuits concordent à 0,1 h. La tuile « Sommeil » reste celle d'Intervals, la
 carte des phases dit qu'elle montre la durée Garmin.

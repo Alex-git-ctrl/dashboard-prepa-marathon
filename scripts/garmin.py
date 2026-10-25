@@ -20,6 +20,23 @@ repond 400 et un corps vide), on decoupe donc tout en tranches de 28 jours.
 L'historique s'accumule dans docs/garmin.json : metrics.json est reconstruit
 de zero a chaque collecte, et sans ce cache il faudrait tout redemander.
 
+Ajouts du 25/10/2026, dans le meme esprit (rien qu'Intervals.icu n'ait deja) :
+  - par activite, jointe aux seances Intervals par leur identifiant Garmin
+    (external_id) : Training Effect aerobie et anaerobie, Body Battery
+    consommee, perte hydrique estimee, minutes d'intensite, meilleurs
+    efforts et records, et pour la natation le SWOLF et les longueurs ;
+  - les zones cardiaques reglees dans la montre (bornes, FC max, seuil) ;
+  - par jour : minutes d'intensite, besoin de sommeil calcule par Garmin,
+    plage normale de la VFC ; et l'age de forme du jour.
+La charge d'entrainement Garmin (EPOC) n'est PAS reprise : Intervals.icu en
+calcule une, sur une autre echelle, et deux chiffres pour la meme idee se
+contrediraient.
+
+CONFIDENTIALITE. Le resume Garmin d'une activite porte la position GPS de
+depart et d'arrivee, le nom de la ville et le nom de l'activite (qui contient
+souvent la ville). Rien de cela n'est copie : seuls les champs de la liste
+blanche CHAMPS_ACTIVITE passent.
+
 Honnetete : sans cle, ou si Garmin refuse ou ne repond pas, la collecte
 continue sans ces champs, garde le cache, et l'etat le dit. Que des
 agregats quotidiens : ni trace, ni position, ni horodatage a la seconde.
@@ -35,7 +52,31 @@ BASE = "https://personal.connectapi.garmin.com"
 JETON = "/personalapitoken-service/personal-api/personal-api-key/token"
 TRANCHE = 28            # jours par requete, la limite du sommeil
 RELIRE = 3              # jours recents redemandes : la nuit d'hier peut arriver tard
+RELIRE_ACTIVITES = 14   # une activite peut etre synchronisee avec retard
 DELAI = 30
+# A incrementer quand on ajoute un champ : un cache d'une version plus
+# ancienne est recharge depuis le debut, sinon les anciens jours n'auraient
+# jamais le nouveau champ.
+VERSION = 2
+
+# Activite Garmin -> champ publie. LISTE BLANCHE : tout le reste (GPS, nom,
+# ville, identite) est ignore. Les meilleurs efforts sont en secondes.
+CHAMPS_ACTIVITE = {
+    "aerobicTrainingEffect": "te_aerobie",
+    "anaerobicTrainingEffect": "te_anaerobie",
+    "trainingEffectLabel": "te_label",
+    "differenceBodyBattery": "bb",
+    "waterEstimated": "eau_ml",
+    "moderateIntensityMinutes": "im_moderees",
+    "vigorousIntensityMinutes": "im_intenses",
+    "fastestSplit_1000": "meilleur_1000",
+    "fastestSplit_1609": "meilleur_1609",
+    "fastestSplit_5000": "meilleur_5000",
+    "fastestSplit_10000": "meilleur_10000",
+    "fastestSplit_21098": "meilleur_21097",
+    "averageSwolf": "swolf",
+    "activeLengths": "longueurs",
+}
 
 # Les champs que ce module ajoute a la serie sante, et leur sens. Le nom est
 # celui de la page, le commentaire dit d'ou il vient chez Garmin.
@@ -114,6 +155,8 @@ def _quotidien(s, d, f, jours):
             # Garmin marque -1 ou -2 un stress non mesure (montre retiree).
             "stress": st.get("avgLevel") if (st.get("avgLevel") or -1) >= 0 else None,
             "stress_eleve_min": _min(st.get("highStressDurationInMillis")),
+            "im_moderees": (x.get("intensityMinutes") or {}).get("moderate"),
+            "im_intenses": (x.get("intensityMinutes") or {}).get("vigorous"),
         }.items() if v is not None})
 
 
@@ -132,6 +175,9 @@ def _sommeil(s, d, f, jours):
             "sommeil_duree": _min(x["sleepTimeSeconds"] * 1000),
             "respiration_nuit": x.get("averageRespirationValue"),
             "fc_nuit": x.get("avgHeartRate"),
+            # Le besoin calcule par Garmin pour cette nuit, en minutes : il
+            # monte apres une dette, une charge ou une VFC basse.
+            "besoin_sommeil": (x.get("sleepNeed") or {}).get("actual"),
         }.items() if v is not None})
 
 
@@ -139,15 +185,65 @@ def _vfc(s, d, f, jours):
     rep = _get(s, "/hrv-service/hrv/daily/%s/%s" % (d.isoformat(), f.isoformat())) or {}
     for x in rep.get("hrvSummaries") or []:
         if x.get("calendarDate") and x.get("status"):
-            jours.setdefault(x["calendarDate"], {})["statut_vfc"] = x["status"]
+            j = jours.setdefault(x["calendarDate"], {})
+            j["statut_vfc"] = x["status"]
+            # La plage "equilibree" de Garmin : ta normale a toi, recalculee
+            # sur trois semaines, pas une norme de population.
+            b = x.get("baseline") or {}
+            if b.get("balancedLow") and b.get("balancedUpper"):
+                j["vfc_bas"], j["vfc_haut"] = b["balancedLow"], b["balancedUpper"]
+
+
+def _activites(s, d, f, acts):
+    """Les champs de la liste blanche, par identifiant d'activite Garmin."""
+    debut = 0
+    while True:
+        rep = _get(s, "/activitylist-service/activities/search/activities",
+                   {"start": debut, "limit": 100, "startDate": d.isoformat(),
+                    "endDate": f.isoformat()}) or []
+        for a in rep:
+            x = {v: a[k] for k, v in CHAMPS_ACTIVITE.items() if a.get(k) not in (None, "")}
+            x["record"] = bool(a.get("pr") or a.get("isPR"))
+            if a.get("poolLength"):
+                x["bassin_m"] = round(a["poolLength"] / 100)     # en centimetres
+            acts[str(a["activityId"])] = x
+        if len(rep) < 100:
+            return
+        debut += 100
+
+
+def _zones(s):
+    """Les zones cardiaques reglees dans la montre."""
+    rep = _get(s, "/biometric-service/heartRateZones/v2") or []
+    z = next((x for x in rep if x.get("sport") == "DEFAULT"), rep[0] if rep else None)
+    if not z or not z.get("zone1Floor"):
+        return None
+    return {"bornes": [z["zone%dFloor" % i] for i in range(1, 6)],
+            "fc_max": z.get("maxHeartRateUsed"),
+            "fc_seuil": z.get("lactateThresholdHeartRateUsed"),
+            "fc_repos": z.get("restingHeartRateUsed"),
+            "methode": z.get("trainingMethod")}
+
+
+def _age_forme(s, jour):
+    """L'age de forme du jour, sans l'age reel : la page est publique."""
+    rep = _get(s, "/fitnessage-service/fitnessage/v2/" + jour.isoformat()) or {}
+    if not rep.get("fitnessAge"):
+        return None
+    c = (rep.get("components") or {}).get("vigorousDaysAvg") or {}
+    return {"age_forme": round(rep["fitnessAge"]),
+            "date": (rep.get("lastUpdated") or jour.isoformat())[:10],
+            "jours_intenses": c.get("value"), "jours_intenses_cible": c.get("targetValue")}
 
 
 def _lis_cache(chemin):
+    """Le cache entier. Vide s'il manque ou s'il date d'une version plus ancienne."""
     try:
         with open(chemin, encoding="utf-8") as fh:
-            return (json.load(fh) or {}).get("jours") or {}
+            c = json.load(fh) or {}
     except (OSError, ValueError):
         return {}
+    return c if c.get("version") == VERSION else {}
 
 
 def met_a_jour(root, depuis, aujourd_hui=None):
@@ -159,20 +255,26 @@ def met_a_jour(root, depuis, aujourd_hui=None):
     """
     aujourd_hui = aujourd_hui or date.today()
     chemin = os.path.join(root, "docs", "garmin.json")
-    jours = _lis_cache(chemin)
+    cache = _lis_cache(chemin)
+    jours = cache.get("jours") or {}
+    acts = cache.get("activites") or {}
+    autres = {k: cache.get(k) for k in ("zones", "age_forme")}
 
     def etat(e, message):
         dates = sorted(jours)
         return {"etat": e, "message": message, "nb_jours": len(dates),
-                "derniere_date": dates[-1] if dates else None, "jours": jours}
+                "derniere_date": dates[-1] if dates else None, "jours": jours,
+                "activites": acts, "nb_activites": len(acts), **autres}
 
     cle = _cle()
     if not cle:
         return etat("absente", "Pas de clé GARMIN_PERSONAL_API_KEY : Body Battery, "
                     "stress et phases du sommeil ne sont pas collectés.")
     debut = depuis
+    debut_act = depuis
     if jours:
         debut = max(depuis, date.fromisoformat(max(jours)) - timedelta(days=RELIRE))
+        debut_act = max(depuis, aujourd_hui - timedelta(days=RELIRE_ACTIVITES))
     try:
         s = _session(cle)
         frais = {}
@@ -180,6 +282,10 @@ def met_a_jour(root, depuis, aujourd_hui=None):
             _quotidien(s, d, f, frais)
             _sommeil(s, d, f, frais)
             _vfc(s, d, f, frais)
+        for d, f in _tranches(debut_act, aujourd_hui):
+            _activites(s, d, f, acts)
+        autres["zones"] = _zones(s) or autres.get("zones")
+        autres["age_forme"] = _age_forme(s, aujourd_hui) or autres.get("age_forme")
     except Refusee:
         return etat("refusee", "Garmin refuse la clé : elle a expiré ou a été "
                     "révoquée. À recréer sur Garmin Connect, puis set_secrets.py.")
@@ -193,7 +299,8 @@ def met_a_jour(root, depuis, aujourd_hui=None):
         jours[k] = v
     jours = {k: jours[k] for k in sorted(jours)}
     with open(chemin, "w", encoding="utf-8") as fh:
-        json.dump({"maj": aujourd_hui.isoformat(), "jours": jours}, fh,
+        json.dump({"version": VERSION, "maj": aujourd_hui.isoformat(),
+                   "jours": jours, "activites": acts, **autres}, fh,
                   ensure_ascii=False, indent=1)
     return etat("ok", "Collecte Garmin à jour.")
 
@@ -206,4 +313,5 @@ if __name__ == "__main__":
     load_dotenv(os.path.join(ROOT, ".env"))
     r = met_a_jour(ROOT, date(2026, 3, 1))
     print(r["etat"], "|", r["message"], "|", r["nb_jours"], "jours, dernier",
-          r["derniere_date"])
+          r["derniere_date"], "|", r["nb_activites"], "activites | zones",
+          r.get("zones"), "| age de forme", r.get("age_forme"))

@@ -35,7 +35,8 @@ DE_GARMIN = {"body_battery", "stress", "respiration_nuit"}
 # Ce que Garmin ajoute a chaque jour sans en faire une courbe : la
 # composition de la nuit, que la page dessine a part, et le detail.
 DETAIL_GARMIN = ("sommeil_profond", "sommeil_paradoxal", "sommeil_leger",
-                 "sommeil_eveil", "sommeil_duree", "fc_nuit", "statut_vfc", "body_battery_min",
+                 "sommeil_eveil", "sommeil_duree", "besoin_sommeil",
+                 "vfc_bas", "vfc_haut", "im_moderees", "im_intenses", "fc_nuit", "statut_vfc", "body_battery_min",
                  "bb_recharge", "bb_depense", "stress_eleve_min")
 
 JOURS_REFERENCE = 28   # fenetre de la moyenne de reference

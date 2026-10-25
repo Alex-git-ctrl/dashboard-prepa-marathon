@@ -32,8 +32,19 @@ V_MINI = 0.6       # m/s : au-dessous on est a l'arret, l'allure ne veut rien di
 # sortie entierement sous 161 bpm ressort "100 % en zone 1" chez Intervals
 # alors que la Forerunner la repartit sur trois zones. On recalcule donc le
 # temps par zone depuis le stream de FC, avec les bornes ci-dessous.
+#
+# Depuis le 25/10/2026, ces valeurs ne sont qu'un repli : la collecte appelle
+# regle_zones() avec les zones que la montre applique vraiment, lues par
+# l'API personnelle Garmin (99, 118, 138, 158, 177, FC max 197 a cette date).
 FC_BORNES = [100, 120, 140, 160, 180]
 FC_MAX_MONTRE = 200
+
+
+def regle_zones(bornes, fc_max):
+    """Remplace les bornes de repli par celles de la montre."""
+    global FC_BORNES, FC_MAX_MONTRE
+    if bornes and len(bornes) == 5 and fc_max:
+        FC_BORNES, FC_MAX_MONTRE = list(bornes), fc_max
 TROU_MAX_S = 30    # au-dela, la trace a ete coupee : l'intervalle ne compte pas
 
 MIN_ECHANTILLONS = 60      # moins d'une minute de trace : rien a decouper
@@ -46,7 +57,7 @@ def _moy(xs):
     return sum(xs) / len(xs) if xs else None
 
 
-def zones_montre(temps, hr, bornes=FC_BORNES):
+def zones_montre(temps, hr, bornes=None):
     """Secondes passees dans chacune des cinq zones de la montre.
 
     Deux details qui changent le resultat :
@@ -59,6 +70,8 @@ def zones_montre(temps, hr, bornes=FC_BORNES):
         pourcentages. C'est ce qui explique l'ecart entre la duree de
         l'activite et la somme des cinq zones sur l'ecran de la montre.
     """
+    # Lues a l'appel, pas a la definition : regle_zones() doit compter.
+    bornes = bornes or FC_BORNES
     n = min(len(temps or []), len(hr or []))
     if n < 2:
         return None

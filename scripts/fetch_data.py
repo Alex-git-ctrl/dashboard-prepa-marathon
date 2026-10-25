@@ -99,9 +99,45 @@ def allege(seances):
     return out
 
 
+# Le nom des sports autres que la course, tel que la page l'affiche. Une
+# activite d'un type absent garde son type Intervals.icu tel quel.
+SPORTS = {"Swim": "Natation", "EBikeRide": "Vélo électrique", "Ride": "Vélo",
+          "VirtualRide": "Home trainer", "Soccer": "Football",
+          "WeightTraining": "Musculation", "Workout": "Renforcement",
+          "Walk": "Marche", "Hike": "Randonnée", "Yoga": "Yoga",
+          "Rowing": "Aviron", "Elliptical": "Elliptique",
+          "Basketball": "Basket", "Tennis": "Tennis"}
+
+# Ce que Garmin ajoute a une activite (garmin.CHAMPS_ACTIVITE) et que la page
+# lit. La charge Garmin n'en fait pas partie : celle d'Intervals.icu fait foi.
+EXTRAS_GARMIN = ("te_aerobie", "te_anaerobie", "te_label", "bb", "eau_ml",
+                 "im_moderees", "im_intenses", "meilleur_1000", "meilleur_1609",
+                 "meilleur_5000", "meilleur_10000", "meilleur_21097", "record",
+                 "swolf", "longueurs", "bassin_m")
+
+
+def extras_garmin(acts, a):
+    """Les champs Garmin d'une activite Intervals.icu, joints par external_id."""
+    x = acts.get(str(a.get("external_id") or "")) or {}
+    out = {}
+    for k in EXTRAS_GARMIN:
+        if x.get(k) is not None:
+            out[k] = round(x[k], 1) if isinstance(x[k], float) else x[k]
+    return out
+
+
 def main():
     s, ath = connect()
     today = date.today()
+
+    # L'API personnelle Garmin d'abord : elle donne les zones cardiaques que
+    # la montre applique, dont le decoupage des seances a besoin, et les
+    # champs par activite (Training Effect, Body Battery...). Sans cle, ou si
+    # Garmin refuse, tout continue avec les valeurs de repli.
+    g = garmin.met_a_jour(ROOT, OLDEST, today)
+    if g.get("zones"):
+        seance_detail.regle_zones(g["zones"]["bornes"], g["zones"]["fc_max"])
+    acts_g = g.get("activites") or {}
 
     # Noms des zones de FC tels que l'athlete les a regles : on les affiche
     # plutot que d'inventer "Zone 4", que personne ne lit sur sa montre.
@@ -129,6 +165,10 @@ def main():
 
     runs = [a for a in activities if genre(a) == "course"]
     renfos = [a for a in activities if genre(a) == "renfo"]
+    # Tout ce qui n'est pas de la course : natation, velo, foot, musculation.
+    # Pendant un arret de course, c'est toute l'activite ; le reste du temps,
+    # c'est ce que les seances de course ne disent pas de la charge reelle.
+    autres_acts = [a for a in activities if genre(a) != "course" and a.get("type")]
     runs.sort(key=lambda x: x.get("start_date_local", ""))
 
     semaines = defaultdict(lambda: {"km": 0.0, "seances": 0, "minutes": 0,
@@ -225,6 +265,7 @@ def main():
             # retour le plus actionnable apres une sortie en endurance.
             "zones_fc": zs or None,
         }
+        rec.update(extras_garmin(acts_g, a))
         seances.append(rec)
         if st.get("derive_pct") is not None:
             derives.append({"date": rec["date"], "km": km,
@@ -274,6 +315,28 @@ def main():
     tot_montre = sum(zmontre)
     tot_all = sum(zall.values())
 
+    # ---- Les autres sports ----
+    # Jamais le nom de l'activite : Garmin y met la ville.
+    autres = []
+    for a in sorted(autres_acts, key=lambda x: x.get("start_date_local", "")):
+        d = datetime.fromisoformat(a["start_date_local"][:19]).date()
+        n = plan_week(d)
+        mins = round((a.get("moving_time") or 0) / 60)
+        if n:
+            w = semaines[n]
+            w["autres_seances"] = w.get("autres_seances", 0) + 1
+            w["autres_minutes"] = w.get("autres_minutes", 0) + mins
+        autres.append(dict({
+            "date": d.isoformat(), "semaine": n, "type": a.get("type"),
+            "sport": SPORTS.get(a.get("type"), a.get("type")),
+            "minutes": mins,
+            "km": round((a.get("distance") or 0) / 1000, 2) or None,
+            "fc_moy": a.get("average_heartrate"),
+            "fc_max": a.get("max_heartrate"),
+            "charge": a.get("icu_training_load"),
+            "calories": a.get("calories"),
+        }, **extras_garmin(acts_g, a)))
+
     metrics = {
         "maj": datetime.now().isoformat(timespec="seconds"),
         "nb_activites": len(runs),
@@ -281,8 +344,11 @@ def main():
                               "minutes": v["minutes"], "charge": round(v["charge"]),
                               "deniv": round(v["deniv"]),
                               "renfo_seances": v["renfo_seances"],
-                              "renfo_minutes": v["renfo_minutes"]}
+                              "renfo_minutes": v["renfo_minutes"],
+                              "autres_seances": v.get("autres_seances", 0),
+                              "autres_minutes": v.get("autres_minutes", 0)}
                      for k, v in sorted(semaines.items())},
+        "autres": autres[-60:],
         "nb_renfos": len(renfos),
         # Splits et courbes pesent lourd. On les garde sur les seances qu'on
         # va vraiment relire et on n'expose que le resume au-dela, sinon
@@ -362,8 +428,7 @@ def main():
     # Garmin ne fournit que ce qu'Intervals.icu n'a pas (Body Battery, stress,
     # phases du sommeil) : voir garmin.py. Sans cle, ou si Garmin refuse, la
     # collecte continue et l'etat le dit sur la page.
-    g = garmin.met_a_jour(ROOT, OLDEST, today)
-    metrics["garmin"] = {k: v for k, v in g.items() if k != "jours"}
+    metrics["garmin"] = {k: v for k, v in g.items() if k not in ("jours", "activites")}
     metrics["sante"] = sante.construit(serie, g["jours"])
 
     # ---- Calibration : zones et projections issues des courses reelles ----
