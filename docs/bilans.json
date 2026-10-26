@@ -56,16 +56,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-09-30T09:36:51",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Référence calée, volume toujours absent",
   "essentiel": "Trois semaines bouclées sur 27, observance 0,88, et la semaine 4 plafonne à 5,9 km sur les 25,1 prévus.",
-  "ou_tu_en_es": "Depuis le bilan du 28/09, une seule sortie ajoutée : 5,9 km le 29/09, efficacité 2,36, la meilleure des neuf. Le reste recule : VFC à 32 ms contre 69,2 de moyenne, sommeil à 3,7 h, dette de 6,3 h sur la semaine. Fatigue à 14,81 pour une forme de fond à 6,22.",
-  "viser_plus_haut": "Non, pas sur ces chiffres : la projection 3h39 à 5:11/km repose sur un seul 10 km et 18,3 km de base hebdo, donc confiance faible. Il faudrait six semaines terminées au-dessus de 0,95 d'observance pour en reparler.",
-  "a_changer": "La priorité des 3 séances hebdo n'est pas suivie : 1 séance et 5,9 km sur 25,1 en semaine 4, après 0 renfo en semaine 3. Deux sorties faciles sous 6:00/km d'ici dimanche, rien de plus.",
-  "quand": "2026-09-30T09:36:51",
-  "empreinte": "c103e337df443dda",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -149,6 +145,18 @@
   "a_changer": "Consigne tenue : 0 km, et la dette de sommeil passée de 5,0 à 2,7 h. Priorité unique des deux semaines : finir d'effacer ces 2,7 h, et aucune course avant l'avis médical, le 8 novembre restant un plancher.",
   "quand": "2026-10-25T21:13:51",
   "empreinte": "3d3254a563c0b38a",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt toujours ouvert, huitième semaine sans course",
+  "essentiel": "Aucun kilomètre couru depuis le 3 octobre, et la dette de sommeil est remontée de 2,7 à 2,9 h sur la semaine.",
+  "ou_tu_en_es": "Sept semaines terminées sur 27, dont les trois dernières à 0 km sur 0 prévu : consigne tenue. Depuis le bilan d'hier, un seul changement, la dette de sommeil qui passe de 2,7 à 2,9 h. L'activité reste réelle avec 100 minutes de natation et vélo électrique en semaine 7, et la fatigue baisse de 1,29 point par semaine.",
+  "viser_plus_haut": "Non, pas maintenant : la projection à 3h39 (5:11/km) repose sur un 10 km du 27 septembre, avec quatre semaines sans course derrière. Pour trancher, il faudra l'avis médical, une reprise tenue vers 30 km par semaine, puis un test chronométré.",
+  "a_changer": "Priorité pas suivie jusqu'au bout : le 0 km tient, mais les 2,7 h de dette de sommeil sont devenues 2,9 h. Sur deux semaines : dormir, garder ces 100 minutes de natation et vélo, aucune course avant l'avis médical.",
+  "quand": "2026-10-26T22:17:59",
+  "empreinte": "4f284e56964bd537",
   "source": "claude_conversation"
  }
 ]
