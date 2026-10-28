@@ -1096,11 +1096,11 @@
    "body_battery": 41,
    "body_battery_min": 5,
    "bb_recharge": 36,
-   "bb_depense": 11,
-   "stress": 33,
-   "stress_eleve_min": 12,
-   "im_moderees": 0,
-   "im_intenses": 0,
+   "bb_depense": 36,
+   "stress": 44,
+   "stress_eleve_min": 129,
+   "im_moderees": 1,
+   "im_intenses": 41,
    "sommeil_profond": 58,
    "sommeil_paradoxal": 0,
    "sommeil_leger": 272,
@@ -1345,7 +1345,7 @@
    "im_intenses": 25,
    "swolf": 47.0,
    "longueurs": 62,
-   "record": true,
+   "record": false,
    "bassin_m": 25
   },
   "24828493549": {
@@ -1419,6 +1419,17 @@
    "im_moderees": 39,
    "im_intenses": 16,
    "record": false
+  },
+  "24882258838": {
+   "te_aerobie": 3.0999999046325684,
+   "te_anaerobie": 2.200000047683716,
+   "te_label": "AEROBIC_BASE",
+   "im_moderees": 1,
+   "im_intenses": 38,
+   "swolf": 47.0,
+   "longueurs": 63,
+   "record": true,
+   "bassin_m": 25
   }
  },
  "zones": {
