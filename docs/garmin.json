@@ -1,6 +1,6 @@
 {
  "version": 2,
- "maj": "2026-10-28",
+ "maj": "2026-10-29",
  "jours": {
   "2026-09-02": {
    "body_battery": 77,
@@ -1097,10 +1097,10 @@
    "body_battery_min": 5,
    "bb_recharge": 36,
    "bb_depense": 36,
-   "stress": 44,
-   "stress_eleve_min": 129,
+   "stress": 46,
+   "stress_eleve_min": 140,
    "im_moderees": 1,
-   "im_intenses": 41,
+   "im_intenses": 42,
    "sommeil_profond": 58,
    "sommeil_paradoxal": 0,
    "sommeil_leger": 272,
@@ -1109,6 +1109,27 @@
    "respiration_nuit": 14.0,
    "fc_nuit": 60.0,
    "besoin_sommeil": 500,
+   "statut_vfc": "BALANCED",
+   "vfc_bas": 62,
+   "vfc_haut": 119
+  },
+  "2026-10-29": {
+   "body_battery": 51,
+   "body_battery_min": 5,
+   "bb_recharge": 46,
+   "bb_depense": 0,
+   "stress": 22,
+   "stress_eleve_min": 2,
+   "im_moderees": 0,
+   "im_intenses": 0,
+   "sommeil_profond": 44,
+   "sommeil_paradoxal": 41,
+   "sommeil_leger": 308,
+   "sommeil_eveil": 2,
+   "sommeil_duree": 393,
+   "respiration_nuit": 13.0,
+   "fc_nuit": 59.0,
+   "besoin_sommeil": 540,
    "statut_vfc": "BALANCED",
    "vfc_bas": 62,
    "vfc_haut": 119
@@ -1447,8 +1468,8 @@
  },
  "age_forme": {
   "age_forme": 18,
-  "date": "2026-10-28",
-  "jours_intenses": 1.6,
+  "date": "2026-10-29",
+  "jours_intenses": 1.8,
   "jours_intenses_cible": 3
  }
 }
