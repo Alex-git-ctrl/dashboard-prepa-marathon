@@ -1177,6 +1177,12 @@
    "vfc_haut": 119
   },
   "2026-11-01": {
+   "body_battery": 37,
+   "body_battery_min": 34,
+   "bb_recharge": 0,
+   "bb_depense": 3,
+   "stress": 49,
+   "stress_eleve_min": 3,
    "im_moderees": 0,
    "im_intenses": 0,
    "statut_vfc": "BALANCED",
