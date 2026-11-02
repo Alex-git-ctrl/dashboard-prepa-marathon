@@ -72,16 +72,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-10-05T23:37:08",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Semaine 5 à 0 km, quatrième semaine creuse",
   "essentiel": "Observance tombée à 0,68 sur les trois dernières semaines, avec 46,3 km courus sur 68 prévus et quatre semaines bouclées sur 27.",
-  "ou_tu_en_es": "Depuis le bilan du 03/10, rien n'a bougé : la semaine 4 a fermé à 7,5 km sur 25,1, et la semaine 5 est à 0 km sur 27,1. L'observance a glissé de 0,88 à 0,681. Forme de fond à 5,89 et VFC à 96 ms montent parce que tu ne cours pas, pas parce que tu progresses.",
-  "viser_plus_haut": "Non. La projection à 3h39 vient d'un 10 km réel (45:33) mais repose sur 15,4 km de base hebdo : il faut six semaines bouclées au-dessus de 0,90 d'observance avant d'en parler.",
-  "a_changer": "La sortie de 8 km demandée n'est pas venue : la semaine 4 s'est close à 2 séances. Objectif unique cette semaine : 3 sorties, 24 km au total (facteur 0,9), toutes sous 6:00/km.",
-  "quand": "2026-10-05T23:37:08",
-  "empreinte": "0e282cf92aa96868",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -165,6 +161,18 @@
   "a_changer": "Priorité pas suivie : le 0 km tient, mais la dette de sommeil passe de 2,9 à 3,4 h. Deux semaines, une cible : dormir pour ramener cette dette sous 2 h, sans course avant l'avis médical.",
   "quand": "2026-11-01T14:23:57",
   "empreinte": "b235a8933de60cc8",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt médical ouvert, cinq semaines sans course",
+  "essentiel": "Cinq semaines sans course depuis le 3 octobre, dette de sommeil bloquée à 3,4 h : rien de mesurable avant l'avis médical.",
+  "ou_tu_en_es": "Depuis le bilan d'hier, aucun chiffre n'a bougé : consigne tenue à 0 km. Ce n'est pas une période inactive, avec 564 minutes de natation et vélo sur les cinq semaines d'arrêt. FC de repos à 43 contre 48,2 de moyenne, fatigue à -0,59 par semaine, mais la VFC perd 4,18 ms par semaine.",
+  "viser_plus_haut": "Non, pas maintenant : la projection 3h39 sort d'un 10 km couru le 27 septembre, soit 36 jours sans course derrière. Pour trancher, il faut l'avis médical, quatre semaines de reprise tenues, puis un 10 km ou semi de contrôle.",
+  "a_changer": "Priorité non suivie : la dette de sommeil reste à 3,4 h, nuits à 6,8 h de moyenne. Même cible pour les deux semaines, la ramener sous 2 h, et aucune course avant l'avis médical (le 8 novembre est un plancher).",
+  "quand": "2026-11-02T23:14:26",
+  "empreinte": "e46f3e442ffbe0f1",
   "source": "claude_conversation"
  }
 ]
