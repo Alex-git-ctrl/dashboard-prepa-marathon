@@ -1,5 +1,5 @@
 {
-  "maj": "2026-11-03T01:35:30",
+  "maj": "2026-11-03T12:45:39",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -14025,12 +14025,12 @@
     },
     {
       "date": "2026-11-03",
-      "hrv": null,
-      "fc_repos": 51,
+      "hrv": 84.0,
+      "fc_repos": 49,
       "poids": null,
       "vo2max": null,
       "readiness": null,
-      "sommeil_score": null,
+      "sommeil_score": 77.0,
       "fc_sommeil": null,
       "spo2": null,
       "respiration": null,
@@ -14038,13 +14038,13 @@
       "ctl": 5.6859465,
       "atl": 3.318589,
       "ramp_rate": -0.4770155,
-      "pas": 22,
+      "pas": 2383,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
       "douleur_niveau": null,
       "commentaire": null,
-      "sommeil_h": null
+      "sommeil_h": 7.2
     }
   ],
   "derives": [
@@ -14197,12 +14197,12 @@
     "vertical_ratio": 8.6
   },
   "actuel": {
-    "hrv": 99.0,
-    "fc_repos": 51,
+    "hrv": 84.0,
+    "fc_repos": 49,
     "poids": 81.0,
     "vo2max": 53.0,
     "readiness": null,
-    "sommeil_score": 79.0,
+    "sommeil_score": 77.0,
     "fc_sommeil": null,
     "spo2": 98.0,
     "respiration": null,
@@ -14210,24 +14210,24 @@
     "ctl": 5.6859465,
     "atl": 3.318589,
     "ramp_rate": -0.4770155,
-    "pas": 22,
+    "pas": 2383,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": 6.8,
+    "sommeil_h": 7.2,
     "derive_pct": 4.6,
     "efficacite": 2.12,
     "cadence": 79.4
   },
   "couverture": {
-    "hrv": 57,
+    "hrv": 58,
     "fc_repos": 62,
     "poids": 2,
     "vo2max": 8,
     "readiness": 0,
-    "sommeil_score": 56,
+    "sommeil_score": 57,
     "fc_sommeil": 0,
     "spo2": 1,
     "respiration": 0,
@@ -14253,12 +14253,12 @@
     "Anaerobic"
   ],
   "dates": {
-    "hrv": "2026-11-02",
+    "hrv": "2026-11-03",
     "fc_repos": "2026-11-03",
     "poids": "2026-10-22",
     "vo2max": "2026-09-27",
     "readiness": null,
-    "sommeil_score": "2026-11-02",
+    "sommeil_score": "2026-11-03",
     "fc_sommeil": null,
     "spo2": "2026-09-04",
     "respiration": null,
@@ -14272,7 +14272,7 @@
     "moral": null,
     "douleur_niveau": null,
     "commentaire": null,
-    "sommeil_h": "2026-11-02",
+    "sommeil_h": "2026-11-03",
     "derive_pct": "2026-09-29",
     "efficacite": "2026-10-03",
     "cadence": "2026-10-03",
@@ -16399,55 +16399,55 @@
         "fatigue_indice": 22
       },
       {
-        "pas": 22,
-        "sommeil_h": null,
-        "sommeil_score": null,
-        "body_battery": 34,
-        "stress": 18,
-        "fc_repos": 51,
-        "hrv": null,
-        "respiration_nuit": null,
+        "pas": 2383,
+        "sommeil_h": 7.2,
+        "sommeil_score": 77.0,
+        "body_battery": 81,
+        "stress": 22,
+        "fc_repos": 49,
+        "hrv": 84.0,
+        "respiration_nuit": 13.0,
         "poids": null,
         "spo2": null,
-        "sommeil_profond": null,
-        "sommeil_paradoxal": null,
-        "sommeil_leger": null,
-        "sommeil_eveil": null,
-        "sommeil_duree": null,
-        "besoin_sommeil": null,
-        "vfc_bas": null,
-        "vfc_haut": null,
+        "sommeil_profond": 37,
+        "sommeil_paradoxal": 62,
+        "sommeil_leger": 336,
+        "sommeil_eveil": 8,
+        "sommeil_duree": 435,
+        "besoin_sommeil": 480,
+        "vfc_bas": 63,
+        "vfc_haut": 117,
         "im_moderees": 0,
         "im_intenses": 0,
-        "fc_nuit": null,
-        "statut_vfc": null,
+        "fc_nuit": 54.0,
+        "statut_vfc": "BALANCED",
         "body_battery_min": 18,
-        "bb_recharge": 16,
-        "bb_depense": 0,
-        "stress_eleve_min": 1,
+        "bb_recharge": 63,
+        "bb_depense": 16,
+        "stress_eleve_min": 6,
         "date": "2026-11-03",
-        "fatigue_indice": 64
+        "fatigue_indice": 48
       }
     ],
     "actuel": {
-      "pas": 22,
+      "pas": 2383,
       "pas_date": "2026-11-03",
-      "sommeil_h": 6.8,
-      "sommeil_h_date": "2026-11-02",
-      "sommeil_score": 79.0,
-      "sommeil_score_date": "2026-11-02",
-      "body_battery": 34,
+      "sommeil_h": 7.2,
+      "sommeil_h_date": "2026-11-03",
+      "sommeil_score": 77.0,
+      "sommeil_score_date": "2026-11-03",
+      "body_battery": 81,
       "body_battery_date": "2026-11-03",
-      "fatigue_indice": 64,
+      "fatigue_indice": 48,
       "fatigue_indice_date": "2026-11-03",
-      "stress": 18,
+      "stress": 22,
       "stress_date": "2026-11-03",
-      "fc_repos": 51,
+      "fc_repos": 49,
       "fc_repos_date": "2026-11-03",
-      "hrv": 99.0,
-      "hrv_date": "2026-11-02",
+      "hrv": 84.0,
+      "hrv_date": "2026-11-03",
       "respiration_nuit": 13.0,
-      "respiration_nuit_date": "2026-11-02",
+      "respiration_nuit_date": "2026-11-03",
       "poids": 81.0,
       "poids_date": "2026-10-22",
       "spo2": 98.0,
@@ -16637,25 +16637,25 @@
       "base_km": 18.3
     },
     "cout": {
-      "indice": 68,
-      "niveau": "eleve",
+      "indice": 59,
+      "niveau": "normal",
       "composantes": [
         {
           "nom": "Variabilité cardiaque",
-          "valeur": "-13 %",
-          "points": 20,
+          "valeur": "-10 %",
+          "points": 16,
           "max": 30
         },
         {
           "nom": "FC de repos",
           "valeur": "+4 bpm",
-          "points": 17,
+          "points": 16,
           "max": 20
         },
         {
           "nom": "Dette de sommeil",
-          "valeur": "3,6 h sur la semaine",
-          "points": 8,
+          "valeur": "3,4 h sur la semaine",
+          "points": 7,
           "max": 15
         }
       ]
@@ -16668,7 +16668,7 @@
       "au_plus_tot": "2026-11-08",
       "consigne": "Pas de course jusqu'à l'avis médical. Natation, vélo à assistance électrique et renforcement autorisés, sans douleur à la cheville.",
       "observance": "moyenne",
-      "cout": "eleve"
+      "cout": "normal"
     },
     "semaines_ajustees": [
       {
@@ -21060,7 +21060,7 @@
     {
       "niveau": "attention",
       "titre": "Variabilité cardiaque en baisse",
-      "detail": "Moyenne sur 7 jours à 73 ms, contre 80 ms de référence.",
+      "detail": "Moyenne sur 7 jours à 73 ms, contre 81 ms de référence.",
       "quoi_faire": "Surveille le sommeil et allège la prochaine séance de qualité si la baisse se poursuit."
     },
     {
