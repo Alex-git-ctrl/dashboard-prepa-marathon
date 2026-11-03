@@ -1213,10 +1213,10 @@
   "2026-11-03": {
    "body_battery": 81,
    "body_battery_min": 18,
-   "bb_recharge": 63,
-   "bb_depense": 50,
+   "bb_recharge": 69,
+   "bb_depense": 61,
    "stress": 30,
-   "stress_eleve_min": 17,
+   "stress_eleve_min": 33,
    "im_moderees": 0,
    "im_intenses": 0,
    "sommeil_profond": 37,
