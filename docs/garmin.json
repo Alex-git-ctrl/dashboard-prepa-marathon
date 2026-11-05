@@ -1253,12 +1253,12 @@
    "vfc_haut": 116
   },
   "2026-11-05": {
-   "body_battery": 33,
+   "body_battery": 34,
    "body_battery_min": 5,
-   "bb_recharge": 28,
-   "bb_depense": 3,
-   "stress": 39,
-   "stress_eleve_min": 8,
+   "bb_recharge": 29,
+   "bb_depense": 22,
+   "stress": 42,
+   "stress_eleve_min": 27,
    "im_moderees": 0,
    "im_intenses": 0,
    "sommeil_profond": 63,
