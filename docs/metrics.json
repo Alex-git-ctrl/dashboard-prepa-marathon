@@ -1,5 +1,5 @@
 {
-  "maj": "2026-11-06T12:55:25",
+  "maj": "2026-11-06T23:43:46",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -14107,7 +14107,7 @@
       "ctl": 5.293973,
       "atl": 2.1618586,
       "ramp_rate": -0.96011734,
-      "pas": 429,
+      "pas": 3722,
       "courbatures": null,
       "fatigue": null,
       "moral": null,
@@ -14279,7 +14279,7 @@
     "ctl": 5.293973,
     "atl": 2.1618586,
     "ramp_rate": -0.96011734,
-    "pas": 429,
+    "pas": 3722,
     "courbatures": null,
     "fatigue": null,
     "moral": null,
@@ -16558,11 +16558,11 @@
         "fatigue_indice": 78
       },
       {
-        "pas": 429,
+        "pas": 3722,
         "sommeil_h": 6.4,
         "sommeil_score": 64.0,
         "body_battery": 59,
-        "stress": 18,
+        "stress": 26,
         "fc_repos": 52,
         "hrv": 73.0,
         "respiration_nuit": 13.0,
@@ -16576,20 +16576,20 @@
         "besoin_sommeil": 540,
         "vfc_bas": 62,
         "vfc_haut": 115,
-        "im_moderees": 0,
-        "im_intenses": 0,
+        "im_moderees": 13,
+        "im_intenses": 23,
         "fc_nuit": 57.0,
         "statut_vfc": "BALANCED",
         "body_battery_min": 5,
         "bb_recharge": 54,
-        "bb_depense": 2,
-        "stress_eleve_min": 3,
+        "bb_depense": 24,
+        "stress_eleve_min": 5,
         "date": "2026-11-06",
         "fatigue_indice": 64
       }
     ],
     "actuel": {
-      "pas": 429,
+      "pas": 3722,
       "pas_date": "2026-11-06",
       "sommeil_h": 6.4,
       "sommeil_h_date": "2026-11-06",
@@ -16599,7 +16599,7 @@
       "body_battery_date": "2026-11-06",
       "fatigue_indice": 64,
       "fatigue_indice_date": "2026-11-06",
-      "stress": 18,
+      "stress": 26,
       "stress_date": "2026-11-06",
       "fc_repos": 52,
       "fc_repos_date": "2026-11-06",
