@@ -80,16 +80,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-10-08T23:47:07",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Repos prescrit en cours, rien à trancher",
   "essentiel": "Semaine 5 à 0 km sur 0 prévu, consigne respectée, et seulement 4 semaines terminées sur 27 avant la reprise du 19 octobre.",
-  "ou_tu_en_es": "Depuis le dernier bilan, le repos est déclaré et la cible de la semaine 5 réécrite à 0 km : les 24 km que j'avais demandés ne tiennent plus. L'observance de référence reste 0,88 sur les semaines 1 à 3, base 18,3 km par semaine. Fatigue 5,89 contre 12,57 de moyenne, VFC 103 ms, coût faible à 27.",
-  "viser_plus_haut": "Non, pas sur ces chiffres : projection 3h39 à 5:11/km tirée d'un seul 10 km et 4 semaines terminées sur 27, confiance faible. Il faudrait six semaines pleines après la reprise, puis un semi chronométré.",
-  "a_changer": "La priorité des 3 sorties et 24 km est annulée par le repos : semaine 5 à 0 km sur 0 prévu, c'est tenu. Une seule chose jusqu'au 18 octobre : ni course ni renfo.",
-  "quand": "2026-10-08T23:47:07",
-  "empreinte": "1e3ef6736e70be67",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -173,6 +169,18 @@
   "a_changer": "Priorité non suivie : la dette de sommeil reste à 3,4 h, nuits à 6,8 h de moyenne. Même cible pour les deux semaines, la ramener sous 2 h, et aucune course avant l'avis médical (le 8 novembre est un plancher).",
   "quand": "2026-11-02T23:14:26",
   "empreinte": "e46f3e442ffbe0f1",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt ouvert, six semaines sans course",
+  "essentiel": "Sixième semaine sans course depuis le 3 octobre, et les 100 minutes hebdomadaires de natation et vélo sont tombées à zéro.",
+  "ou_tu_en_es": "Semaines 4 à 11 en pause, 0 km prévu : rien de manqué. Depuis le bilan du 2 novembre, le vrai changement est ailleurs : 0 minute d'autre sport en semaines 9 et 10, contre 213 en semaine 6. Les pentes suivent : forme de fond à 4,93 contre 6,07 de moyenne, FC de repos à 52.",
+  "viser_plus_haut": "Non, pas maintenant : la projection à 3h39 (5:11/km) repose sur un 10 km du 27 septembre, soit une forme vieille de six semaines. Confiance faible : il faudrait l'avis médical, une reprise menée à terme, puis un 10 km rechronométré.",
+  "a_changer": "Priorité toujours pas suivie : la dette de sommeil reste à 3,4 h, troisième bilan de suite. Cible unique sur deux semaines : décrocher l'avis médical, le plancher du 8 novembre étant passé, et aucune course avant lui.",
+  "quand": "2026-11-09T23:34:01",
+  "empreinte": "ff8cfbb44bece7be",
   "source": "claude_conversation"
  }
 ]
