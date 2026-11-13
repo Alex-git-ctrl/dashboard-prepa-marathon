@@ -1,5 +1,5 @@
 {
-  "maj": "2026-11-12T13:44:44",
+  "maj": "2026-11-13T00:22:01",
   "nb_activites": 10,
   "semaines": {
     "1": {
@@ -14252,6 +14252,29 @@
       "douleur_niveau": null,
       "commentaire": null,
       "sommeil_h": null
+    },
+    {
+      "date": "2026-11-13",
+      "hrv": null,
+      "fc_repos": null,
+      "poids": null,
+      "vo2max": null,
+      "readiness": null,
+      "sommeil_score": null,
+      "fc_sommeil": null,
+      "spo2": null,
+      "respiration": null,
+      "masse_grasse": null,
+      "ctl": 4.481251,
+      "atl": 0.7953033,
+      "ramp_rate": -0.8127222,
+      "pas": null,
+      "courbatures": null,
+      "fatigue": null,
+      "moral": null,
+      "douleur_niveau": null,
+      "commentaire": null,
+      "sommeil_h": null
     }
   ],
   "derives": [
@@ -14414,9 +14437,9 @@
     "spo2": 98.0,
     "respiration": null,
     "masse_grasse": null,
-    "ctl": 4.5892277,
-    "atl": 0.91743404,
-    "ramp_rate": -0.83230495,
+    "ctl": 4.481251,
+    "atl": 0.7953033,
+    "ramp_rate": -0.8127222,
     "pas": 3722,
     "courbatures": null,
     "fatigue": null,
@@ -14439,9 +14462,9 @@
     "spo2": 1,
     "respiration": 0,
     "masse_grasse": 0,
-    "ctl": 72,
-    "atl": 72,
-    "ramp_rate": 65,
+    "ctl": 73,
+    "atl": 73,
+    "ramp_rate": 66,
     "pas": 65,
     "courbatures": 0,
     "fatigue": 0,
@@ -14449,7 +14472,7 @@
     "douleur_niveau": 0,
     "commentaire": 0
   },
-  "jours_wellness": 72,
+  "jours_wellness": 73,
   "zones_noms": [
     "Recovery",
     "Aerobic",
@@ -14470,9 +14493,9 @@
     "spo2": "2026-09-04",
     "respiration": null,
     "masse_grasse": null,
-    "ctl": "2026-11-12",
-    "atl": "2026-11-12",
-    "ramp_rate": "2026-11-12",
+    "ctl": "2026-11-13",
+    "atl": "2026-11-13",
+    "ramp_rate": "2026-11-13",
     "pas": "2026-11-06",
     "courbatures": null,
     "fatigue": null,
@@ -14485,7 +14508,7 @@
     "cadence": "2026-10-03",
     "volume": "2026-10-03"
   },
-  "derniere_donnee": "2026-11-12",
+  "derniere_donnee": "2026-11-13",
   "derniere_seance": "2026-10-03",
   "journal": [
     {
@@ -16904,6 +16927,36 @@
         "stress_eleve_min": null,
         "date": "2026-11-12",
         "fatigue_indice": null
+      },
+      {
+        "pas": null,
+        "sommeil_h": null,
+        "sommeil_score": null,
+        "body_battery": null,
+        "stress": null,
+        "fc_repos": null,
+        "hrv": null,
+        "respiration_nuit": null,
+        "poids": null,
+        "spo2": null,
+        "sommeil_profond": null,
+        "sommeil_paradoxal": null,
+        "sommeil_leger": null,
+        "sommeil_eveil": null,
+        "sommeil_duree": null,
+        "besoin_sommeil": null,
+        "vfc_bas": null,
+        "vfc_haut": null,
+        "im_moderees": null,
+        "im_intenses": null,
+        "fc_nuit": null,
+        "statut_vfc": null,
+        "body_battery_min": null,
+        "bb_recharge": null,
+        "bb_depense": null,
+        "stress_eleve_min": null,
+        "date": "2026-11-13",
+        "fatigue_indice": null
       }
     ],
     "actuel": {
@@ -17125,24 +17178,12 @@
       "base_km": 18.3
     },
     "cout": {
-      "indice": 49,
+      "indice": 52,
       "niveau": "normal",
       "composantes": [
         {
-          "nom": "Variabilité cardiaque",
-          "valeur": "-7 %",
-          "points": 11,
-          "max": 30
-        },
-        {
-          "nom": "FC de repos",
-          "valeur": "+3 bpm",
-          "points": 13,
-          "max": 20
-        },
-        {
           "nom": "Dette de sommeil",
-          "valeur": "3,7 h sur la semaine",
+          "valeur": "3,6 h sur la semaine",
           "points": 8,
           "max": 15
         }
