@@ -1,6 +1,6 @@
 {
  "version": 2,
- "maj": "2026-11-13",
+ "maj": "2026-11-14",
  "jours": {
   "2026-09-02": {
    "body_battery": 77,
@@ -1420,14 +1420,36 @@
    "vfc_haut": 115
   },
   "2026-11-13": {
+   "body_battery": 22,
+   "body_battery_min": 5,
+   "bb_recharge": 17,
+   "bb_depense": 17,
+   "stress": 48,
+   "stress_eleve_min": 114,
+   "im_moderees": 35,
+   "im_intenses": 31,
+   "sommeil_profond": 84,
+   "sommeil_paradoxal": 10,
+   "sommeil_leger": 241,
+   "sommeil_eveil": 25,
+   "sommeil_duree": 335,
+   "respiration_nuit": 15.0,
+   "fc_nuit": 71.0,
+   "besoin_sommeil": 540,
+   "statut_vfc": "LOW",
+   "vfc_bas": 64,
+   "vfc_haut": 115
+  },
+  "2026-11-14": {
    "body_battery": 5,
    "body_battery_min": 5,
    "bb_recharge": 0,
    "bb_depense": 0,
-   "stress": 56,
-   "stress_eleve_min": 15,
-   "im_moderees": 13,
-   "im_intenses": 14
+   "im_moderees": 16,
+   "im_intenses": 2,
+   "statut_vfc": "LOW",
+   "vfc_bas": 64,
+   "vfc_haut": 114
   }
  },
  "activites": {
@@ -1787,6 +1809,26 @@
    "longueurs": 61,
    "record": true,
    "bassin_m": 25
+  },
+  "25070162283": {
+   "te_aerobie": 1.399999976158142,
+   "te_anaerobie": 0.0,
+   "te_label": "RECOVERY",
+   "bb": 0,
+   "eau_ml": 241.0,
+   "im_moderees": 19,
+   "im_intenses": 8,
+   "record": false
+  },
+  "25070162217": {
+   "te_aerobie": 2.0,
+   "te_anaerobie": 0.699999988079071,
+   "te_label": "RECOVERY",
+   "bb": 0,
+   "eau_ml": 246.0,
+   "im_moderees": 16,
+   "im_intenses": 11,
+   "record": false
   }
  },
  "zones": {
@@ -1804,7 +1846,7 @@
  },
  "age_forme": {
   "age_forme": 18,
-  "date": "2026-11-13",
+  "date": "2026-11-14",
   "jours_intenses": 1.1,
   "jours_intenses_cible": 3
  }
