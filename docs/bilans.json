@@ -88,16 +88,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-10-12T23:01:15",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Repos tenu, reprise prévue le 19 octobre",
   "essentiel": "Cinq semaines terminées sur 27 et la consigne à 0 km respectée deux semaines d'affilée : rien de mesurable avant la reprise.",
-  "ou_tu_en_es": "Depuis le bilan du 8 octobre, le volume n'a pas bougé : semaine 5 close à 0 km sur 0 prévu, semaine 6 identique. La fenêtre de référence reste les semaines 1 à 3, soit 54,9 km courus sur 62,4 prévus (ratio 0,88). Fatigue à 6,83 contre 11,89 de moyenne, FC de repos à 50 contre 47,3.",
-  "viser_plus_haut": "Non, pas maintenant : avec 5 semaines terminées sur 27, la confiance reste faible malgré une projection à 3h39 (20 minutes de marge). Il faudrait quatre semaines de reprise à 100 % du prévu, puis un semi proche de 4:59/km.",
-  "a_changer": "La consigne du 8 octobre est tenue : 0 km et 0 renfo en semaines 5 et 6. Priorité unique jusqu'au 18 octobre, ne rien courir, puis tenir 100 % de la cible de reprise, pas encore chiffrée au dossier.",
-  "quand": "2026-10-12T23:01:15",
-  "empreinte": "b4feb43694906632",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -181,6 +177,18 @@
   "a_changer": "Priorité toujours pas suivie : la dette de sommeil reste à 3,4 h, troisième bilan de suite. Cible unique sur deux semaines : décrocher l'avis médical, le plancher du 8 novembre étant passé, et aucune course avant lui.",
   "quand": "2026-11-09T23:34:01",
   "empreinte": "ff8cfbb44bece7be",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt toujours ouvert, dette de sommeil doublée",
+  "essentiel": "Sixième semaine à 0 km prévu et 0 km couru, mais 155 minutes de natation et vélo : l'activité est repartie.",
+  "ou_tu_en_es": "Sur les trois semaines avant l'arrêt, 54,9 km faits pour 62,4 prévus, ratio 0,88 : la base tenait. Depuis mon dernier bilan, l'activité croisée est remontée de zéro à 155 minutes, dont trois sorties vélo le 13 novembre. En face, VFC à 64 ms, sommeil à 5,6 h, coût à 97, niveau élevé : la récupération se dégrade.",
+  "viser_plus_haut": "Non, pas maintenant, et ma confiance est faible : la projection 3h39 vient d'un 10 km du 27 septembre, couru avant six semaines sans course. Pour trancher, il faudrait l'avis médical, quatre semaines de reprise pleine, puis un 10 km couru.",
+  "a_changer": "Priorité non suivie pour la quatrième fois : la dette de sommeil passe de 3,4 à 6,0 h, nuits à 5,6 h. Deux semaines, une cible, ramener cette dette sous 3 h, l'arrêt reste ouvert et aucune course avant l'avis médical.",
+  "quand": "2026-11-14T21:23:21",
+  "empreinte": "dc39f0d9e43b5e79",
   "source": "claude_conversation"
  }
 ]
