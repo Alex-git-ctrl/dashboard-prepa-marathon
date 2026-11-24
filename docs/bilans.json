@@ -96,16 +96,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-10-18T20:57:29",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Arrêt toujours ouvert, sommeil en chute",
   "essentiel": "Cinq semaines terminées sur 27, arrêt médical sans date de fin, et le sommeil tombé à 4,5 h contre 6,53 h de moyenne.",
-  "ou_tu_en_es": "Rien n'a bougé depuis le dernier bilan : semaines 5 et 6 à 0 km sur 0 prévu, consigne tenue. Ce qui bouge, c'est la récupération : VFC à 49 ms contre 83,07 de moyenne, score de sommeil à 44 contre 74,15. La fatigue descend à 7,67, logique à l'arrêt.",
-  "viser_plus_haut": "Non, pas maintenant : le 10 km du 27 septembre en 45:33 projette 3h39, mais avec 5 semaines sur 27 et un arrêt ouvert, la confiance reste faible. Pour trancher, il faudra une reprise complète puis un test couru.",
-  "a_changer": "La consigne est tenue : 0 km et 0 renfo en semaines 5 et 6, rien de neuf à signaler. Priorité unique des deux semaines : pas de course, et combler les 4,7 h de dette de sommeil.",
-  "quand": "2026-10-18T20:57:29",
-  "empreinte": "b4feb43694906632",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -189,6 +185,18 @@
   "a_changer": "Priorité non suivie pour la quatrième fois : la dette de sommeil passe de 3,4 à 6,0 h, nuits à 5,6 h. Deux semaines, une cible, ramener cette dette sous 3 h, l'arrêt reste ouvert et aucune course avant l'avis médical.",
   "quand": "2026-11-14T21:23:21",
   "empreinte": "dc39f0d9e43b5e79",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt toujours ouvert, dette de sommeil 7,8 h",
+  "essentiel": "Sept semaines terminées à 0 km depuis le 3 octobre, mais la natation tient : quatre séances depuis le 14 novembre, dont 25 minutes hier.",
+  "ou_tu_en_es": "Sept semaines terminées à 0 km prévu et 0 couru : rien n'est manqué, l'arrêt est en vigueur. La natation continue, mais le volume d'activité hebdo tombe de 155 à 60 puis 25 minutes. Depuis le dernier bilan, la VFC descend à 61 ms contre 66 de moyenne et la fatigue monte à 6,7.",
+  "viser_plus_haut": "Non, et la confiance reste faible : le 10 km du 27 septembre (45:33, VDOT 42,4) projette 3h39, mais sept semaines sans course le suivent. Pour trancher : avis médical, puis six semaines courues et un test refait.",
+  "a_changer": "Priorité non suivie, cinquième fois : la dette de sommeil passe de 6,0 à 7,8 h, nuits à 6,3 h de moyenne. Une seule cible sur deux semaines, la ramener sous 5 h, l'arrêt restant ouvert.",
+  "quand": "2026-11-24T23:02:27",
+  "empreinte": "4d0226369b0eef39",
   "source": "claude_conversation"
  }
 ]
