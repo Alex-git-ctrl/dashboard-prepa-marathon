@@ -104,16 +104,12 @@
   "abrege": true
  },
  {
+  "quand": "2026-10-19T23:23:31",
   "verdict": "trop_tot",
   "confiance": "faible",
   "titre": "Arrêt ouvert, sommeil et VFC toujours bas",
   "essentiel": "Sixième semaine consécutive à 0 km sur 0 prévu, consigne tenue, et le plancher médical du 8 novembre n'est pas encore atteint.",
-  "ou_tu_en_es": "Trois semaines courues avant l'arrêt : 54,9 km sur 62,4 prévus, ratio 0,88, pour une base de 18,3 km. Depuis le bilan du 18 octobre, rien n'a bougé côté course, la consigne reste à 0 km. La fatigue descend à 6,65, mais la récupération ne suit pas : VFC à 49 ms contre 82,58 de moyenne.",
-  "viser_plus_haut": "Non, pas maintenant : la projection 3h39 s'appuie sur un 10 km couru le 27 septembre, avant l'arrêt, et ma confiance reste faible. Il faudrait six semaines pleines après la reprise, puis un semi chronométré.",
-  "a_changer": "Consigne à moitié suivie : 0 km tenu, mais la dette de sommeil est passée de 4,7 à 5,0 h. Priorité unique des deux semaines : remonter vers 6,5 h de moyenne, et aucune course avant l'avis médical.",
-  "quand": "2026-10-19T23:23:31",
-  "empreinte": "79795b54f7a51bb3",
-  "source": "claude_conversation"
+  "abrege": true
  },
  {
   "verdict": "trop_tot",
@@ -197,6 +193,18 @@
   "a_changer": "Priorité non suivie, cinquième fois : la dette de sommeil passe de 6,0 à 7,8 h, nuits à 6,3 h de moyenne. Une seule cible sur deux semaines, la ramener sous 5 h, l'arrêt restant ouvert.",
   "quand": "2026-11-24T23:02:27",
   "empreinte": "4d0226369b0eef39",
+  "source": "claude_conversation"
+ },
+ {
+  "verdict": "trop_tot",
+  "confiance": "faible",
+  "titre": "Arrêt ouvert, sommeil en légère amélioration",
+  "essentiel": "Huit semaines sans course depuis le 3 octobre, mais la natation continue : 30 minutes le 26 novembre, effet aérobie 3,1.",
+  "ou_tu_en_es": "Semaine 12, cible 0 km, 0 km couru : rien de manqué. Depuis le bilan du 24 novembre, une natation en plus (30 minutes le 26), mais la semaine 11 est tombée à 60 minutes d'activité contre 155 en semaine 10. Récupération encore dégradée : FC de repos 57 contre 52,9 de moyenne, VFC 60 contre 66,5.",
+  "viser_plus_haut": "Non : la projection 3h39 à 5:11/km vient du 10 km du 27 septembre, couru avant huit semaines d'arrêt, la confiance est faible. Pour trancher, il faudrait l'avis médical, quatre semaines de course sans douleur, puis un 10 km refait.",
+  "a_changer": "Priorité suivie pour la première fois : la dette de sommeil passe de 7,8 à 6,8 h, dernière nuit mesurée à 7,2 h. Même cible sur deux semaines, sous 5 h, et l'arrêt reste ouvert sans date de reprise.",
+  "quand": "2026-11-27T11:14:07",
+  "empreinte": "37adf761c1af33fb",
   "source": "claude_conversation"
  }
 ]

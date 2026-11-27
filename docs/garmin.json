@@ -1684,13 +1684,24 @@
    "vfc_haut": 109
   },
   "2026-11-27": {
-   "body_battery": 5,
+   "body_battery": 51,
    "body_battery_min": 5,
-   "bb_recharge": 0,
+   "bb_recharge": 46,
    "bb_depense": 0,
-   "stress": 44,
+   "stress": 24,
    "im_moderees": 0,
-   "im_intenses": 0
+   "im_intenses": 0,
+   "sommeil_profond": 77,
+   "sommeil_paradoxal": 40,
+   "sommeil_leger": 314,
+   "sommeil_eveil": 7,
+   "sommeil_duree": 431,
+   "respiration_nuit": 14.0,
+   "fc_nuit": 61.0,
+   "besoin_sommeil": 540,
+   "statut_vfc": "UNBALANCED",
+   "vfc_bas": 63,
+   "vfc_haut": 109
   }
  },
  "activites": {
