@@ -1,6 +1,6 @@
 {
  "version": 2,
- "maj": "2026-11-26",
+ "maj": "2026-11-27",
  "jours": {
   "2026-09-02": {
    "body_battery": 77,
@@ -1665,12 +1665,12 @@
   "2026-11-26": {
    "body_battery": 55,
    "body_battery_min": 5,
-   "bb_recharge": 53,
-   "bb_depense": 14,
-   "stress": 27,
-   "stress_eleve_min": 1,
-   "im_moderees": 0,
-   "im_intenses": 0,
+   "bb_recharge": 55,
+   "bb_depense": 55,
+   "stress": 47,
+   "stress_eleve_min": 121,
+   "im_moderees": 9,
+   "im_intenses": 31,
    "sommeil_profond": 60,
    "sommeil_paradoxal": 44,
    "sommeil_leger": 187,
@@ -1682,6 +1682,15 @@
    "statut_vfc": "UNBALANCED",
    "vfc_bas": 63,
    "vfc_haut": 109
+  },
+  "2026-11-27": {
+   "body_battery": 5,
+   "body_battery_min": 5,
+   "bb_recharge": 0,
+   "bb_depense": 0,
+   "stress": 44,
+   "im_moderees": 0,
+   "im_intenses": 0
   }
  },
  "activites": {
@@ -2081,7 +2090,7 @@
    "im_intenses": 25,
    "swolf": 40.0,
    "longueurs": 53,
-   "record": true,
+   "record": false,
    "bassin_m": 25
   },
   "25188678512": {
@@ -2104,6 +2113,17 @@
    "swolf": 51.0,
    "longueurs": 51,
    "record": false,
+   "bassin_m": 25
+  },
+  "25209454836": {
+   "te_aerobie": 3.0999999046325684,
+   "te_anaerobie": 2.4000000953674316,
+   "te_label": "AEROBIC_BASE",
+   "im_moderees": 4,
+   "im_intenses": 28,
+   "swolf": 42.0,
+   "longueurs": 63,
+   "record": true,
    "bassin_m": 25
   }
  },
